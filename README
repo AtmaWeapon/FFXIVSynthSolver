@@ -48,3 +48,21 @@ A: * Binary release, for people who don't want to / don't know how to compile th
    * Built-in recipe database so you don't have to hardcode the parameters of an item.
    * Class profiles, so you can configure your stats for individual crafts, so those don't
      have to be hardcoded either.
+   * More user-friendly playback code path.
+     
+Q: OMG it's so slow, what do I do?
+A: The easiest way to increase performance is to decrease the analysis depth.  You can do
+   this by setting the MaxAnalysisDepth property on the Analyzer object during program
+   initialization.  This comes at a slight accracy cost, as doing so will cause the analyzer
+   to ignore branches after MaxAnalysisDepth until such time that your current # of steps
+   reaches that point.  Example: Suppose you set MaxAnalysisDepth to 5 so that it completes
+   quickly.  During the initial analysis it will not see past the 5th action in any sequence
+   it examines.  If playback of the sequence takes more than 5 actions, then at the 5th action
+   it will re-start the analysis process from the current state and continue from there.  This
+   is less accurate than if it could have considered deeper branches from all the paths that you
+   didn't choose, but significantly faster.
+   
+Q: What's a good value for MaxAnalysisDepth?
+A: On my computer, anything under 10 completes almost instantly.  However it varies wildly depending
+   on your stats (the decision tree of a user with 800 CP will be huge, for example, compared to that
+   of a person with 200 CP) and the number of abilities that are supported by the analyzer.
