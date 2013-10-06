@@ -59,7 +59,6 @@ namespace Simulator.Tests
         Assert.AreEqual(true, child.originatingAction.Attributes.Type == ActionType.Progress);
     }
 
-    [TestMethod]
     public void NodesUnsolvedAfterMaxDepth()
     {
       Analyzer analyzer = new Analyzer();
