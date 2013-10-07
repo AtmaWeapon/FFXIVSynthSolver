@@ -82,6 +82,23 @@ namespace Simulator.Engine
         }
       }
     }
+
+    public UserDecisionNode Choose(Type interactionType, bool success, Condition newCondition)
+    {
+      foreach (PreRandomDecisionNode interaction in choices)
+      {
+        if (interaction.originatingAction.GetType() != interactionType)
+          continue;
+
+        foreach (PostRandomDecisionNode outcome in interaction.outcomes)
+        {
+          if (outcome.wasSuccess == success && outcome.newState.Condition == newCondition)
+            return outcome.interaction;
+        }
+      }
+
+      return null;
+    }
   }
 
   public class SolvedScoreNode

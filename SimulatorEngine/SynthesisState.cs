@@ -118,8 +118,8 @@ namespace Simulator.Engine
 
     private static readonly float kQualityWeight = 2.0f;
     private static readonly float kProgressWeight = 1.5f;
-    private static readonly float kCPWeight = 0.6f;
-    private static readonly float kDurabilityWeight = 0.4f;
+    private static readonly float kCPWeight = 0.4f;
+    private static readonly float kDurabilityWeight = 0.6f;
 
     private static readonly float kMaxWeight = kQualityWeight + kProgressWeight + kCPWeight + kDurabilityWeight;
 
@@ -172,8 +172,6 @@ namespace Simulator.Engine
       {
         case SynthesisStatus.BUSTED:
           return 0.0f;
-        case SynthesisStatus.COMPLETED:
-          return 1.0f + (float)Quality / (float)MaxQuality;
         default:
           return ScoreEstimate;
       }

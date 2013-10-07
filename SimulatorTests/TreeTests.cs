@@ -95,5 +95,83 @@ namespace Simulator.Tests
       mmbuff2.Buff = mm;
       Assert.AreEqual(mmbuff, mmbuff2);
     }
+
+    [TestMethod]
+    public void EnsureMastersMendAtEndOfSingleStageSynth()
+    {
+      Analyzer analyzer = new Analyzer();
+      analyzer.Actions.AddAction(new BasicSynthesis());
+      analyzer.Actions.AddAction(new BasicTouch());
+      analyzer.Actions.AddAction(new MastersMend());
+      analyzer.Actions.AddAction(new SteadyHand());
+      analyzer.Actions.AddAction(new Observe());
+      analyzer.Actions.AddAction(new Manipulation());
+      analyzer.Actions.AddAction(new TricksOfTheTrade());
+      analyzer.Actions.AddAction(new StandardTouch());
+
+      State initialState = new State();
+      initialState.Condition = Condition.Normal;
+      initialState.Control = 115;
+      initialState.Craftsmanship = 123;
+      initialState.CP = 251;
+      initialState.MaxCP = 251;
+      initialState.MaxDurability = 70;
+      initialState.Durability = 10;
+      initialState.Progress = 73;
+      initialState.MaxProgress = 74;
+      initialState.Quality = 0;
+      initialState.MaxQuality = 1053;
+      initialState.SynthLevel = 20;
+      initialState.CrafterLevel = 18;
+
+      analyzer.MaxAnalysisDepth = 1;
+
+      UserDecisionNode root = new UserDecisionNode();
+      root.originalState = initialState;
+      analyzer.Run(root);
+
+      Assert.AreEqual(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
+   }
+
+    [TestMethod]
+    public void EnsureMastersMendAtEndOfMultiStageSynth()
+    {
+      // By using a 4 step max analysis depth, we can check that after 3 steps, if the
+      // 4th step would end the synth, a Master's Mend can be used to regain durability.
+      Analyzer analyzer = new Analyzer();
+      analyzer.Actions.AddAction(new BasicSynthesis());
+      analyzer.Actions.AddAction(new BasicTouch());
+      analyzer.Actions.AddAction(new MastersMend());
+      analyzer.Actions.AddAction(new SteadyHand());
+      analyzer.Actions.AddAction(new Observe());
+      analyzer.Actions.AddAction(new Manipulation());
+      analyzer.Actions.AddAction(new TricksOfTheTrade());
+      analyzer.Actions.AddAction(new StandardTouch());
+
+      State initialState = new State();
+      initialState.Condition = Condition.Normal;
+      initialState.Control = 115;
+      initialState.Craftsmanship = 123;
+      initialState.CP = 251;
+      initialState.MaxCP = 251;
+      initialState.MaxDurability = 40;
+      initialState.Durability = 40;
+      initialState.MaxProgress = 74;
+      initialState.Quality = 0;
+      initialState.MaxQuality = 1053;
+      initialState.SynthLevel = 20;
+      initialState.CrafterLevel = 18;
+
+      analyzer.MaxAnalysisDepth = 4;
+
+      UserDecisionNode root = new UserDecisionNode();
+      root.originalState = initialState;
+      analyzer.Run(root);
+
+      root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
+      root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
+      root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
+      Assert.AreEqual(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
+    }
   }
 }
