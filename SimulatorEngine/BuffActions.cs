@@ -139,7 +139,7 @@ namespace Simulator.Engine
                           return true;
                         // If we have enough CP to restore durability, it's not urgent so don't
                         // allow Steady hand to be used.
-                        if (state.CP >= Compute.CP(SynthAction<MastersMend>.Attributes.CP, state))
+                        if (state.CP >= Compute.CP(92, state))
                           return false;
 
                         // Otherwise either we must use SH for safety reasons, or there's no additional harm
