@@ -188,10 +188,6 @@ namespace Simulator.Engine
     {
       // By definition the ability is disabled unless Condition==Good.
       usageChecks.Add(delegate(State state) { return state.Condition == Condition.Good; });
-      // Don't use Tricks of the Trade unless we're <= 10 Durability.  In practice this is
-      // reasonable, and not doing so will cause the simulator to get into an endless loop
-      // since it will always compute the branch where a Normal transitions into a Good.
-      usageChecks.Add(delegate(State state) { return state.Durability <= 10; });
       // Only use Tricks of the trade if we actually  need the full 20 CP gain.
       usageChecks.Add(delegate(State state) { return state.MaxCP - state.CP >= 20; });
     }
