@@ -32,7 +32,7 @@ namespace Simulator.Engine
   {
   }
 
-  [SynthAction(ActionType.Quality, Name = "Standard Touch", Efficiency = 125, SuccessRate = 80, CP = 38)]
+  [SynthAction(ActionType.Quality, Name = "Standard Touch", Efficiency = 125, SuccessRate = 80, CP = 32)]
   public class StandardTouch : QualityAction
   {
   }

@@ -24,6 +24,7 @@ namespace Simulator.Tests
 
     // Test is disabled because it doesn't work, although it should.  The numbers have been verified
     // through in-game observation.  Something is wrong with the progress formula.
+    [TestMethod]
     public void TestProgressFormulaByObservation1()
     {
       Engine.State state = Utility.CreateDefaultState();
