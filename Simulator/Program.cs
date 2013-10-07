@@ -22,6 +22,7 @@ namespace Simulator
       analyzer.Actions.AddAction(new Observe());
       analyzer.Actions.AddAction(new Manipulation());
       analyzer.Actions.AddAction(new TricksOfTheTrade());
+      analyzer.Actions.AddAction(new StandardTouch());
 
 
       State initialState = new State();
@@ -32,10 +33,11 @@ namespace Simulator
       initialState.MaxCP = 233;
       initialState.MaxDurability = 70;
       initialState.Durability = 70;
-      initialState.MaxProgress = 63;
-      initialState.MaxQuality = 866;
-      initialState.SynthLevel = 16;
-      initialState.CrafterLevel = 16;
+      initialState.MaxProgress = 68;
+      initialState.Quality = 0;
+      initialState.MaxQuality = 982;
+      initialState.SynthLevel = 19;
+      initialState.CrafterLevel = 17;
 
       analyzer.MaxAnalysisDepth = 12;
 

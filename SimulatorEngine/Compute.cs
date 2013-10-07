@@ -16,8 +16,15 @@ namespace Simulator.Engine
 
     public static int Progress(State state, int efficiency)
     {
-      double result = ((double)efficiency/100.0)*Math.Round((1 + 0.05f * state.LevelSurplus) * (0.21 * state.Craftsmanship + 1.6));
-      return (int)result;
+      double result = ((double)efficiency / 100.0)*(1 - 0.05f * state.LevelSurplus) * (0.21 * state.Craftsmanship + 1.6);
+      double penaltyMultiplier = 0.0;
+      if (state.LevelSurplus > 0)
+        penaltyMultiplier = 0.05;
+      else
+        penaltyMultiplier = -0.1;
+      double penaltyFactor = 1.0 + penaltyMultiplier * Math.Min(5, Math.Abs(state.LevelSurplus));
+      int progress = (int)Math.Round(result*penaltyFactor);
+      return progress;
     }
 
     public static int Quality(State state, int efficiency)
