@@ -44,7 +44,9 @@ namespace Simulator
           stopwatch.Start();
           analyzer.Run(root);
           stopwatch.Stop();
-          System.Console.WriteLine("Solved {0} states in {1} seconds.", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds);
+          double statesPerSecond = (double)analyzer.NumStatesExamined / stopwatch.Elapsed.TotalSeconds;
+          double cacheHitRate = (double)analyzer.NumQuickSolved / (double)(analyzer.NumQuickSolved + analyzer.NumSlowSolved);
+          System.Console.WriteLine("Solved {0:N0} states in {1:F2} seconds ({2:N2} states / second).  cache hit rate = {3:P2}", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds, statesPerSecond, cacheHitRate);
         }
 
         PreRandomDecisionNode optimalAction = root.OptimalAction;

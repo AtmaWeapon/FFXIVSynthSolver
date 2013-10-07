@@ -116,10 +116,10 @@ namespace Simulator.Engine
       }
     }
 
-    private static readonly float kQualityWeight = 2.0f;
-    private static readonly float kProgressWeight = 1.5f;
-    private static readonly float kCPWeight = 0.4f;
-    private static readonly float kDurabilityWeight = 0.6f;
+    private static readonly float kQualityWeight = 60.0f;
+    private static readonly float kProgressWeight = 10.0f;
+    private static readonly float kCPWeight = 2.0f;
+    private static readonly float kDurabilityWeight = 3.0f;
 
     private static readonly float kMaxWeight = kQualityWeight + kProgressWeight + kCPWeight + kDurabilityWeight;
 
@@ -127,6 +127,9 @@ namespace Simulator.Engine
     {
       get
       {
+        if (Status == SynthesisStatus.BUSTED)
+          return 0.0f;
+
         float qualityPercent = (float)Quality / (float)MaxQuality;
         float durabilityPercent = (float)Durability / (float)MaxDurability;
         float cpPercent = (float)CP / (float)MaxCP;
@@ -156,24 +159,7 @@ namespace Simulator.Engine
     {
       get
       {
-        if (Status == SynthesisStatus.BUSTED)
-          return 0;
-
-
-        return (int)(1000000.0f*ScoreEstimate);
-      }
-    }
-    private float ComputeScore()
-    {
-      // We should never call ComputeScore() on an in progress synth, since its
-      // score is basically indeterminate.
-      //Debug.Assert(Status == SynthesisStatus.COMPLETED || Status == SynthesisStatus.BUSTED);
-      switch (Status)
-      {
-        case SynthesisStatus.BUSTED:
-          return 0.0f;
-        default:
-          return ScoreEstimate;
+        return (int)(10000000.0f*ScoreEstimate);
       }
     }
 
@@ -321,7 +307,7 @@ namespace Simulator.Engine
       {
         if (!scoreComputed)
         {
-          score = ComputeScore();
+          score = ScoreEstimate;
           scoreComputed = true;
         }
 
