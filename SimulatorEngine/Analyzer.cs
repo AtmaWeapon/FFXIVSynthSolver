@@ -107,13 +107,12 @@ namespace Simulator.Engine
 
     private void ExpandRandomOutcomes(PreRandomDecisionNode preDecisionNode)
     {
-      bool playback = false;
       State stateBeforeOutcome = preDecisionNode.originalState;
       Action action = preDecisionNode.originatingAction;
 
       preDecisionNode.outcomes = ExpandRandomOutcomes(action, stateBeforeOutcome);
 
-      float finalScore = 0.0f;
+      double finalScore = 0.0f;
       foreach (PostRandomDecisionNode outcome in preDecisionNode.outcomes)
       {
         Debug.Assert(outcome.newState != stateBeforeOutcome);
@@ -150,8 +149,6 @@ namespace Simulator.Engine
             {
               ExpandInteractions(outcome.interaction);
 
-              if (playback)
-                PlaybackSequence(outcome.newState);
               // The child interaction should automatically be solved when its recursive
               // descent is complete.
               Debug.Assert(outcome.interaction.IsSolved);

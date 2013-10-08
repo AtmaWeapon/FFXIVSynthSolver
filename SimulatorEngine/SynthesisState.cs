@@ -42,7 +42,7 @@ namespace Simulator.Engine
   {
     private StateDetails state;
 
-    private float score;
+    private double score;
     private bool scoreComputed;
 
     public struct Transition
@@ -116,30 +116,36 @@ namespace Simulator.Engine
       }
     }
 
-    private static readonly float kQualityWeight = 2.0f;
-    private static readonly float kProgressWeight = 1.5f;
-    private static readonly float kCPWeight = 0.4f;
-    private static readonly float kDurabilityWeight = 0.6f;
+    private static readonly double kQualityWeight = 2.0;
+    private static readonly double kProgressWeight = 1.5;
+    private static readonly double kCPWeight = 0.4;
+    private static readonly double kDurabilityWeight = 0.6;
 
-    private static readonly float kMaxWeight = kQualityWeight + kProgressWeight + kCPWeight + kDurabilityWeight;
+    private static readonly double kMaxWeight = kQualityWeight + kProgressWeight + kCPWeight + kDurabilityWeight;
 
-    public float ScoreEstimate
+    public double ScoreEstimate
     {
       get
       {
-        float qualityPercent = (float)Quality / (float)MaxQuality;
-        float durabilityPercent = (float)Durability / (float)MaxDurability;
-        float cpPercent = (float)CP / (float)MaxCP;
-        float progressPercent = (float)Progress / (float)MaxProgress;
+        if (Status == SynthesisStatus.BUSTED)
+          return 0.0f;
 
-        float result = 0.0f;
+        double q = (double)Quality;
+        double qmax = (double)MaxQuality;
+        double p = (double)Progress;
+        double pmax = (double)MaxProgress;
+        double d = (double)Durability;
+        double dmax = (double)MaxDurability;
+        double c = (double)CP;
+        double cmax = (double)MaxCP;
 
-        result += kQualityWeight * qualityPercent;
-        result += kProgressWeight * progressPercent;
-        result += kCPWeight * cpPercent;
-        result += kDurabilityWeight * durabilityPercent;
+        double turnsRemaining = Math.Ceiling(d / 10.0);
+        double progressPercent = p / pmax;
+        double qualityPercent = q / qmax;
+        double cpRemaining = c / cmax;
 
-        result /= kMaxWeight;
+        //double result = (1.0 + p / pmax) * (1.0 + q * pmax / p) * Math.Exp(c / cmax) * Math.Exp(d / dmax);
+        double result = (1.0 + p / pmax) * (1.0 + q * pmax / p) * Math.Exp(turnsRemaining * cmax / c);
         return result;
       }
     }
@@ -156,24 +162,19 @@ namespace Simulator.Engine
     {
       get
       {
-        if (Status == SynthesisStatus.BUSTED)
-          return 0;
+        double qualityPercent = (double)Quality / (double)MaxQuality;
+        double durabilityPercent = (double)Durability / (double)MaxDurability;
+        double cpPercent = (double)CP / (double)MaxCP;
+        double progressPercent = (double)Progress / (double)MaxProgress;
 
+        double result = 0.0f;
 
-        return (int)(1000000.0f*ScoreEstimate);
-      }
-    }
-    private float ComputeScore()
-    {
-      // We should never call ComputeScore() on an in progress synth, since its
-      // score is basically indeterminate.
-      //Debug.Assert(Status == SynthesisStatus.COMPLETED || Status == SynthesisStatus.BUSTED);
-      switch (Status)
-      {
-        case SynthesisStatus.BUSTED:
-          return 0.0f;
-        default:
-          return ScoreEstimate;
+        result += kQualityWeight * qualityPercent;
+        result += kProgressWeight * progressPercent;
+        result += kCPWeight * cpPercent;
+        result += kDurabilityWeight * durabilityPercent;
+
+        return (int)(1000000.0*result);
       }
     }
 
@@ -315,13 +316,13 @@ namespace Simulator.Engine
       }
     }
 
-    public float Score
+    public double Score
     {
       get
       {
         if (!scoreComputed)
         {
-          score = ComputeScore();
+          score = ScoreEstimate;
           scoreComputed = true;
         }
 

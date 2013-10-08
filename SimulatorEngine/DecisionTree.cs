@@ -10,18 +10,18 @@ namespace Simulator.Engine
 
   public class TreeNode
   {
-    private float score;
+    private double score;
     private bool isSolved;
     public State originalState;
 
     public TreeNode()
     {
-      this.score = 0.0f;
+      this.score = 0.0;
       this.isSolved = false;
       this.originalState = null;
     }
 
-    public void Solve(float score)
+    public void Solve(double score)
     {
       Debug.Assert(!isSolved);
       this.score = score;
@@ -30,7 +30,7 @@ namespace Simulator.Engine
 
     public bool IsSolved { get { return isSolved; } }
 
-    public float Score
+    public double Score
     {
       get
       {
@@ -103,7 +103,7 @@ namespace Simulator.Engine
 
   public class SolvedScoreNode
   {
-    public SolvedScoreNode(float score, UserDecisionNode originalNode)
+    public SolvedScoreNode(double score, UserDecisionNode originalNode)
     {
       Debug.Assert(originalNode == null || originalNode.IsSolved);
 
@@ -112,7 +112,7 @@ namespace Simulator.Engine
     }
 
     public UserDecisionNode originalNode;
-    public float score;
+    public double score;
   }
 
   public class PreRandomDecisionNode : TreeNode
