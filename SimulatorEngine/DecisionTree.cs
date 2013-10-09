@@ -151,7 +151,7 @@ namespace Simulator.Engine
     {
       this.probability = probability;
       this.wasSuccess = wasSuccess;
-      this.newState = (State)originalState.Clone();
+      this.newState = new State(originalState, null);
       this.newState.Condition = newCondition;
     }
   }

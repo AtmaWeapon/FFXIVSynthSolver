@@ -38,7 +38,7 @@ namespace Simulator.Engine
     public Condition condition;
   }
 
-  public class State : ICloneable
+  public class State
   {
     private StateDetails state;
 
@@ -95,15 +95,16 @@ namespace Simulator.Engine
       this.scoreComputed = oldState.scoreComputed;
       if (leadingAction != null)
       {
+        // TODO: Deep clone the transition entries
         this.transitionSequence = new List<Transition>(oldState.transitionSequence);
         Transition transition = new Transition();
-        transition.previousState = oldState;
+        transition.previousState = new State(oldState, null);
         transition.action = leadingAction;
         transition.newState = this;
         transitionSequence.Add(transition);
       }
       else
-        this.transitionSequence = oldState.transitionSequence;
+        this.transitionSequence = new List<Transition>(oldState.transitionSequence);
       // Make sure to do a deep copy, so that the ActiveBuff structures are cloned instead of
       // copied by reference.  Otherwise after advancing a state, ticking a buff in the new state
       // will cause it to tick in the old state as well.
@@ -139,13 +140,12 @@ namespace Simulator.Engine
         double c = (double)CP;
         double cmax = (double)MaxCP;
 
-        double turnsRemaining = Math.Ceiling(d / 10.0);
-        double progressPercent = p / pmax;
-        double qualityPercent = q / qmax;
-        double cpRemaining = c / cmax;
+        double cpct = c/cmax;
+        double dpct = d/dmax;
+        double ppct = p/pmax;
+        double qpct = q/qmax;
 
-        //double result = (1.0 + p / pmax) * (1.0 + q * pmax / p) * Math.Exp(c / cmax) * Math.Exp(d / dmax);
-        double result = (1.0 + p / pmax) * (1.0 + q * pmax / p) * Math.Exp(turnsRemaining * cmax / c);
+        double result = (1.0 + ppct) * (1.0 + q * pmax / p) * Math.Exp(cpct) * Math.Exp(dpct);
         return result;
       }
     }
@@ -167,14 +167,21 @@ namespace Simulator.Engine
         double cpPercent = (double)CP / (double)MaxCP;
         double progressPercent = (double)Progress / (double)MaxProgress;
 
-        double result = 0.0f;
+        double result = 0.0;
 
         result += kQualityWeight * qualityPercent;
         result += kProgressWeight * progressPercent;
         result += kCPWeight * cpPercent;
         result += kDurabilityWeight * durabilityPercent;
 
-        return (int)(1000000.0*result);
+        if (Condition == Engine.Condition.Poor)
+          result -= 0.1;
+        else if (Condition == Engine.Condition.Good)
+          result += 0.1;
+        else if (Condition == Engine.Condition.Excellent)
+          result += 0.2;
+
+        return (int)(100000000.0*result);
       }
     }
 
@@ -328,11 +335,6 @@ namespace Simulator.Engine
 
         return score;
       }
-    }
-
-    public object Clone()
-    {
-      return new State(this, null);
     }
   }
 }
