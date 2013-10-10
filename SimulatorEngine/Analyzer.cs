@@ -87,7 +87,7 @@ namespace Simulator.Engine
       PreRandomDecisionNode optimal = interaction.OptimalAction;
       interaction.Solve(optimal.Score);
       SolvedScoreNode scoreNode = new SolvedScoreNode(optimal.Score, interaction);
-      solvedStates.Add((State)interaction.originalState.Clone(), scoreNode);
+      solvedStates.Add(new State(interaction.originalState, null), scoreNode);
       ++numSlowSolved;
     }
 

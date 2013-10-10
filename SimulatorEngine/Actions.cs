@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  public enum Condition
+  public enum Condition : uint
   {
-    Poor,
-    Normal,
-    Good,
-    Excellent,
+    // We use 0 for normal so that it corresponds to the default value of an
+    // uninitialized integer.
+    Normal = 0,
+    Poor = 1,
+    Good = 2,
+    Excellent = 3,
   }
 
   public delegate void StateOperator(State originalState, State newState);

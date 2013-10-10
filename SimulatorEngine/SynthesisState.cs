@@ -15,6 +15,174 @@ namespace Simulator.Engine
     COMPLETED
   }
 
+  public struct StateDetails2
+  {
+    public ulong w1;
+    public ulong w2;
+
+    public ulong RawWord1 { get { return w1; } }
+    public ulong RawWord2 { get { return w2; } }
+
+    /* 
+       | max progress (7 bits) | progress (7 bits) | max durability (7 bits) | durability (7 bits) | maxcp (9 bits) | cp (9 bits) | control (9 bits) | craftsmanship (9 bits) |
+     */
+
+    public static readonly int kCraftsmanshipOffset = 0;
+    public static readonly int kCraftsmanshipLength = 9;
+    public static readonly int kControlOffset = kCraftsmanshipOffset + kCraftsmanshipLength;
+    public static readonly int kControlLength = 9;
+    public static readonly int kCPOffset = kControlOffset + kControlLength;
+    public static readonly int kCPLength = 9;
+    public static readonly int kMaxCPOffset = kCPOffset + kCPLength;
+    public static readonly int kMaxCPLength = 9;
+    public static readonly int kDurabilityOffset = kMaxCPOffset + kMaxCPLength;
+    public static readonly int kDurabilityLength = 7;
+    public static readonly int kMaxDurabilityOffset = kDurabilityOffset + kDurabilityLength;
+    public static readonly int kMaxDurabilityLength = 7;
+    public static readonly int kProgressOffset = kMaxDurabilityOffset + kMaxDurabilityLength;
+    public static readonly int kProgressLength = 7;
+    public static readonly int kMaxProgressOffset = kProgressOffset + kProgressLength;
+    public static readonly int kMaxProgressLength = 7;
+
+    /* 
+       | steady hand (3 bits) | ingenuity (2 bits) | great strides (2 bits) | manipulation (2 bits) | condition (2 bits) | crafter level (6 bits) | synth level (6 bits) |
+     */
+    public static readonly int kSynthLevelOffset = 0;
+    public static readonly int kSynthLevelLength = 6;
+    public static readonly int kCrafterLevelOffset = kSynthLevelOffset + kSynthLevelLength;
+    public static readonly int kCrafterLevelLength = 6;
+    public static readonly int kConditionOffset = kCrafterLevelOffset + kCrafterLevelLength;
+    public static readonly int kConditionLength = 2;
+    public static readonly int kManipulationOffset = kConditionOffset + kConditionLength;
+    public static readonly int kManipulationLength = 2;
+    public static readonly int kGreatStridesOffset = kManipulationOffset + kManipulationLength;
+    public static readonly int kGreatStridesLength = 2;
+    public static readonly int kIngenuityOffset = kGreatStridesOffset + kGreatStridesLength;
+    public static readonly int kIngenuityLength = 2;
+    public static readonly int kSteadyHandOffset = kIngenuityOffset + kIngenuityLength;
+    public static readonly int kSteadyHandLength = 3;
+
+    private uint Retrieve(ulong bitfield, int bitoffset, int bitlength)
+    {
+      ulong mask = ((1UL << bitlength) - 1UL) << bitoffset;
+      ulong result = bitfield & mask;
+      return (uint)(result >> bitoffset);
+    }
+
+    private void Assign(ref ulong bitfield, int bitoffset, int bitlength, uint value)
+    {
+      ulong mask1 = ((1UL << bitlength) - 1UL) << bitoffset;  // 0000000000011111000000
+      ulong mask2 = ~mask1;                                   // 1111111111100000111111
+
+      // Clear the old value
+      bitfield &= mask2;
+
+      ulong assignmentMask = (ulong)value << bitoffset;
+      // Or in the new value
+      bitfield |= assignmentMask;
+    }
+
+    public uint Craftsmanship
+    {
+      get { return Retrieve(w1, kCraftsmanshipOffset, kCraftsmanshipLength); }
+      set { Assign(ref w1, kCraftsmanshipOffset, kCraftsmanshipLength, value); }
+    }
+
+    public uint Control
+    {
+      get { return Retrieve(w1, kControlOffset, kControlLength); }
+      set { Assign(ref w1, kControlOffset, kControlLength, value); }
+    }
+
+    public uint CP
+    {
+      get { return Retrieve(w1, kCPOffset, kCPLength); }
+      set { Assign(ref w1, kCPOffset, kCPLength, value); }
+    }
+
+    public uint MaxCP
+    {
+      get { return Retrieve(w1, kMaxCPOffset, kMaxCPLength); }
+      set { Assign(ref w1, kMaxCPOffset, kMaxCPLength, value); }
+    }
+
+    public uint Durability
+    {
+      get { return Retrieve(w1, kDurabilityOffset, kDurabilityLength); }
+      set { Assign(ref w1, kDurabilityOffset, kDurabilityLength, value); }
+    }
+
+    public uint MaxDurability
+    {
+      get { return Retrieve(w1, kMaxDurabilityOffset, kMaxDurabilityLength); }
+      set { Assign(ref w1, kMaxDurabilityOffset, kMaxDurabilityLength, value); }
+    }
+
+    public uint Progress
+    {
+      get { return Retrieve(w1, kProgressOffset, kProgressLength); }
+      set { Assign(ref w1, kProgressOffset, kProgressLength, value); }
+    }
+
+    public uint MaxProgress
+    {
+      get { return Retrieve(w1, kMaxProgressOffset, kMaxProgressLength); }
+      set { Assign(ref w1, kMaxProgressOffset, kMaxProgressLength, value); }
+    }
+
+    public uint SynthLevel
+    {
+      get { return Retrieve(w2, kSynthLevelOffset, kSynthLevelLength); }
+      set { Assign(ref w2, kSynthLevelOffset, kSynthLevelLength, value); }
+    }
+
+    public uint CrafterLevel
+    {
+      get { return Retrieve(w2, kCrafterLevelOffset, kCrafterLevelLength); }
+      set { Assign(ref w2, kCrafterLevelOffset, kCrafterLevelLength, value); }
+    }
+
+    public uint LevelSurplus
+    {
+      get { return CrafterLevel - SynthLevel; }
+    }
+
+    public Condition Condition
+    {
+      get { return (Condition)Retrieve(w2, kConditionOffset, kConditionLength); }
+      set { Assign(ref w2, kConditionOffset, kConditionLength, (uint)value); }
+    }
+
+    public uint ManipulationTurns
+    {
+      get { return Retrieve(w2, kManipulationOffset, kManipulationLength); }
+      set { Assign(ref w2, kManipulationOffset, kManipulationLength, value); }
+    }
+
+    public uint GreatStridesTurns
+    {
+      get { return Retrieve(w2, kGreatStridesOffset, kGreatStridesLength); }
+      set { Assign(ref w2, kGreatStridesOffset, kGreatStridesLength, value); }
+    }
+
+    public uint IngenuityTurns
+    {
+      get { return Retrieve(w2, kIngenuityOffset, kIngenuityLength); }
+      set { Assign(ref w2, kIngenuityOffset, kIngenuityLength, value); }
+    }
+
+    public uint SteadyHandTurns
+    {
+      get { return Retrieve(w2, kSteadyHandOffset, kSteadyHandLength); }
+      set { Assign(ref w2, kSteadyHandOffset, kSteadyHandLength, value); }
+    }
+
+    public double SuccessBonus
+    {
+      get { return (SteadyHandTurns > 0) ? 0.2 : 0.0; }
+    }
+  }
+
   public struct StateDetails
   {
     // The user's stats in this state.
