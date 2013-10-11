@@ -62,6 +62,8 @@ namespace Simulator.Engine
     private void ExpandInteractions(UserDecisionNode interaction)
     {
       //Debug.Assert(!solvedStates.ContainsKey(interaction.currentState));
+      if (solvedStates.ContainsKey(interaction.originalState))
+        Debugger.Break();
 
       foreach (PreRandomDecisionNode choice in interaction.choices)
       {
@@ -69,6 +71,8 @@ namespace Simulator.Engine
         ExpandRandomOutcomes(choice);
       }
 
+      if (solvedStates.ContainsKey(interaction.originalState))
+        Debugger.Break();
       // After expanding all the child user interactions, this node can be solved by
       // choosing the best child action.
       PreRandomDecisionNode optimal = interaction.OptimalAction;

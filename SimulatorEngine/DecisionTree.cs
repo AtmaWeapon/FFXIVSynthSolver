@@ -151,6 +151,9 @@ namespace Simulator.Engine
       this.wasSuccess = wasSuccess;
       this.newState = new State(originalState);
       this.newState.Condition = newCondition;
+
+      int hash1 = this.newState.GetHashCode();
+      int hash2 = originalState.GetHashCode();
     }
   }
 }

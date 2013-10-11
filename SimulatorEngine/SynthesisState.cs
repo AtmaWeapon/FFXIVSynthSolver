@@ -252,6 +252,8 @@ namespace Simulator.Engine
       leadingAction = null;
     }
 
+    // Makes a new state which was arrived at by performing an action from a
+    // previous state.
     public State(State oldState, Action leadingAction)
     {
       this.details = oldState.details;
@@ -262,21 +264,16 @@ namespace Simulator.Engine
       this.step = oldState.step + 1;
     }
 
+    // Makes an exact copy of the original state
     public State(State oldState)
     {
+      Debug.Assert(oldState != null);
+
       this.details = oldState.details;
 
-      this.previousState = oldState;    // do we need to clone here?
-      if (oldState != null)
-      {
-        this.leadingAction = oldState.leadingAction;
-        this.step = oldState.step;
-      }
-      else
-      {
-        this.leadingAction = null;
-        this.step = 1;
-      }
+      this.previousState = oldState.previousState;    // do we need to clone here?
+      this.leadingAction = oldState.leadingAction;
+      this.step = oldState.step;
     }
 
     public override bool Equals(object obj)
