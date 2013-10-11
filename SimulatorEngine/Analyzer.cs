@@ -20,12 +20,13 @@ namespace Simulator.Engine
     private ActionDatabase actions = new ActionDatabase();
     private Dictionary<State, SolvedScoreNode> solvedStates;
 
+    private uint baseStep = 1;
+
     public int MaxAnalysisDepth
     {
       get { return maxAnalysisDepth; }
       set { maxAnalysisDepth = value; }
     }
-    public int NumSolvedStates { get { return solvedStates.Count; } }
     public ActionDatabase Actions { get { return actions; } }
     public int NumSlowSolved { get { return numSlowSolved; } }
     public int NumQuickSolved { get { return numQuickSolved; } }
@@ -45,6 +46,33 @@ namespace Simulator.Engine
 
     public void Run(UserDecisionNode root)
     {
+      // The base step allows us to resume a deep calculation from the middle of the tree, 
+      // and ensure we can still travel an *additional* MaxAnalysisDepth nodes deep from
+      // an arbitrary starting point.
+      baseStep = root.originalState.Step;
+
+      // There's a nasty edge case where, when you run against the actual root of the tree,
+      // you can analyze some leaf (let's call it L), but be forced to stop searching that
+      // particular branch because it's at MaxAnalysisDepth.  Later in the same analysis
+      // you encounter the state L again, but because it was originally a leaf it was not
+      // inserted into the solved score node dictionary.  If you then playback the sequence
+      // all the way to the *original* L, it will try to solve it again never realizing that
+      // it's already been solved.  Checking the dictionary EVERY TIME would fix it, but that
+      // would be prohibitively slow.  
+      //
+      // Most likely we need a way to mark the node as a leaf,
+      // and in the main loop double-check all leaf nodes in case they've already been solved.
+      // Still, even this presents complications.  If we do find it in the solved score node 
+      // lookup, then what do we do?  I suppose one solution is to replace its SolvedScoreNode
+      // entry with the new one after we solve it, since theoretically it will be more accurate
+      // than the other one.  It's not clear what the best strategy is.
+      //
+      // Unfortunately, the current approach means that replaying an entire synth from the beginning
+      // will cause the entire thing to be re-evaluated and ultimately end up being slow, whereas
+      // before it could re-use the previous cache for the replay operation.  We should address this
+      // soon since this is important.
+      solvedStates.Clear();
+
       foreach (Action action in actions)
       {
         if (!action.CanUse(root.originalState))
@@ -61,24 +89,18 @@ namespace Simulator.Engine
 
     private void ExpandInteractions(UserDecisionNode interaction)
     {
-      //Debug.Assert(!solvedStates.ContainsKey(interaction.currentState));
-      if (solvedStates.ContainsKey(interaction.originalState))
-        Debugger.Break();
-
       foreach (PreRandomDecisionNode choice in interaction.choices)
       {
         // This represents a user choice, so the probability hasn't changed yet.
         ExpandRandomOutcomes(choice);
       }
 
-      if (solvedStates.ContainsKey(interaction.originalState))
-        Debugger.Break();
       // After expanding all the child user interactions, this node can be solved by
       // choosing the best child action.
       PreRandomDecisionNode optimal = interaction.OptimalAction;
       interaction.Solve(optimal.Score);
       SolvedScoreNode scoreNode = new SolvedScoreNode(optimal.Score, interaction);
-      solvedStates.Add(new State(interaction.originalState), scoreNode);
+      solvedStates.Add(interaction.originalState, scoreNode);
       ++numSlowSolved;
     }
 
@@ -136,7 +158,7 @@ namespace Simulator.Engine
             // been handled earlier.
             Debug.Assert(outcome.interaction.choices.Count > 0);
 
-            if (outcome.newState.Step <= MaxAnalysisDepth)
+            if ((outcome.newState.Step - baseStep + 1) <= MaxAnalysisDepth)
             {
               ExpandInteractions(outcome.interaction);
 

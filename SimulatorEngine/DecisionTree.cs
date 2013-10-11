@@ -52,8 +52,6 @@ namespace Simulator.Engine
         PreRandomDecisionNode bestNode = null;
         foreach (PreRandomDecisionNode child in choices)
         {
-          Debug.Assert(child.IsSolved);
-
           if (bestNode == null || child.Score > bestNode.Score)
             bestNode = child;
         }
