@@ -28,7 +28,7 @@ namespace Simulator.Tests
 
       analyzer.Run(root);
 
-      Assert.AreEqual(true, root.OptimalAction.originatingAction.Attributes.Type == ActionType.Progress);
+      Assert.AreEqual<ActionType>(ActionType.Progress, root.OptimalAction.originatingAction.Attributes.Type);
     }
 
     [TestMethod]
@@ -47,7 +47,7 @@ namespace Simulator.Tests
       state.CP = Compute.CP(SynthAction<MastersMend>.Attributes.CP, state) - 1;
       state.Durability = 20;
 
-      int progressGain = 30;
+      uint progressGain = 30;
       state.Progress = 0;
       state.MaxProgress = progressGain * 2;
       UserDecisionNode root = new UserDecisionNode();
@@ -56,7 +56,7 @@ namespace Simulator.Tests
       analyzer.Run(root);
 
       foreach (PreRandomDecisionNode child in root.OptimalUserDecisions)
-        Assert.AreEqual(true, child.originatingAction.Attributes.Type == ActionType.Progress);
+        Assert.AreEqual<ActionType>(ActionType.Progress, child.originatingAction.Attributes.Type);
     }
 
     public void NodesUnsolvedAfterMaxDepth()
@@ -78,22 +78,6 @@ namespace Simulator.Tests
 
       foreach (PreRandomDecisionNode child in root.choices)
         Assert.IsFalse(child.IsSolved);
-    }
-
-    [TestMethod]
-    public void IdenticalActiveBuffsEqual()
-    {
-      MastersMend mm = new MastersMend();
-      //Ingenuity ing = new Ingenuity();
-
-      ActiveBuff mmbuff = new ActiveBuff();
-      mmbuff.TurnsRemaining = mm.Attributes.BuffDuration;
-      mmbuff.Buff = mm;
-
-      ActiveBuff mmbuff2 = new ActiveBuff();
-      mmbuff2.TurnsRemaining = mm.Attributes.BuffDuration;
-      mmbuff2.Buff = mm;
-      Assert.AreEqual(mmbuff, mmbuff2);
     }
 
     [TestMethod]
@@ -130,7 +114,7 @@ namespace Simulator.Tests
       root.originalState = initialState;
       analyzer.Run(root);
 
-      Assert.AreEqual(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
+      Assert.AreEqual<Type>(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
    }
 
     [TestMethod]
@@ -171,7 +155,7 @@ namespace Simulator.Tests
       root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
       root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
       root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
-      Assert.AreEqual(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
+      Assert.AreEqual<Type>(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
     }
   }
 }

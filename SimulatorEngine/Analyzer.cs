@@ -38,22 +38,9 @@ namespace Simulator.Engine
       }
     }
 
-    class ScoreHashComparer : IEqualityComparer<State>
-    {
-      public bool Equals(State x, State y)
-      {
-        return x.Equals(y);
-      }
-
-      public int GetHashCode(State obj)
-      {
-        return obj.HashCode;
-      }
-    }
-
     public Analyzer()
     {
-      solvedStates = new Dictionary<State, SolvedScoreNode>(new ScoreHashComparer());
+      solvedStates = new Dictionary<State, SolvedScoreNode>();
     }
 
     public void Run(UserDecisionNode root)
@@ -87,7 +74,7 @@ namespace Simulator.Engine
       PreRandomDecisionNode optimal = interaction.OptimalAction;
       interaction.Solve(optimal.Score);
       SolvedScoreNode scoreNode = new SolvedScoreNode(optimal.Score, interaction);
-      solvedStates.Add(new State(interaction.originalState, null), scoreNode);
+      solvedStates.Add(new State(interaction.originalState), scoreNode);
       ++numSlowSolved;
     }
 
@@ -145,7 +132,7 @@ namespace Simulator.Engine
             // been handled earlier.
             Debug.Assert(outcome.interaction.choices.Count > 0);
 
-            if (outcome.newState.TransitionSequence.Count < MaxAnalysisDepth)
+            if (outcome.newState.Step <= MaxAnalysisDepth)
             {
               ExpandInteractions(outcome.interaction);
 
@@ -168,34 +155,27 @@ namespace Simulator.Engine
         }
 
         // The outcome may not be solved if we were hit with the max depth limit.  In that case
-        // Don't factor this term into the final score.  (This probably won't cause a huge effect
-        // anyway, since this far down it will hardly effect the probability.
+        // recalculate the score from the state.  That score is just an estimate, but that's ok.
         if (outcome.IsSolved)
           finalScore += outcome.probability * outcome.Score;
         else
-          finalScore += outcome.probability * outcome.newState.ScoreEstimate;
+          finalScore += outcome.probability * outcome.newState.Score;
       }
 
       preDecisionNode.Solve(finalScore);
     }
 
-    private void PlaybackSequence(State state)
+    private void PrintTransition(State s)
     {
-      foreach (State.Transition transition in state.TransitionSequence)
-        PrintTransition(transition);
-    }
-
-    private void PrintTransition(State.Transition transition)
-    {
-      State s = transition.previousState;
+      Action leadingAction = s.LeadingAction;
       Debug.WriteLine("CP: {0}/{1}, Dura: {2}/{3}, Progress: {4}/{5}, Quality: {6}/{7} ==> {8}",
                         s.CP, s.MaxCP, s.Durability, s.MaxDurability, s.Progress, s.MaxProgress,
-                        s.Quality, s.MaxQuality, transition.action.Attributes.Name);
+                        s.Quality, s.MaxQuality, leadingAction.Attributes.Name);
     }
 
     private List<PostRandomDecisionNode> ExpandRandomOutcomes(Action action, State initialState)
     {
-      float successProbability = Compute.SuccessRate(action.Attributes.SuccessRate, initialState);
+      double successProbability = Compute.SuccessRate(action.Attributes.SuccessRate, initialState);
       State successState = action.SuccessState(initialState);
       State failureState = action.FailureState(initialState);
 

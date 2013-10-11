@@ -16,7 +16,7 @@ namespace Simulator.Engine
     protected virtual void Advance(State originalState, State newState)
     {
       float delta = Compute.Progress(originalState, Attributes.Efficiency);
-      newState.Progress = Math.Min(newState.Progress + (int)delta, newState.MaxProgress);
+      newState.Progress = Math.Min(newState.Progress + (uint)delta, newState.MaxProgress);
     }
   }
 

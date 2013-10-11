@@ -18,7 +18,7 @@ namespace Simulator.Engine
     protected virtual void Advance(State originalState, State newState)
     {
       float delta = Compute.Quality(originalState, Attributes.Efficiency);
-      newState.Quality = Math.Min(newState.Quality + (int)delta, newState.MaxQuality);
+      newState.Quality = Math.Min(newState.Quality + (uint)delta, newState.MaxQuality);
     }
   }
 

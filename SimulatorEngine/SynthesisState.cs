@@ -15,7 +15,7 @@ namespace Simulator.Engine
     COMPLETED
   }
 
-  public struct StateDetails2
+  public struct StateDetails
   {
     public ulong w1;
     public ulong w2;
@@ -49,16 +49,20 @@ namespace Simulator.Engine
      */
     public static readonly int kSynthLevelOffset = 0;
     public static readonly int kSynthLevelLength = 6;
-    public static readonly int kCrafterLevelOffset = kSynthLevelOffset + kSynthLevelLength;
+    public static readonly int kQualityOffset = kSynthLevelOffset + kSynthLevelLength;
+    public static readonly int kQualityLength = 11;
+    public static readonly int kMaxQualityOffset = kQualityOffset + kQualityLength;
+    public static readonly int kMaxQualityLength = 11;
+    public static readonly int kCrafterLevelOffset = kMaxQualityOffset + kMaxQualityLength;
     public static readonly int kCrafterLevelLength = 6;
     public static readonly int kConditionOffset = kCrafterLevelOffset + kCrafterLevelLength;
     public static readonly int kConditionLength = 2;
     public static readonly int kManipulationOffset = kConditionOffset + kConditionLength;
-    public static readonly int kManipulationLength = 2;
+    public static readonly int kManipulationLength = 3;
     public static readonly int kGreatStridesOffset = kManipulationOffset + kManipulationLength;
-    public static readonly int kGreatStridesLength = 2;
+    public static readonly int kGreatStridesLength = 3;
     public static readonly int kIngenuityOffset = kGreatStridesOffset + kGreatStridesLength;
-    public static readonly int kIngenuityLength = 2;
+    public static readonly int kIngenuityLength = 3;
     public static readonly int kSteadyHandOffset = kIngenuityOffset + kIngenuityLength;
     public static readonly int kSteadyHandLength = 3;
 
@@ -71,6 +75,8 @@ namespace Simulator.Engine
 
     private void Assign(ref ulong bitfield, int bitoffset, int bitlength, uint value)
     {
+      Debug.Assert(value < (1 << bitlength));
+
       ulong mask1 = ((1UL << bitlength) - 1UL) << bitoffset;  // 0000000000011111000000
       ulong mask2 = ~mask1;                                   // 1111111111100000111111
 
@@ -136,15 +142,30 @@ namespace Simulator.Engine
       set { Assign(ref w2, kSynthLevelOffset, kSynthLevelLength, value); }
     }
 
+    public uint Quality
+    {
+      get { return Retrieve(w2, kQualityOffset, kQualityLength); }
+      set { Assign(ref w2, kQualityOffset, kQualityLength, value); }
+    }
+
+    public uint MaxQuality
+    {
+      get { return Retrieve(w2, kMaxQualityOffset, kMaxQualityLength); }
+      set { Assign(ref w2, kMaxQualityOffset, kMaxQualityLength, value); }
+    }
+
     public uint CrafterLevel
     {
       get { return Retrieve(w2, kCrafterLevelOffset, kCrafterLevelLength); }
       set { Assign(ref w2, kCrafterLevelOffset, kCrafterLevelLength, value); }
     }
 
-    public uint LevelSurplus
+    public int LevelSurplus
     {
-      get { return CrafterLevel - SynthLevel; }
+      get 
+      { 
+        return (int)CrafterLevel - (int)SynthLevel; 
+      }
     }
 
     public Condition Condition
@@ -181,299 +202,6 @@ namespace Simulator.Engine
     {
       get { return (SteadyHandTurns > 0) ? 0.2 : 0.0; }
     }
-  }
-
-  public struct StateDetails
-  {
-    // The user's stats in this state.
-    public int craftsmanship;
-    public int control;
-    public int cp;
-    public int maxCp;
-    public int synthLevel;
-    public int crafterLevel;
-
-    public float successBonus;
-    public int recipeLevelReductionBonus;
-
-    // The synthesis' stats in this state.
-    public int durability;
-    public int maxDurability;
-    public int quality;
-    public int maxQuality;
-    public int progress;
-    public int maxProgress;
-    public Condition condition;
-  }
-
-  public class State
-  {
-    private StateDetails state;
-
-    private double score;
-    private bool scoreComputed;
-
-    public struct Transition
-    {
-      public Action action;
-      public State previousState;
-      public State newState;
-    }
-    private List<Transition> transitionSequence = new List<Transition>();
-    public List<ActiveBuff> activeBuffs = new List<ActiveBuff>();
-
-    public override bool Equals(object obj)
-    {
-      State other = obj as State;
-      if (other == null)
-        return false;
-
-      if (!state.Equals(other.state))
-        return false;
-
-      if (activeBuffs.Count != other.activeBuffs.Count)
-        return false;
-      for (int i = 0; i < activeBuffs.Count; ++i)
-      {
-        ActiveBuff currentBuff = activeBuffs[i];
-        ActiveBuff otherBuff = other.activeBuffs[i];
-        if (!currentBuff.Equals(otherBuff))
-          return false;
-      }
-      return true;
-    }
-
-    public override int GetHashCode()
-    {
-      return state.GetHashCode();
-    }
-
-    public State()
-    {
-      state = new StateDetails();
-      score = 0.0f;
-      scoreComputed = false;
-    }
-
-    public State(State oldState, Action leadingAction)
-    {
-      this.state = oldState.state;
-
-      this.score = oldState.score;
-      this.scoreComputed = oldState.scoreComputed;
-      if (leadingAction != null)
-      {
-        // TODO: Deep clone the transition entries
-        this.transitionSequence = new List<Transition>(oldState.transitionSequence);
-        Transition transition = new Transition();
-        transition.previousState = new State(oldState, null);
-        transition.action = leadingAction;
-        transition.newState = this;
-        transitionSequence.Add(transition);
-      }
-      else
-        this.transitionSequence = new List<Transition>(oldState.transitionSequence);
-      // Make sure to do a deep copy, so that the ActiveBuff structures are cloned instead of
-      // copied by reference.  Otherwise after advancing a state, ticking a buff in the new state
-      // will cause it to tick in the old state as well.
-      foreach (ActiveBuff oldBuff in oldState.ActiveBuffs)
-      {
-        ActiveBuff copy = new ActiveBuff();
-        copy.Buff = oldBuff.Buff;
-        copy.TurnsRemaining = oldBuff.TurnsRemaining;
-        this.activeBuffs.Add(copy);
-      }
-    }
-
-    private static readonly double kQualityWeight = 2.0;
-    private static readonly double kProgressWeight = 1.5;
-    private static readonly double kCPWeight = 0.4;
-    private static readonly double kDurabilityWeight = 0.6;
-
-    private static readonly double kMaxWeight = kQualityWeight + kProgressWeight + kCPWeight + kDurabilityWeight;
-
-    public double ScoreEstimate
-    {
-      get
-      {
-        if (Status == SynthesisStatus.BUSTED)
-          return 0.0f;
-
-        double q = (double)Quality;
-        double qmax = (double)MaxQuality;
-        double p = (double)Progress;
-        double pmax = (double)MaxProgress;
-        double d = (double)Durability;
-        double dmax = (double)MaxDurability;
-        double c = (double)CP;
-        double cmax = (double)MaxCP;
-
-        double cpct = c/cmax;
-        double dpct = d/dmax;
-        double ppct = p/pmax;
-        double qpct = q/qmax;
-
-        double result = (1.0 + ppct) * (1.0 + q * pmax / p) * Math.Exp(cpct) * Math.Exp(dpct);
-        return result;
-      }
-    }
-
-    public IList<Transition> TransitionSequence
-    {
-      get
-      {
-        return transitionSequence;
-      }
-    }
-
-    public int HashCode
-    {
-      get
-      {
-        double qualityPercent = (double)Quality / (double)MaxQuality;
-        double durabilityPercent = (double)Durability / (double)MaxDurability;
-        double cpPercent = (double)CP / (double)MaxCP;
-        double progressPercent = (double)Progress / (double)MaxProgress;
-
-        double result = 0.0;
-
-        result += kQualityWeight * qualityPercent;
-        result += kProgressWeight * progressPercent;
-        result += kCPWeight * cpPercent;
-        result += kDurabilityWeight * durabilityPercent;
-
-        if (Condition == Engine.Condition.Poor)
-          result -= 0.1;
-        else if (Condition == Engine.Condition.Good)
-          result += 0.1;
-        else if (Condition == Engine.Condition.Excellent)
-          result += 0.2;
-
-        return (int)(100000000.0*result);
-      }
-    }
-
-    public void TickBuffs()
-    {
-      // Tick all the active buffs, and remove the ones that are expired.
-      for (int i = 0; i < ActiveBuffs.Count; )
-      {
-        ActiveBuff buff = ActiveBuffs[i];
-        Debug.Assert(buff.TurnsRemaining > 0);
-        // Buffs that were just added this pass, don't tick them yet.
-        if (!buff.IsNewBuff)
-        {
-          buff.Tick(this);
-          if (buff.TurnsRemaining == 0)
-          {
-            buff.Remove(this);
-            ActiveBuffs.RemoveAt(i);
-          }
-          else
-            ++i;
-        }
-        else
-        {
-          buff.IsNewBuff = false;
-          ++i;
-        }
-      };
-    }
-
-    public List<ActiveBuff> ActiveBuffs
-    {
-      get { return activeBuffs; }
-      set { activeBuffs = value; }
-    }
-
-    public bool IsBuffActive(BuffAction buff)
-    {
-      return ActiveBuffs.Exists(delegate(ActiveBuff abuff) { return (abuff.Buff == buff); });
-    }
-    
-    public int Craftsmanship
-    {
-      get { return state.craftsmanship; }
-      set { scoreComputed = false; state.craftsmanship = value; }
-    }
-
-    public int Control
-    {
-      get { return state.control; }
-      set { scoreComputed = false; state.control = value; }
-    }
-    public int CP
-    {
-      get { return state.cp; }
-      set { scoreComputed = false; state.cp = value; }
-    }
-    public int MaxCP
-    {
-      get { return state.maxCp; }
-      set { scoreComputed = false; state.maxCp = value; }
-    }
-    public int LevelSurplus
-    {
-      get { return state.crafterLevel - state.synthLevel - state.recipeLevelReductionBonus; }
-    }
-    public int CrafterLevel
-    {
-      get { return state.crafterLevel; }
-      set { scoreComputed = false; state.crafterLevel = value; }
-    }
-    public int SynthLevel
-    {
-      get { return state.synthLevel; }
-      set { scoreComputed = false; state.synthLevel = value; }
-    }
-
-    public int RecipeLevelReductionBonus
-    {
-      get { return state.recipeLevelReductionBonus; }
-      set { scoreComputed = false; state.recipeLevelReductionBonus = value; }
-    }
-    public float SuccessBonus
-    {
-      get { return state.successBonus; }
-      set { scoreComputed = false; state.successBonus = value; }
-    }
-
-    // The synthesis' stats in this state.
-    public int Durability
-    {
-      get { return state.durability; }
-      set { scoreComputed = false; state.durability = value; }
-    }
-    public int MaxDurability
-    {
-      get { return state.maxDurability; }
-      set { scoreComputed = false; state.maxDurability = value; }
-    }
-    public int Quality
-    {
-      get { return state.quality; }
-      set { scoreComputed = false; state.quality = value; }
-    }
-    public int MaxQuality
-    {
-      get { return state.maxQuality; }
-      set { scoreComputed = false; state.maxQuality = value; }
-    }
-    public int Progress
-    {
-      get { return state.progress; }
-      set { scoreComputed = false; state.progress = value; }
-    }
-    public int MaxProgress
-    {
-      get { return state.maxProgress; }
-      set { scoreComputed = false; state.maxProgress = value; }
-    }
-    public Condition Condition
-    {
-      get { return state.condition; }
-      set { scoreComputed = false; state.condition = value; }
-    }
 
     public SynthesisStatus Status
     {
@@ -481,7 +209,7 @@ namespace Simulator.Engine
       {
         if (Progress < MaxProgress)
         {
-          if (Durability <= 0)
+          if (Durability == 0)
             return SynthesisStatus.BUSTED;
           else
             return SynthesisStatus.IN_PROGRESS;
@@ -490,19 +218,217 @@ namespace Simulator.Engine
           return SynthesisStatus.COMPLETED;
       }
     }
+  }
 
+  public class State
+  {
+    private StateDetails details;
+
+    private State previousState;
+    private Action leadingAction;
+    private uint step;
+
+    // It's a bit hackish to store these here, but actions are immutable so it's not
+    // necessarily wrong to store static copies, just awkward.  It would be nice if
+    // there were a generic mapping between these actions and the corresponding getters
+    // setters in the StateDetails
+    private static GreatStrides greatStrides;
+    private static Ingenuity ingenunity;
+    private static SteadyHand steadyHand;
+    private static Manipulation manipulation;
+
+    static State()
+    {
+      greatStrides = new GreatStrides();
+      ingenunity = new Ingenuity();
+      steadyHand = new SteadyHand();
+      manipulation = new Manipulation();
+    }
+    public State()
+    {
+      details = new StateDetails();
+      step = 1;
+      previousState = null;
+      leadingAction = null;
+    }
+
+    public State(State oldState, Action leadingAction)
+    {
+      this.details = oldState.details;
+
+      this.previousState = oldState;    // do we need to clone here?
+      this.leadingAction = leadingAction;
+
+      this.step = oldState.step + 1;
+    }
+
+    public State(State oldState)
+    {
+      this.details = oldState.details;
+
+      this.previousState = oldState;    // do we need to clone here?
+      if (oldState != null)
+      {
+        this.leadingAction = oldState.leadingAction;
+        this.step = oldState.step;
+      }
+      else
+      {
+        this.leadingAction = null;
+        this.step = 1;
+      }
+    }
+
+    public override bool Equals(object obj)
+    {
+      State other = obj as State;
+      if (other == null)
+        return false;
+
+      if (!details.Equals(other.details))
+        return false;
+
+      // State comparison is only concerned with the state details, not the state that we
+      // were in before or the action that got us here.  This is because 2 different states
+      // can lead to the same state through the use of different actions.  Because of this
+      // it's incorrect to compare previousState or leadingAction here.
+      return true;
+    }
+
+    public override int GetHashCode()
+    {
+      return details.GetHashCode();
+    }
+
+    public void TickBuffs()
+    {
+      steadyHand.TickBuff(this);
+      greatStrides.TickBuff(this);
+      manipulation.TickBuff(this);
+      ingenunity.TickBuff(this);
+    }
+
+    public uint Step
+    {
+      get { return step; }
+    }
+    public State PreviousState
+    {
+      get { return previousState; }
+    }
+
+    public Action LeadingAction
+    {
+      get { return leadingAction; }
+    }
+
+    public SynthesisStatus Status
+    {
+      get { return details.Status; }
+    }
+    public uint Craftsmanship
+    {
+      get { return details.Craftsmanship; }
+      set { details.Craftsmanship = value; }
+    }
+
+    public uint Control
+    {
+      get { return details.Control; }
+      set { details.Control = value; }
+    }
+    public uint CP
+    {
+      get { return details.CP; }
+      set { details.CP = value; }
+    }
+    public uint MaxCP
+    {
+      get { return details.MaxCP; }
+      set { details.MaxCP = value; }
+    }
+    public int LevelSurplus
+    {
+      get { return details.LevelSurplus; }
+    }
+    public uint CrafterLevel
+    {
+      get { return details.CrafterLevel; }
+      set { details.CrafterLevel = value; }
+    }
+    public uint SynthLevel
+    {
+      get { return details.SynthLevel; }
+      set { details.SynthLevel = value; }
+    }
+    public double SuccessBonus
+    {
+      get { return details.SuccessBonus; }
+    }
+
+    // The synthesis' stats in this state.
+    public uint Durability
+    {
+      get { return details.Durability; }
+      set { details.Durability = value; }
+    }
+    public uint MaxDurability
+    {
+      get { return details.MaxDurability; }
+      set { details.MaxDurability = value; }
+    }
+    public uint Quality
+    {
+      get { return details.Quality; }
+      set { details.Quality = value; }
+    }
+    public uint MaxQuality
+    {
+      get { return details.MaxQuality; }
+      set { details.MaxQuality = value; }
+    }
+    public uint Progress
+    {
+      get { return details.Progress; }
+      set { details.Progress = value; }
+    }
+    public uint MaxProgress
+    {
+      get { return details.MaxProgress; }
+      set { details.MaxProgress = value; }
+    }
+    public Condition Condition
+    {
+      get { return details.Condition; }
+      set { details.Condition = value; }
+    }
+
+    public uint ManipulationTurns
+    {
+      get { return details.ManipulationTurns; }
+      set { details.ManipulationTurns = value; }
+    }
+
+    public uint GreatStridesTurns
+    {
+      get { return details.GreatStridesTurns; }
+      set { details.GreatStridesTurns = value; }
+    }
+
+    public uint IngenuityTurns
+    {
+      get { return details.IngenuityTurns; }
+      set { details.IngenuityTurns = value; }
+    }
+
+    public uint SteadyHandTurns
+    {
+      get { return details.SteadyHandTurns; }
+      set { details.SteadyHandTurns = value; }
+    }
     public double Score
     {
-      get
-      {
-        if (!scoreComputed)
-        {
-          score = ScoreEstimate;
-          scoreComputed = true;
-        }
-
-        return score;
-      }
+      get { return Compute.StateScore(this); }
     }
   }
 }

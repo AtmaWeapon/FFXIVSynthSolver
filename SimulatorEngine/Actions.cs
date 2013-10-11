@@ -64,13 +64,10 @@ namespace Simulator.Engine
         return null;
 
       State newState = new State(oldState, this);
+
       foreach (StateOperator op in failureOperators)
         op(oldState, newState);
 
-      // This is kind of hackish, but with buffs like Manipulation that restore durability, the durability is still
-      // checked before the buff is applied.  So if you have 10 durability with Manipulation up, and go down to 0
-      // then the synth will fail, even though Manipulation would restore that 10 durability.  So only tick the buffs
-      // if the synth is still in an OK state.
       if (newState.Status == SynthesisStatus.IN_PROGRESS)
         newState.TickBuffs();
 
@@ -84,12 +81,9 @@ namespace Simulator.Engine
       foreach (StateOperator op in successOperators)
         op(oldState, newState);
 
-      // This is kind of hackish, but with buffs like Manipulation that restore durability, the durability is still
-      // checked before the buff is applied.  So if you have 10 durability with Manipulation up, and go down to 0
-      // then the synth will fail, even though Manipulation would restore that 10 durability.  So only tick the buffs
-      // if the synth is still in an OK state.
       if (newState.Status == SynthesisStatus.IN_PROGRESS)
         newState.TickBuffs();
+
       return newState;
     }
 
@@ -105,14 +99,14 @@ namespace Simulator.Engine
 
     private void DeductBasicCosts(State originalState, State newState)
     {
-      Debug.Assert(originalState.CP >= Attributes.CP);
-      Debug.Assert(originalState.Durability >= 0);
+      Debug.Assert(newState.CP >= Attributes.CP);
+      Debug.Assert(newState.Durability >= 0);
 
       // Deduct CP
-      newState.CP = originalState.CP - Attributes.CP;
+      newState.CP -= Attributes.CP;
 
       // Deduct Durability
-      newState.Durability = Math.Max(originalState.Durability - Attributes.Durability, 0);
+      newState.Durability = Math.Max(newState.Durability - Attributes.Durability, 0);
     }
   }
 

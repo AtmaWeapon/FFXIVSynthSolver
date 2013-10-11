@@ -27,19 +27,19 @@ namespace Simulator
 
       State initialState = new State();
       initialState.Condition = Condition.Normal;
-      initialState.Control = 102;
-      initialState.Craftsmanship = 105;
-      initialState.CP = 233;
-      initialState.MaxCP = 233;
+      initialState.Control = 119;
+      initialState.Craftsmanship = 131;
+      initialState.CP = 254;
+      initialState.MaxCP = 254;
       initialState.MaxDurability = 70;
       initialState.Durability = 70;
-      initialState.MaxProgress = 68;
-      initialState.Quality = 0;
-      initialState.MaxQuality = 982;
-      initialState.SynthLevel = 19;
-      initialState.CrafterLevel = 17;
+      initialState.MaxProgress = 74;
+      initialState.Quality = 284;
+      initialState.MaxQuality = 1053;
+      initialState.SynthLevel = 20;
+      initialState.CrafterLevel = 19;
 
-      analyzer.MaxAnalysisDepth = 12;
+      analyzer.MaxAnalysisDepth = 8;
 
       SolutionPlayer player = new SolutionPlayer(analyzer);
       player.Play(initialState);

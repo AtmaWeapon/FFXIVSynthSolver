@@ -18,8 +18,8 @@ namespace Simulator.Tests
       state.Progress = 50;
       state.MaxProgress = 70;
 
-      Assert.AreEqual(Engine.SynthesisStatus.BUSTED, state.Status);
-      Assert.AreEqual(0.0f, state.Score);
+      Assert.AreEqual<SynthesisStatus>(Engine.SynthesisStatus.BUSTED, state.Status);
+      Assert.AreEqual<double>(0.0, state.Score);
     }
 
     // Test is disabled because it doesn't work, although it should.  The numbers have been verified
@@ -33,8 +33,8 @@ namespace Simulator.Tests
       state.CrafterLevel = 17;
       state.SynthLevel = 19;
 
-      int progress = Compute.Progress(state, (SynthAction<BasicSynthesis>.Attributes.Efficiency));
-      Assert.AreEqual(19, progress);
+      uint progress = Compute.Progress(state, (SynthAction<BasicSynthesis>.Attributes.Efficiency));
+      Assert.AreEqual<uint>(19, progress);
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ namespace Simulator.Tests
       s2.Durability = 40;
       s2.CP = 59;
 
-      Assert.AreEqual(true, s2.Score > s1.Score);
+      Assert.IsTrue(s2.Score > s1.Score);
     }
 
     [TestMethod]
@@ -85,7 +85,7 @@ namespace Simulator.Tests
       mastersMendState.CP -= 92;
       mastersMendState.Durability += 30;
 
-      Assert.IsTrue(completedState.ScoreEstimate < mastersMendState.ScoreEstimate);
+      Assert.IsTrue(completedState.Score < mastersMendState.Score);
     }
   }
 }

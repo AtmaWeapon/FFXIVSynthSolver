@@ -9,14 +9,37 @@ namespace Simulator.Engine
 {
   public static class Compute
   {
-    public static int DurabilityLoss(int baseDurability, State state)
+    public static uint DurabilityLoss(uint baseDurability, State state)
     {
       return baseDurability;
     }
 
-    public static int RawProgress(int craftsmanship, int efficiency, int levelSurplus)
+    public static double StateScore(State state)
     {
-      double levelFactor = 1.0f;
+      if (state.Status == SynthesisStatus.BUSTED)
+        return 0.0f;
+
+      double q = (double)state.Quality;
+      double qmax = (double)state.MaxQuality;
+      double p = (double)state.Progress;
+      double pmax = (double)state.MaxProgress;
+      double d = (double)state.Durability;
+      double dmax = (double)state.MaxDurability;
+      double c = (double)state.CP;
+      double cmax = (double)state.MaxCP;
+
+      double cpct = c / cmax;
+      double dpct = d / dmax;
+      double ppct = p / pmax;
+      double qpct = q / qmax;
+
+      double result = (1.0 + ppct) * (1.0 + q * pmax / p) * Math.Exp(cpct) * Math.Exp(dpct);
+      return result;
+    }
+
+    public static uint RawProgress(uint craftsmanship, uint efficiency, int levelSurplus)
+    {
+      double levelFactor = 1.0;
       if (levelSurplus > 0)
         levelFactor += (double)Math.Min(5, levelSurplus) * 0.05;
       else if (levelSurplus < 0)
@@ -24,45 +47,45 @@ namespace Simulator.Engine
 
       double craftsmanshipFactor = (0.21 * craftsmanship + 1.6);
       double result = ((double)efficiency / 100.0) * levelFactor * craftsmanshipFactor;
-      int progress = (int)Math.Round(result);
+      uint progress = (uint)Math.Round(result);
       return progress;
     }
 
-    public static int Progress(State state, int efficiency)
+    public static uint Progress(State state, uint efficiency)
     {
       return RawProgress(state.Craftsmanship, efficiency, state.LevelSurplus);
     }
 
-    public static int Quality(State state, int efficiency)
+    public static uint Quality(State state, uint efficiency)
     {
       return RawQuality(state.Condition, state.Control, efficiency, state.LevelSurplus);
     }
 
-    public static int RawQuality(Condition condition, int control, int efficiency, int levelSurplus)
+    public static uint RawQuality(Condition condition, uint control, uint efficiency, int levelSurplus)
     {
-      float multiplier = 1.0f;
+      double multiplier = 1.0;
       if (condition == Condition.Poor)
-        multiplier = 0.5f;
+        multiplier = 0.5;
       else if (condition == Condition.Good)
-        multiplier = 1.5f;
+        multiplier = 1.5;
       else if (condition == Condition.Excellent)
-        multiplier = 4.0f;
+        multiplier = 4.0;
 
       // Level difference is only used if it's negative (i.e. if crafter level is below the synth level)
-      float levelFactor = 1.0f + 0.05f * (float)Math.Min(0, levelSurplus);
-      float controlFactor = 0.36f * (float)control + 34.0f;
+      double levelFactor = 1.0 + 0.05 * (double)Math.Min(0, levelSurplus);
+      double controlFactor = 0.36 * (double)control + 34.0;
       double result = ((double)efficiency / 100.0) * multiplier * Math.Round(levelFactor * controlFactor);
-      return (int)result;
+      return (uint)result;
     }
 
-    public static int CP(int baseCP, State state)
+    public static uint CP(uint baseCP, State state)
     {
       return baseCP;
     }
 
-    public static float SuccessRate(int baseSuccessRate, State state)
+    public static double SuccessRate(uint baseSuccessRate, State state)
     {
-      return Math.Min((float)baseSuccessRate/100.0f + state.SuccessBonus, 1.0f);
+      return Math.Min((double)baseSuccessRate/100.0 + state.SuccessBonus, 1.0);
     }
   }
 }

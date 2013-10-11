@@ -18,12 +18,12 @@ namespace Simulator.Engine
   public class SynthActionAttribute : Attribute
   {
     private ActionType type = ActionType.Progress;
-    private int cp = 0;
+    private uint cp = 0;
     private string name = String.Empty;
-    private int efficiency = 0;
-    private int durability = 10;
-    private int successRate = 100;
-    private int buffDuration = 0;
+    private uint efficiency = 0;
+    private uint durability = 10;
+    private uint successRate = 100;
+    private uint buffDuration = 0;
     private bool disabled = false;
 
     public SynthActionAttribute(ActionType type)
@@ -48,7 +48,7 @@ namespace Simulator.Engine
       get { return type; }
     }
 
-    public int CP
+    public uint CP
     {
       get { return cp; }
       set { cp = value; }
@@ -60,25 +60,25 @@ namespace Simulator.Engine
       set { name = value; }
     }
 
-    public int Efficiency
+    public uint Efficiency
     {
       get { return efficiency; }
       set { efficiency = value; }
     }
 
-    public int BuffDuration
+    public uint BuffDuration
     {
       get { return buffDuration; }
       set { buffDuration = value; }
     }
 
-    public int Durability
+    public uint Durability
     {
       get { return durability; }
       set { durability = value; }
     }
 
-    public int SuccessRate
+    public uint SuccessRate
     {
       get { return successRate; }
       set { successRate = value; }

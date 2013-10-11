@@ -35,7 +35,7 @@ namespace Simulator.Engine
       get
       {
         if (!isSolved)
-          throw new InvalidOperationException();
+          return originalState.Score;
         return score;
       }
     }
@@ -52,9 +52,7 @@ namespace Simulator.Engine
         PreRandomDecisionNode bestNode = null;
         foreach (PreRandomDecisionNode child in choices)
         {
-          // All child interactions must be solved before this method can be called.
-          if (!child.IsSolved)
-            throw new InvalidOperationException();
+          Debug.Assert(child.IsSolved);
 
           if (bestNode == null || child.Score > bestNode.Score)
             bestNode = child;
@@ -141,17 +139,17 @@ namespace Simulator.Engine
   public class PostRandomDecisionNode : TreeNode
   {
     public bool wasSuccess;               // Was this node a result of a success or a failure?
-    public float probability;             // The probability that this random outcome was chosen.
+    public double probability;           // The probability that this random outcome was chosen.
     public UserDecisionNode interaction;  // The interaction node following this decision's outcome.
     public State newState;
 
     public UserDecisionNode OutcomeInteractionNode { get { return interaction; } }
 
-    public PostRandomDecisionNode(float probability, State originalState, Condition newCondition, bool wasSuccess)
+    public PostRandomDecisionNode(double probability, State originalState, Condition newCondition, bool wasSuccess)
     {
       this.probability = probability;
       this.wasSuccess = wasSuccess;
-      this.newState = new State(originalState, null);
+      this.newState = new State(originalState);
       this.newState.Condition = newCondition;
     }
   }
