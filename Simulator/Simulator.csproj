@@ -76,11 +76,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ISolutionPlayer.cs" />
     <Compile Include="RandomOutcomeSelector.xaml.cs">
       <DependentUpon>RandomOutcomeSelector.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SolutionPlayerConsole.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SolutionPlayer.cs" />
