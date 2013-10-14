@@ -42,6 +42,8 @@ namespace Simulator.Tests
     {
       State s1 = new State();
       s1.Progress = 75;
+      s1.Control = 50;
+      s1.Craftsmanship = 50;
       s1.MaxProgress = 75;
       s1.Quality = 248;
       s1.MaxQuality = 1080;
