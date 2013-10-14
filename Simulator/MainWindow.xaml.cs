@@ -83,7 +83,7 @@ namespace Simulator
       analyzer.Actions.AddAction(new TricksOfTheTrade());
       analyzer.Actions.AddAction(new StandardTouch());
 
-      analyzer.MaxAnalysisDepth = 4;
+      analyzer.MaxAnalysisDepth = 8;
 
       SetAppState(AppState.Idle);
     }
@@ -126,33 +126,20 @@ namespace Simulator
       }
     }
 
-    private void ChooseOptimalAction(bool initializing)
+    private void UpdateUIState(UserDecisionNode node)
     {
-      PreRandomDecisionNode optimalAction = activeNode.OptimalAction;
-      btnAccept.Content = String.Format("Use {0}", activeNode.OptimalAction.originatingAction.Attributes.Name);
-
-      if (!initializing)
-      {
-        RadioParams selectedParams = (RadioParams)selectedRadio.Tag;
-        string statusString = (selectedParams.success) ? "Success" : "Failure";
-        string conditionString = selectedParams.condition.ConditionString();
-        txtStatusLog.AppendText(String.Format("{0}!  New condition = {1}.\n", statusString, conditionString));
-        activeNode = optimalAction.FindMatchingOutcome(selectedParams.success, selectedParams.condition);
-        if (activeNode == null)
-          SetAppState(AppState.Idle);
-      }
-
+      Simulator.Engine.Action optimalAction = node.OptimalAction.originatingAction;
       State state = activeNode.originalState;
       txtStatusLog.AppendText(String.Format("Condition={9}, Progress {0}/{1}, Quality={2}/{3}, CP={4}/{5}, Dura={6}/{7}.  Best Action = {8}\n",
                               state.Progress, state.MaxProgress, state.Quality, state.MaxQuality,
                               state.CP, state.MaxCP, state.Durability, state.MaxDurability,
-                              optimalAction.originatingAction.Attributes.Name, state.Condition));
+                              optimalAction.Attributes.Name, state.Condition));
       lblQuality.Content = String.Format("{0}/{1}", state.Quality, state.MaxQuality);
       lblProgress.Content = String.Format("{0}/{1}", state.Progress, state.MaxProgress);
       lblCondition.Content = state.Condition.ToString();
       lblCP.Content = String.Format("{0}/{1}", state.CP, state.MaxCP);
       lblDurability.Content = String.Format("{0}/{1}", state.Durability, state.MaxDurability);
-      lblAction.Content = activeNode.OptimalAction.originatingAction.Attributes.Name;
+      lblAction.Content = optimalAction.Attributes.Name;
 
       switch (activeNode.originalState.Condition)
       {
@@ -168,7 +155,8 @@ namespace Simulator
           radioFailureNormal.IsEnabled = true;
           radioSuccessNormal.IsEnabled = true;
 
-          radioSuccessNormal.IsChecked = true;
+          if (selectedRadio != null)
+            selectedRadio.IsChecked = false;
           break;
         case Engine.Condition.Excellent:
           radioFailurePoor.IsEnabled = true;
@@ -181,7 +169,8 @@ namespace Simulator
           radioSuccessGood.IsEnabled = false;
           radioSuccessNormal.IsEnabled = false;
 
-          radioSuccessPoor.IsChecked = true;
+          if (selectedRadio != null)
+            selectedRadio.IsChecked = false;
           break;
         case Engine.Condition.Normal:
           radioFailureExcellent.IsEnabled = true;
@@ -194,8 +183,32 @@ namespace Simulator
           radioFailurePoor.IsEnabled = false;
           radioSuccessPoor.IsEnabled = false;
 
-          radioSuccessNormal.IsChecked = true;
+          if (selectedRadio != null)
+            selectedRadio.IsChecked = false;
           break;
+      }
+    }
+
+    private void ChooseOptimalAction(bool initializing)
+    {
+      PreRandomDecisionNode optimalAction = activeNode.OptimalAction;
+
+      RadioParams selectedParams = (RadioParams)selectedRadio.Tag;
+      string statusString = (selectedParams.success) ? "Success" : "Failure";
+      string conditionString = selectedParams.condition.ConditionString();
+      txtStatusLog.AppendText(String.Format("{0}!  New condition = {1}.\n", statusString, conditionString));
+      UserDecisionNode newActiveNode = optimalAction.FindMatchingOutcome(selectedParams.success, selectedParams.condition);
+      if (newActiveNode == null)
+        SetAppState(AppState.Idle);
+      else
+      {
+        activeNode = newActiveNode;
+        UpdateUIState(newActiveNode);
+        if (!newActiveNode.IsSolved)
+        {
+          SetAppState(AppState.Analyzing);
+          worker.RunWorkerAsync(activeNode);
+        }
       }
     }
 
@@ -230,6 +243,7 @@ namespace Simulator
     private void radio_Checked(object sender, RoutedEventArgs e)
     {
       selectedRadio = (RadioButton)sender;
+      ChooseOptimalAction(false);
     }
 
     private void SetAppState(AppState newState)
@@ -255,6 +269,8 @@ namespace Simulator
           radioSuccessPoor.IsEnabled = false;
           break;
         case AppState.Analyzing:
+          btnAccept.Content = "Analyzing...";
+          btnAccept.IsEnabled = false;
           btnCancel.Content = "Cancel Analysis";
           btnCancel.IsEnabled = true;
 
@@ -268,8 +284,7 @@ namespace Simulator
           radioSuccessPoor.IsEnabled = false;
           break;
         case AppState.Playback:
-          btnAccept.Content = String.Format("Use {0}", activeNode.OptimalAction.originatingAction.Attributes.Name);
-          btnAccept.IsEnabled = true;
+          btnAccept.IsEnabled = false;
           btnCancel.Content = "Cancel Playback";
           btnCancel.IsEnabled = true;
 
@@ -282,7 +297,7 @@ namespace Simulator
           radioSuccessNormal.IsEnabled = true;
           radioSuccessPoor.IsEnabled = true;
 
-          ChooseOptimalAction(true);
+          UpdateUIState(activeNode);
           break;
       }
 

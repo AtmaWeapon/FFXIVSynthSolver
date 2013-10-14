@@ -33,7 +33,8 @@ namespace Simulator.Engine
       double ppct = p / pmax;
       double qpct = q / qmax;
 
-      double result = (1.0 + ppct) * (1.0 + q * pmax / p) * Math.Exp(cpct) * Math.Exp(dpct);
+      double qfactor = (state.Progress == 0) ? 1.0 : (1.0 + q * pmax / p);
+      double result = (1.0 + ppct) * qfactor * Math.Exp(cpct) * Math.Exp(dpct);
       return result;
     }
 

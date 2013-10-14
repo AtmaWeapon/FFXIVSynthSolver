@@ -18,7 +18,7 @@
     <Border BorderBrush="Black" Background="Aqua" BorderThickness="1" HorizontalAlignment="Left" Height="86" Margin="299,138,0,0" VerticalAlignment="Top" Width="157">
       <Grid Margin="0,0,0,0">
         <RadioButton x:Name="radioFailurePoor" Content="Poor" GroupName="Buttons" HorizontalAlignment="Left" Height="18" Margin="10,2,0,0" VerticalAlignment="Top" Width="134" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioFailureNormal" Content="Normal" GroupName="Buttons" IsChecked="True" HorizontalAlignment="Left" Height="18" Margin="10,20,0,0" VerticalAlignment="Top" Width="134" Checked="radio_Checked"/>
+        <RadioButton x:Name="radioFailureNormal" Content="Normal" GroupName="Buttons" HorizontalAlignment="Left" Height="18" Margin="10,20,0,0" VerticalAlignment="Top" Width="134" Checked="radio_Checked"/>
         <RadioButton x:Name="radioFailureGood" Content="Good" GroupName="Buttons" HorizontalAlignment="Left" Height="18" Margin="10,38,0,0" VerticalAlignment="Top" Width="134" Checked="radio_Checked"/>
         <RadioButton x:Name="radioFailureExcellent" Content="Excellent" GroupName="Buttons" HorizontalAlignment="Left" Height="18" Margin="10,56,0,0" VerticalAlignment="Top" Width="134" Checked="radio_Checked"/>
       </Grid>
