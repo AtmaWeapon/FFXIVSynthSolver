@@ -34,7 +34,7 @@ namespace Simulator.Engine
       for (uint i = 0; i < kMaxFactorial; ++i)
       {
         for (uint j = 0; j < kMaxFactorial; ++j)
-          bincoeff[i, j] = Binomial(i, j);
+          bincoeff[i, j] = SlowBinomial(i, j);
       }
     }
 
@@ -71,37 +71,38 @@ namespace Simulator.Engine
       return result;
     }
 
+    public static double FailureProbability(State state) 
+    {
+      uint progressRemaining = state.MaxProgress - state.Progress;
+      uint basicProgressPerTurn = Compute.Progress(state, 100);
+      uint successfulTurnsNeeded = (uint)Math.Ceiling((double)progressRemaining / (double)basicProgressPerTurn);
+      uint turnsRemaining = (uint)Math.Ceiling((double)state.Durability / 10.0);
+      double successProb = Probability(successfulTurnsNeeded, turnsRemaining, 0.9);
+      return 1.0 - successProb;
+    }
+
+    public static double SuccessProbability(State state) 
+    {
+      return 1.0 - FailureProbability(state);
+    }
+
     public static double StateScore(State state)
     {
       if (state.Status == SynthesisStatus.BUSTED)
         return 0.0f;
 
-      double failureProbability = 0.0;
-      uint ProgressRemaining = state.MaxProgress - state.Progress;
-      uint BasicProgressPerTurn = Compute.Progress(state, 100);
-      uint successfulTurnsNeeded = (uint)Math.Ceiling((double)ProgressRemaining / (double)BasicProgressPerTurn);
+      double psucc = SuccessProbability(state);
       uint turnsRemaining = (uint)Math.Ceiling((double)state.Durability / 10.0);
-      double successProb = Probability(successfulTurnsNeeded, turnsRemaining, 0.9);
-      failureProbability = 1.0 - successProb;
 
       double q = (double)state.Quality;
       double qmax = (double)state.MaxQuality;
-      double p = (double)state.Progress;
-      double pmax = (double)state.MaxProgress;
-      double d = (double)state.Durability;
-      double dmax = (double)state.MaxDurability;
       double c = (double)state.CP;
       double cmax = (double)state.MaxCP;
 
       double cpct = c / cmax;
-      double dpct = d / dmax;
-      double ppct = p / pmax;
       double qpct = q / qmax;
 
-      //double qfactor = (state.Progress == 0) ? 1.0 : (1.0 + (q * pmax) / (p*qmax));
-      //double result = (1.0 + failureProbability*ppct) * qfactor * Math.Exp(cpct) * Math.Exp(dpct);
-      // By using (1.0+failureProbability)*ppct, progress is considered more valuable as we get closer to failing.
-      double result = (1.0 + failureProbability * ppct) * (1.0 + cpct) * (1.0 + dpct) * (1.0 + qpct);
+      double result = psucc * (1.0 + Math.Log(turnsRemaining) + cpct + qpct);
       return result;
     }
 

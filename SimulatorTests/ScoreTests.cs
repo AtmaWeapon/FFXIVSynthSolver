@@ -38,10 +38,10 @@ namespace Simulator.Tests
     }
 
     [TestMethod]
-    public void CompareScores1()
+    public void TestQualityPreferredOverProgressWhenSuccessProbabilityIsHigh()
     {
       State s1 = new State();
-      s1.Progress = 75;
+      s1.Progress = 57;
       s1.Control = 50;
       s1.Craftsmanship = 50;
       s1.MaxProgress = 75;
@@ -53,13 +53,20 @@ namespace Simulator.Tests
       s1.MaxDurability = 70;
       s1.Condition = Condition.Normal;
 
-      State s2 = new State(s1, null);
-      s2.Progress = 57;
-      s2.Quality = 329;
-      s2.Durability = 40;
-      s2.CP = 59;
+      // Basic Synthesis
+      State s2 = new State(s1);
+      s2.Progress += 18;
+      s2.Durability -= 10;
 
-      Assert.IsTrue(s2.Score > s1.Score);
+      // Basic Touch
+      State s3 = new State(s1, null);
+      s3.Quality += 91;
+      s3.Durability -= 10;
+      s3.CP -= 18;
+
+      // Since the probability of failing is extremely low, we should prefer
+      // quality actions.
+      Assert.IsTrue(s3.Score > s2.Score);
     }
 
     [TestMethod]

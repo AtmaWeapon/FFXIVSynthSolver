@@ -427,5 +427,15 @@ namespace Simulator.Engine
     {
       get { return Compute.StateScore(this); }
     }
+
+    public double FailureProbability 
+    {
+      get { return Compute.FailureProbability(this);  }
+    }
+
+    public double SuccessProbability 
+    {
+      get { return 1.0 - FailureProbability; }
+    }
   }
 }
