@@ -9,46 +9,35 @@ namespace Simulator.Engine
 {
   public static class Compute
   {
-    static uint[] factorials;
     static uint[,] bincoeff;
     static uint kMaxFactorial = 13;
 
     static Compute()
     {
-      factorials = new uint[kMaxFactorial];
-      factorials[0] = 1U;
-      factorials[1] = 1U;
-      factorials[2] = 2U;
-      factorials[3] = 6U;
-      factorials[4] = 24U;
-      factorials[5] = 120U;
-      factorials[6] = 720U;
-      factorials[7] = 5040U;
-      factorials[8] = 40320U;
-      factorials[9] = 362880U;
-      factorials[10] = 3628800U;
-      factorials[11] = 39916800U;
-      factorials[12] = 479001600U;
-
       bincoeff = new uint[kMaxFactorial, kMaxFactorial];
-      for (uint i = 0; i < kMaxFactorial; ++i)
-      {
-        for (uint j = 0; j < kMaxFactorial; ++j)
-          bincoeff[i, j] = SlowBinomial(i, j);
-      }
+      SetBinomials(0, new int[] { 1 });
+      SetBinomials(1, new int[] { 1, 1 });
+      SetBinomials(2, new int[] { 1, 2, 1 });
+      SetBinomials(3, new int[] { 1, 3, 3, 1 });
+      SetBinomials(4, new int[] { 1, 4, 6, 4, 1 });
+      SetBinomials(5, new int[] { 1, 5, 10, 10, 5, 1 });
+      SetBinomials(6, new int[] { 1, 6, 15, 20, 15, 6, 1 });
+      SetBinomials(7, new int[] { 1, 7, 21, 35, 35, 21, 7, 1 });
+      SetBinomials(8, new int[] { 1, 8, 28, 56, 70, 56, 28, 8, 1 });
+      SetBinomials(9, new int[] { 1, 9, 36, 84, 126, 126, 84, 36, 9, 1 });
+      SetBinomials(10, new int[] { 1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1 });
+      SetBinomials(11, new int[] { 1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1 });
+      SetBinomials(12, new int[] { 1, 12, 66, 220, 495, 792, 924, 792, 495, 220, 66, 12, 1  });
+    }
+
+    private static void SetBinomials(int i, int[] binomials)
+    {
+      Buffer.BlockCopy(binomials, 0, bincoeff, (int)kMaxFactorial*i*sizeof(int), binomials.Length*sizeof(int));
     }
 
     public static uint DurabilityLoss(uint baseDurability, State state)
     {
       return baseDurability;
-    }
-
-    // Computes m choose n
-    private static uint SlowBinomial(uint m, uint n)
-    {
-      if (m < n)
-        return SlowBinomial(n, m);
-      return (factorials[m] / factorials[n]) / factorials[m - n];
     }
 
     public static uint Binomial(uint m, uint n)
