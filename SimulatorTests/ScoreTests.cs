@@ -156,5 +156,33 @@ namespace Simulator.Tests
 
       Assert.IsTrue(basicTouchState.Score > tottState.Score);
     }
+
+    [TestMethod]
+    public void TestStateWithLowSuccessProbabilityHasLowScore()
+    {
+      State goodState = new State();
+      goodState.Condition = Simulator.Engine.Condition.Good;
+      goodState.Control = 119;
+      goodState.Craftsmanship = 131;
+      goodState.CP = 254;
+      goodState.MaxCP = 254;
+      goodState.MaxDurability = 70;
+      goodState.Durability = 70;
+      goodState.MaxProgress = 74;
+      goodState.Quality = 284;
+      goodState.MaxQuality = 1053;
+      goodState.SynthLevel = 20;
+      goodState.CrafterLevel = 19;
+
+      State badState = new State(goodState);
+      badState.Craftsmanship = 100;
+
+      State badState2 = new State(goodState);
+      badState2.Durability -= 10;
+
+      Assert.IsTrue(goodState.Score > badState.Score);
+
+      Assert.IsTrue(goodState.Score > badState2.Score);
+    }
   }
 }
