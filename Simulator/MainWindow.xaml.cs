@@ -30,6 +30,8 @@ namespace Simulator
     private UserDecisionNode activeNode;
     private RadioButton selectedRadio;
 
+    private State initialState = null;
+
     private class RadioParams
     {
       public RadioParams(bool success, Engine.Condition condition)
@@ -85,6 +87,23 @@ namespace Simulator
 
       analyzer.MaxAnalysisDepth = 8;
 
+      //txtStatusLog.Clear();
+      initialState = new State();
+      initialState.Condition = Simulator.Engine.Condition.Normal;
+      initialState.Control = 119;
+      initialState.Craftsmanship = 131;
+      initialState.CP = 254;
+      initialState.MaxCP = 254;
+      initialState.MaxDurability = 70;
+      initialState.Durability = 70;
+      initialState.MaxProgress = 74;
+      initialState.Quality = 284;
+      initialState.MaxQuality = 1053;
+      initialState.SynthLevel = 20;
+      initialState.CrafterLevel = 19;
+
+      UpdateUIState(initialState);
+
       SetAppState(AppState.Idle);
     }
 
@@ -92,26 +111,8 @@ namespace Simulator
     {
       if (appState == AppState.Idle)
       {
-        // We're kicking off an analysis, so create a new activeNode.  Otherwise use
-        // the existing activeNode.
-        txtStatusLog.Clear();
-        State initialState = new State();
-        initialState.Condition = Simulator.Engine.Condition.Normal;
-        initialState.Control = 119;
-        initialState.Craftsmanship = 131;
-        initialState.CP = 254;
-        initialState.MaxCP = 254;
-        initialState.MaxDurability = 70;
-        initialState.Durability = 70;
-        initialState.MaxProgress = 74;
-        initialState.Quality = 284;
-        initialState.MaxQuality = 1053;
-        initialState.SynthLevel = 20;
-        initialState.CrafterLevel = 19;
-
         activeNode = new UserDecisionNode();
         activeNode.originalState = initialState;
-
       }
 
       if (activeNode.IsSolved)
@@ -130,16 +131,9 @@ namespace Simulator
     {
       Simulator.Engine.Action optimalAction = node.OptimalAction.originatingAction;
       State state = activeNode.originalState;
-      txtStatusLog.AppendText(String.Format("Condition={9}, Progress {0}/{1}, Quality={2}/{3}, CP={4}/{5}, Dura={6}/{7}.  Best Action = {8}\n",
-                              state.Progress, state.MaxProgress, state.Quality, state.MaxQuality,
-                              state.CP, state.MaxCP, state.Durability, state.MaxDurability,
-                              optimalAction.Attributes.Name, state.Condition));
-      lblQuality.Content = String.Format("{0}/{1}", state.Quality, state.MaxQuality);
-      lblProgress.Content = String.Format("{0}/{1}", state.Progress, state.MaxProgress);
-      lblCondition.Content = state.Condition.ToString();
-      lblCP.Content = String.Format("{0}/{1}", state.CP, state.MaxCP);
-      lblDurability.Content = String.Format("{0}/{1}", state.Durability, state.MaxDurability);
-      lblAction.Content = optimalAction.Attributes.Name;
+      UpdateUIState(state);
+
+      lblBestAction.Content = optimalAction.Attributes.Name;
 
       switch (activeNode.originalState.Condition)
       {
@@ -189,6 +183,27 @@ namespace Simulator
       }
     }
 
+    private void UpdateUIState(State state)
+    {
+      //txtStatusLog.AppendText(String.Format("Condition={9}, Progress {0}/{1}, Quality={2}/{3}, CP={4}/{5}, Dura={6}/{7}.  Best Action = {8}\n",
+      //                        state.Progress, state.MaxProgress, state.Quality, state.MaxQuality,
+      //                        state.CP, state.MaxCP, state.Durability, state.MaxDurability,
+      //                        optimalAction.Attributes.Name, state.Condition));
+      lblQuality.Content = progressQuality.Value = state.Quality;
+      lblMaxQuality.Content = progressQuality.Maximum = state.MaxQuality;
+
+      lblProgress.Content = progressProgress.Value = state.Progress;
+      lblMaxProgress.Content = progressProgress.Maximum = state.MaxProgress;
+      lblCondition.Content = state.Condition.ToString();
+      //lblCP.Content = String.Format("{0}/{1}", state.CP, state.MaxCP);
+      lblDurability.Content = state.Durability;
+      lblMaxDurability.Content = state.MaxDurability;
+      lblStep.Content = state.Step;
+      lblFailureChance.Content = state.FailureProbability.ToString("P2");
+      lblCurrentScore.Content = state.Score.ToString("F3");
+      lblBestAction.Content = "<Unknown>";
+    }
+
     private void ChooseOptimalAction(bool initializing)
     {
       PreRandomDecisionNode optimalAction = activeNode.OptimalAction;
@@ -196,7 +211,7 @@ namespace Simulator
       RadioParams selectedParams = (RadioParams)selectedRadio.Tag;
       string statusString = (selectedParams.success) ? "Success" : "Failure";
       string conditionString = selectedParams.condition.ConditionString();
-      txtStatusLog.AppendText(String.Format("{0}!  New condition = {1}.\n", statusString, conditionString));
+      //txtStatusLog.AppendText(String.Format("{0}!  New condition = {1}.\n", statusString, conditionString));
       UserDecisionNode newActiveNode = optimalAction.FindMatchingOutcome(selectedParams.success, selectedParams.condition);
       if (newActiveNode == null)
         SetAppState(AppState.Idle);
@@ -234,7 +249,7 @@ namespace Simulator
       stopwatch.Stop();
       State state = activeNode.originalState;
 
-      txtStatusLog.AppendText(String.Format("Solved {0} states in {1} seconds.\n", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds));
+      //txtStatusLog.AppendText(String.Format("Solved {0} states in {1} seconds.\n", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds));
       activeNode = (UserDecisionNode)e.Result;
 
       SetAppState(AppState.Playback);
@@ -285,6 +300,7 @@ namespace Simulator
           break;
         case AppState.Playback:
           btnAccept.IsEnabled = false;
+          btnAccept.Content = "Playing Back";
           btnCancel.Content = "Cancel Playback";
           btnCancel.IsEnabled = true;
 

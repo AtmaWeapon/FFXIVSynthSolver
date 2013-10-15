@@ -96,5 +96,65 @@ namespace Simulator.Tests
 
       Assert.IsTrue(completedState.Score < mastersMendState.Score);
     }
+
+    [TestMethod]
+    public void TestBasicTouchPreferredOverTricksOfTheTradeWithHighDurability()
+    {
+      Simulator.Engine.Action tott = new TricksOfTheTrade();
+      Simulator.Engine.Action basicTouch = new BasicTouch();
+
+      State state = new State();
+      state.Condition = Simulator.Engine.Condition.Good;
+      state.Control = 119;
+      state.Craftsmanship = 131;
+      state.CP = 254;
+      state.MaxCP = 254;
+      state.MaxDurability = 70;
+      state.Durability = 70;
+      state.MaxProgress = 74;
+      state.Quality = 284;
+      state.MaxQuality = 1053;
+      state.SynthLevel = 20;
+      state.CrafterLevel = 19;
+
+      State tottState = tott.SuccessState(state);
+      tottState.Condition = Condition.Normal;
+
+      State basicTouchState = basicTouch.SuccessState(state);
+      basicTouchState.Condition = Condition.Normal;
+
+      Assert.IsTrue(basicTouchState.Score > tottState.Score);
+    }
+
+    [TestMethod]
+    public void TestBasicTouchPreferredOverTricksOfTheTradeWithHighDurability2()
+    {
+      Simulator.Engine.Action tott = new TricksOfTheTrade();
+      Simulator.Engine.Action basicTouch = new BasicTouch();
+      Simulator.Engine.Action steadyHand = new SteadyHand();
+
+      State state = new State();
+      state.Condition = Simulator.Engine.Condition.Good;
+      state.Control = 119;
+      state.Craftsmanship = 131;
+      state.CP = 254;
+      state.MaxCP = 254;
+      state.MaxDurability = 70;
+      state.Durability = 70;
+      state.MaxProgress = 74;
+      state.Quality = 284;
+      state.MaxQuality = 1053;
+      state.SynthLevel = 20;
+      state.CrafterLevel = 19;
+
+      state = steadyHand.SuccessState(state);
+      State tottState = tott.SuccessState(state);
+      tottState.Condition = Condition.Normal;
+
+      State basicTouchState = basicTouch.SuccessState(state);
+      basicTouchState.Condition = Condition.Normal;
+
+      Assert.IsTrue(basicTouchState.Score > tottState.Score);
+    }
   }
 }

@@ -91,7 +91,7 @@ namespace Simulator.Engine
       double cpct = c / cmax;
       double qpct = q / qmax;
 
-      double result = psucc * (1.0 + Math.Log(turnsRemaining) + cpct + qpct);
+      double result = psucc * (1.0 + Math.Log(turnsRemaining)*cpct) + Math.Exp(0.5 + 2.0*qpct);
       return result;
     }
 
