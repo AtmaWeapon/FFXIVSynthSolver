@@ -91,6 +91,13 @@ namespace Simulator.Engine
       double cpct = c / cmax;
       double qpct = q / qmax;
 
+      // TODO: Investigate the implications of multiplying the logarithmic factor by pfail.  The obvious effect
+      // of this is that as your success probability goes toward 1, the only factor influencing the final score
+      // will be the quality.  On paper this seems like a good idea, as two states which are both completed
+      // (e.g. psucc = 1), should not care what their CP is, only their respective qualities.
+      // Furthermore, the more likely you are to fail, the more CP will buy you some oh shit time (e.g. Master's
+      // Mend, Manipulation, etc) so this also lends further evidence to the idea that multiplying  that factor
+      // by pfail would be a good idea.
       double result = Math.Pow(psucc,2.0) * (1.0 + Math.Log(turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
       return result;
     }
