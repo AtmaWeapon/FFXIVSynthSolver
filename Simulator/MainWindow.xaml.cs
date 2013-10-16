@@ -104,6 +104,13 @@ namespace Simulator
 
       UpdateUIState(initialState);
 
+      txtAnalysisDepth.Text = analyzer.MaxAnalysisDepth.ToString();
+      txtControl.Text = initialState.Control.ToString();
+      txtCP.Text = initialState.MaxCP.ToString();
+      txtCrafterLevel.Text = initialState.CrafterLevel.ToString();
+      txtCraftsmanship.Text = initialState.Craftsmanship.ToString();
+      txtInitialQuality.Text = initialState.Quality.ToString();
+
       SetAppState(AppState.Idle);
     }
 
@@ -194,10 +201,14 @@ namespace Simulator
 
       lblProgress.Content = progressProgress.Value = state.Progress;
       lblMaxProgress.Content = progressProgress.Maximum = state.MaxProgress;
-      lblCondition.Content = state.Condition.ToString();
-      //lblCP.Content = String.Format("{0}/{1}", state.CP, state.MaxCP);
+
+      lblCP.Content = progressCP.Value = state.CP;
+      lblMaxCP.Content = progressCP.Maximum = state.MaxCP;
+      
       lblDurability.Content = state.Durability;
       lblMaxDurability.Content = state.MaxDurability;
+
+      lblCondition.Content = state.Condition.ToString();
       lblStep.Content = state.Step;
       lblFailureChance.Content = state.FailureProbability.ToString("P2");
       lblCurrentScore.Content = state.Score.ToString("F3");
@@ -274,6 +285,17 @@ namespace Simulator
           btnCancel.Content = "Exit";
           btnCancel.IsEnabled = true;
 
+          // Re-enable parameter entry.
+          txtInitialQuality.IsEnabled = true;
+          txtCraftsmanship.IsEnabled = true;
+          txtCrafterLevel.IsEnabled = true;
+          txtCP.IsEnabled = true;
+          txtControl.IsEnabled = true;
+          txtAnalysisDepth.IsEnabled = true;
+          comboBoxCraft.IsEnabled = true;
+          comboBoxRecipe.IsEnabled = true;
+
+          // Disable random outcome entry.
           radioFailureExcellent.IsEnabled = false;
           radioFailureGood.IsEnabled = false;
           radioFailureNormal.IsEnabled = false;
@@ -289,6 +311,17 @@ namespace Simulator
           btnCancel.Content = "Cancel Analysis";
           btnCancel.IsEnabled = true;
 
+          // Disable parameter entry.
+          txtInitialQuality.IsEnabled = false;
+          txtCraftsmanship.IsEnabled = false;
+          txtCrafterLevel.IsEnabled = false;
+          txtCP.IsEnabled = false;
+          txtControl.IsEnabled = false;
+          txtAnalysisDepth.IsEnabled = false;
+          comboBoxCraft.IsEnabled = false;
+          comboBoxRecipe.IsEnabled = false;
+
+          // Disable random outcome entry.
           radioFailureExcellent.IsEnabled = false;
           radioFailureGood.IsEnabled = false;
           radioFailureNormal.IsEnabled = false;
@@ -304,6 +337,17 @@ namespace Simulator
           btnCancel.Content = "Cancel Playback";
           btnCancel.IsEnabled = true;
 
+          // Disable parameter entry.
+          txtInitialQuality.IsEnabled = false;
+          txtCraftsmanship.IsEnabled = false;
+          txtCrafterLevel.IsEnabled = false;
+          txtCP.IsEnabled = false;
+          txtControl.IsEnabled = false;
+          txtAnalysisDepth.IsEnabled = false;
+          comboBoxCraft.IsEnabled = false;
+          comboBoxRecipe.IsEnabled = false;
+
+          // Enable random outcome entry.
           radioFailureExcellent.IsEnabled = true;
           radioFailureGood.IsEnabled = true;
           radioFailureNormal.IsEnabled = true;
