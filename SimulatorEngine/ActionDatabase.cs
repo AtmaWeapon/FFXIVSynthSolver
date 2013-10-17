@@ -37,7 +37,6 @@ namespace Simulator.Engine
 
     public void AddAction(Action action)
     {
-      Debug.Assert(!action.Attributes.Disabled);
       actions.Add(action.GetType(), action);
     }
 
