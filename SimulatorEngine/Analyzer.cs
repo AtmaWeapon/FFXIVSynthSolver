@@ -21,12 +21,20 @@ namespace Simulator.Engine
     private Dictionary<State, SolvedScoreNode> solvedStates;
 
     private uint baseStep = 1;
+    private bool pruneSuboptimalBranches = false;
 
     public int MaxAnalysisDepth
     {
       get { return maxAnalysisDepth; }
       set { maxAnalysisDepth = value; }
     }
+
+    public bool PruneSuboptimalBranches
+    {
+      get { return pruneSuboptimalBranches; }
+      set { pruneSuboptimalBranches = value; }
+    }
+
     public ActionDatabase Actions { get { return actions; } }
     public int NumSlowSolved { get { return numSlowSolved; } }
     public int NumQuickSolved { get { return numQuickSolved; } }
@@ -103,6 +111,9 @@ namespace Simulator.Engine
       SolvedScoreNode scoreNode = new SolvedScoreNode(optimal.Score, interaction);
       solvedStates.Add(interaction.originalState, scoreNode);
       ++numSlowSolved;
+
+      if (PruneSuboptimalBranches)
+        interaction.PruneSuboptimalActions();
     }
 
     private bool TryQuickSolve(PostRandomDecisionNode node)

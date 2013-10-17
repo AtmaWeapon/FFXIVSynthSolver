@@ -79,6 +79,7 @@ namespace Simulator
       analyzer.Actions.AddAllActions();
 
       analyzer.MaxAnalysisDepth = 8;
+      analyzer.PruneSuboptimalBranches = true;
 
       initialState = new State();
       initialState.Condition = Simulator.Engine.Condition.Normal;

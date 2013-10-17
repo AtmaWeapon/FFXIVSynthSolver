@@ -95,6 +95,13 @@ namespace Simulator.Engine
 
       return null;
     }
+
+    public void PruneSuboptimalActions()
+    {
+      PreRandomDecisionNode optimal = OptimalAction;
+      choices.Clear();
+      choices.Add(optimal);
+    }
   }
 
   public class SolvedScoreNode
