@@ -392,8 +392,8 @@ namespace Simulator
       if (uint.TryParse(txtCP.Text, out value))
       {
         initialState.CP = initialState.MaxCP = value;
-        lblCP.Content = value;
-        progressCP.Maximum = value;
+        lblMaxCP.Content = lblCP.Content = value;
+        progressCP.Maximum = progressCP.Value = value;
       }
     }
 
