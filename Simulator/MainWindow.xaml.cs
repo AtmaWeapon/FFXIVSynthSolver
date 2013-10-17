@@ -110,6 +110,10 @@ namespace Simulator
       txtCrafterLevel.Text = initialState.CrafterLevel.ToString();
       txtCraftsmanship.Text = initialState.Craftsmanship.ToString();
       txtInitialQuality.Text = initialState.Quality.ToString();
+      txtRecipeDurability.Text = initialState.Durability.ToString();
+      txtRecipeDifficulty.Text = initialState.MaxProgress.ToString();
+      txtRecipeLevel.Text = initialState.SynthLevel.ToString();
+      txtRecipeQuality.Text = initialState.MaxQuality.ToString();
 
       SetAppState(AppState.Idle);
     }
@@ -292,8 +296,12 @@ namespace Simulator
           txtCP.IsEnabled = true;
           txtControl.IsEnabled = true;
           txtAnalysisDepth.IsEnabled = true;
-          comboBoxCraft.IsEnabled = true;
-          comboBoxRecipe.IsEnabled = true;
+          txtRecipeDifficulty.IsEnabled = true;
+          txtRecipeDurability.IsEnabled = true;
+          txtRecipeLevel.IsEnabled = true;
+          txtRecipeQuality.IsEnabled = true;
+          comboBoxCraft.IsEnabled = false;
+          comboBoxRecipe.IsEnabled = false;
 
           // Disable random outcome entry.
           radioFailureExcellent.IsEnabled = false;
@@ -320,6 +328,10 @@ namespace Simulator
           txtAnalysisDepth.IsEnabled = false;
           comboBoxCraft.IsEnabled = false;
           comboBoxRecipe.IsEnabled = false;
+          txtRecipeDifficulty.IsEnabled = false;
+          txtRecipeDurability.IsEnabled = false;
+          txtRecipeLevel.IsEnabled = false;
+          txtRecipeQuality.IsEnabled = false;
 
           // Disable random outcome entry.
           radioFailureExcellent.IsEnabled = false;
@@ -346,8 +358,12 @@ namespace Simulator
           txtAnalysisDepth.IsEnabled = false;
           comboBoxCraft.IsEnabled = false;
           comboBoxRecipe.IsEnabled = false;
+          txtRecipeDifficulty.IsEnabled = false;
+          txtRecipeDurability.IsEnabled = false;
+          txtRecipeLevel.IsEnabled = false;
+          txtRecipeQuality.IsEnabled = false;
 
-          // Enable random outcome entry.
+        // Enable random outcome entry.
           radioFailureExcellent.IsEnabled = true;
           radioFailureGood.IsEnabled = true;
           radioFailureNormal.IsEnabled = true;
@@ -362,6 +378,70 @@ namespace Simulator
       }
 
       appState = newState;
+    }
+
+    private void txtInitialQuality_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      uint value;
+      if (uint.TryParse(txtInitialQuality.Text, out value))
+      {
+        initialState.Quality = value;
+        lblQuality.Content = value;
+        progressQuality.Value = value;
+      }
+    }
+
+    private void txtCP_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      uint value;
+      if (uint.TryParse(txtCP.Text, out value))
+      {
+        initialState.CP = initialState.MaxCP = value;
+        lblCP.Content = value;
+        progressCP.Maximum = value;
+      }
+    }
+
+    private void txtRecipeDurability_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      uint value;
+      if (uint.TryParse(txtRecipeDurability.Text, out value))
+      {
+        initialState.Durability = initialState.MaxDurability = value;
+        lblMaxDurability.Content = value;
+        lblDurability.Content = value;
+      }
+    }
+
+    private void txtRecipeQuality_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      uint value;
+      if (uint.TryParse(txtRecipeQuality.Text, out value))
+      {
+        initialState.MaxQuality = value;
+        lblMaxQuality.Content = value;
+        progressQuality.Maximum = value;
+      }
+    }
+
+    private void txtRecipeDifficulty_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      uint value;
+      if (uint.TryParse(txtRecipeDifficulty.Text, out value))
+      {
+        initialState.MaxProgress = value;
+        lblMaxProgress.Content = value;
+        progressProgress.Maximum = value;
+      }
+    }
+
+    private void txtAnalysisDepth_TextChanged(object sender, TextChangedEventArgs e)
+    {
+      uint value;
+      if (uint.TryParse(txtRecipeDifficulty.Text, out value))
+      {
+        analyzer.MaxAnalysisDepth = (int)value;
+      }
     }
   }
 }
