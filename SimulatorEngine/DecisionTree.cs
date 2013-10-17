@@ -117,20 +117,15 @@ namespace Simulator.Engine
 
     internal List<PostRandomDecisionNode> outcomes = new List<PostRandomDecisionNode>();
 
-    public UserDecisionNode FindMatchingOutcome(bool success, Condition newCondition)
+    public PostRandomDecisionNode FindMatchingOutcome(bool success, Condition newCondition)
     {
-      PostRandomDecisionNode matchedOutcome = null;
       foreach (PostRandomDecisionNode outcome in outcomes)
       {
-        if (outcome.interaction == null)
-          continue;
-        Condition outcomeCondition = outcome.interaction.originalState.Condition;
+        Condition outcomeCondition = outcome.newState.Condition;
         if (outcome.wasSuccess == success && outcomeCondition == newCondition)
-          matchedOutcome = outcome;
+          return outcome;
       }
-      if (matchedOutcome == null)
-        return null;
-      return matchedOutcome.OutcomeInteractionNode;
+      return null;
     }
   }
 

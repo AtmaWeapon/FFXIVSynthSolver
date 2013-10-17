@@ -72,6 +72,7 @@ namespace Simulator.Engine
       // before it could re-use the previous cache for the replay operation.  We should address this
       // soon since this is important.
       solvedStates.Clear();
+      numSlowSolved = numLeafSolved = numQuickSolved = 0;
 
       foreach (Action action in actions)
       {

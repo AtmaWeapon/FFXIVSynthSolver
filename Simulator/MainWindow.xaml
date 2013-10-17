@@ -146,5 +146,6 @@
     <TextBox x:Name="txtRecipeDurability" HorizontalAlignment="Left" Height="26" Margin="1001,341,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" Background="{x:Null}" VerticalContentAlignment="Center" Foreground="#FFEEE1C5" FontSize="16" TextChanged="txtRecipeDurability_TextChanged"/>
     <TextBox x:Name="txtRecipeQuality" HorizontalAlignment="Left" Height="26" Margin="1001,367,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" Background="{x:Null}" VerticalContentAlignment="Center" Foreground="#FFEEE1C5" FontSize="16" TextChanged="txtRecipeQuality_TextChanged"/>
     <TextBox x:Name="txtRecipeDifficulty" HorizontalAlignment="Left" Height="26" Margin="1001,393,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" Background="{x:Null}" VerticalContentAlignment="Center" Foreground="#FFEEE1C5" FontSize="16" TextChanged="txtRecipeDifficulty_TextChanged"/>
+    <Label x:Name="lblStatus" Content="" HorizontalAlignment="Left" Height="26" Margin="29,502,0,0" VerticalAlignment="Top" Width="388" Foreground="#FFCCCCCC" VerticalContentAlignment="Center"/>
   </Grid>
 </Window>

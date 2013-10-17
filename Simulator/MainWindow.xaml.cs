@@ -76,18 +76,10 @@ namespace Simulator
       radioFailureNormal.Tag = new RadioParams(false, Engine.Condition.Normal);
       radioFailurePoor.Tag = new RadioParams(false, Engine.Condition.Poor);
 
-      analyzer.Actions.AddAction(new BasicSynthesis());
-      analyzer.Actions.AddAction(new BasicTouch());
-      analyzer.Actions.AddAction(new MastersMend());
-      analyzer.Actions.AddAction(new SteadyHand());
-      analyzer.Actions.AddAction(new Observe());
-      analyzer.Actions.AddAction(new Simulator.Engine.Manipulation());
-      analyzer.Actions.AddAction(new TricksOfTheTrade());
-      analyzer.Actions.AddAction(new StandardTouch());
+      analyzer.Actions.AddAllActions();
 
       analyzer.MaxAnalysisDepth = 8;
 
-      //txtStatusLog.Clear();
       initialState = new State();
       initialState.Condition = Simulator.Engine.Condition.Normal;
       initialState.Control = 119;
@@ -138,13 +130,14 @@ namespace Simulator
       }
     }
 
-    private void UpdateUIState(UserDecisionNode node)
+    private void UpdateUIStateForPlayback(State state, Simulator.Engine.Action bestAction)
     {
-      Simulator.Engine.Action optimalAction = node.OptimalAction.originatingAction;
-      State state = activeNode.originalState;
       UpdateUIState(state);
 
-      lblBestAction.Content = optimalAction.Attributes.Name;
+      if (bestAction != null)
+        lblBestAction.Content = bestAction.Attributes.Name;
+      else
+        lblBestAction.Content = String.Empty;
 
       switch (activeNode.originalState.Condition)
       {
@@ -227,15 +220,16 @@ namespace Simulator
       string statusString = (selectedParams.success) ? "Success" : "Failure";
       string conditionString = selectedParams.condition.ConditionString();
       //txtStatusLog.AppendText(String.Format("{0}!  New condition = {1}.\n", statusString, conditionString));
-      UserDecisionNode newActiveNode = optimalAction.FindMatchingOutcome(selectedParams.success, selectedParams.condition);
-      if (newActiveNode == null)
-        SetAppState(AppState.Idle);
+      PostRandomDecisionNode newActiveNode = optimalAction.FindMatchingOutcome(selectedParams.success, selectedParams.condition);
+      if (newActiveNode.interaction == null)
+        UpdateUIStateForPlayback(newActiveNode.newState, null);
       else
       {
-        activeNode = newActiveNode;
-        UpdateUIState(newActiveNode);
+        activeNode = newActiveNode.interaction;
+        UpdateUIStateForPlayback(newActiveNode.newState, activeNode.OptimalAction.originatingAction);
         if (!newActiveNode.IsSolved)
         {
+          // We hit a leaf.  Kick off a new analysis.
           SetAppState(AppState.Analyzing);
           worker.RunWorkerAsync(activeNode);
         }
@@ -264,7 +258,7 @@ namespace Simulator
       stopwatch.Stop();
       State state = activeNode.originalState;
 
-      //txtStatusLog.AppendText(String.Format("Solved {0} states in {1} seconds.\n", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds));
+      lblStatus.Content = String.Format("Solved {0:N0} states in {1:F2} seconds.", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds);
       activeNode = (UserDecisionNode)e.Result;
 
       SetAppState(AppState.Playback);
@@ -373,7 +367,7 @@ namespace Simulator
           radioSuccessNormal.IsEnabled = true;
           radioSuccessPoor.IsEnabled = true;
 
-          UpdateUIState(activeNode);
+          UpdateUIStateForPlayback(activeNode.originalState, activeNode.OptimalAction.originatingAction);
           break;
       }
 
@@ -438,7 +432,7 @@ namespace Simulator
     private void txtAnalysisDepth_TextChanged(object sender, TextChangedEventArgs e)
     {
       uint value;
-      if (uint.TryParse(txtRecipeDifficulty.Text, out value))
+      if (uint.TryParse(txtAnalysisDepth.Text, out value))
       {
         analyzer.MaxAnalysisDepth = (int)value;
       }

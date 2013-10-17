@@ -99,7 +99,7 @@ namespace Simulator.Engine
     }
   }
 
-  [SynthAction(ActionType.Buff, Name = "Observe", CP = 14, BuffDuration=0)]
+  [SynthAction(ActionType.Buff, Name = "Observe", CP = 14, BuffDuration=0, Disabled=true)]
   public class Observe : BuffAction
   {
     // Observe only consumes CP (to give the condition a chance to change).
@@ -123,7 +123,7 @@ namespace Simulator.Engine
     public override void TickBuff(State state) { }
   }
 
-  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration=0)]
+  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration=0, Disabled=true)]
   public class TricksOfTheTrade : BuffAction
   {
     public TricksOfTheTrade()

@@ -70,7 +70,8 @@ namespace Simulator
           }
         }
 
-        root = optimalAction.FindMatchingOutcome(success, newCondition);
+        PostRandomDecisionNode outcomeNode = optimalAction.FindMatchingOutcome(success, newCondition);
+        root = outcomeNode.interaction;
         if (root == null)
         {
           System.Console.WriteLine("Could not find a matching entry for this outcome.  Quit this playback session and replay from the beginning?  (Y/N) ");
