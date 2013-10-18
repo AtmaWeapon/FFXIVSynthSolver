@@ -123,7 +123,7 @@ namespace Simulator.Engine
     public override void TickBuff(State state) { }
   }
 
-  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration=0, Disabled=true)]
+  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration = 0, Disabled = true)]
   public class TricksOfTheTrade : BuffAction
   {
     public TricksOfTheTrade()

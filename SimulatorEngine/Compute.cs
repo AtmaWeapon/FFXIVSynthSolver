@@ -10,7 +10,7 @@ namespace Simulator.Engine
   public static class Compute
   {
     static uint[,] bincoeff;
-    static uint kMaxFactorial = 13;
+    static uint kMaxFactorial = 16;
 
     static Compute()
     {
@@ -27,7 +27,10 @@ namespace Simulator.Engine
       SetBinomials(9, new int[] { 1, 9, 36, 84, 126, 126, 84, 36, 9, 1 });
       SetBinomials(10, new int[] { 1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1 });
       SetBinomials(11, new int[] { 1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1 });
-      SetBinomials(12, new int[] { 1, 12, 66, 220, 495, 792, 924, 792, 495, 220, 66, 12, 1  });
+      SetBinomials(12, new int[] { 1, 12, 66, 220, 495, 792, 924, 792, 495, 220, 66, 12, 1 });
+      SetBinomials(13, new int[] { 1, 13, 78, 286, 715, 1287, 1716, 1716, 1287, 715, 286, 78, 13, 1 });
+      SetBinomials(14, new int[] { 1, 14, 91, 364, 1001, 2002, 3003, 3432, 3003, 2002, 1001, 364, 91, 14, 1 });
+      SetBinomials(15, new int[] { 1, 15, 105, 455, 1365, 3003, 5005, 6435, 6435, 5005, 3003, 1365, 455, 105, 15, 1 });
     }
 
     private static void SetBinomials(int i, int[] binomials)
@@ -65,7 +68,9 @@ namespace Simulator.Engine
       uint progressRemaining = state.MaxProgress - state.Progress;
       uint basicProgressPerTurn = Compute.Progress(state, 100);
       uint successfulTurnsNeeded = (uint)Math.Ceiling((double)progressRemaining / (double)basicProgressPerTurn);
-      uint turnsRemaining = (uint)Math.Ceiling((double)state.Durability / 10.0);
+      uint numMastersMendsAvailable = state.CP / 92;
+      uint effectiveDurability = Math.Min(state.MaxDurability, state.Durability + numMastersMendsAvailable * 30);
+      uint turnsRemaining = (uint)Math.Ceiling((double)effectiveDurability / 10.0);
       double successProb = Probability(successfulTurnsNeeded, turnsRemaining, 0.9);
       return 1.0 - successProb;
     }
@@ -77,29 +82,7 @@ namespace Simulator.Engine
 
     public static double StateScore(State state)
     {
-      if (state.Status == SynthesisStatus.BUSTED)
-        return 0.0f;
-
-      double psucc = SuccessProbability(state);
-      uint turnsRemaining = (uint)Math.Ceiling((double)state.Durability / 10.0);
-
-      double q = (double)state.Quality;
-      double qmax = (double)state.MaxQuality;
-      double c = (double)state.CP;
-      double cmax = (double)state.MaxCP;
-
-      double cpct = c / cmax;
-      double qpct = q / qmax;
-
-      // TODO: Investigate the implications of multiplying the logarithmic factor by pfail.  The obvious effect
-      // of this is that as your success probability goes toward 1, the only factor influencing the final score
-      // will be the quality.  On paper this seems like a good idea, as two states which are both completed
-      // (e.g. psucc = 1), should not care what their CP is, only their respective qualities.
-      // Furthermore, the more likely you are to fail, the more CP will buy you some oh shit time (e.g. Master's
-      // Mend, Manipulation, etc) so this also lends further evidence to the idea that multiplying  that factor
-      // by pfail would be a good idea.
-      double result = Math.Pow(psucc,2.0) * (1.0 + Math.Log(turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
-      return result;
+      return MetricsDatabase.ExponentialQualityPlusFailureWeightedCP3ExtraSafe(state);
     }
 
     public static uint RawProgress(uint craftsmanship, uint efficiency, int levelSurplus)
