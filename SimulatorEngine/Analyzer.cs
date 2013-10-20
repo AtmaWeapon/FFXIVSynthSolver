@@ -170,13 +170,6 @@ namespace Simulator.Engine
                         s.Quality, s.MaxQuality, leadingAction.Attributes.Name);
     }
 
-    private State StateWithCondition(State state, Condition condition)
-    {
-      State result = new State(state);
-      result.Condition = condition;
-      return result;
-    }
-
     private List<RandomOutcome> GenerateRandomOutcomes(State initialState, Action action)
     {
       double successProbability = Compute.SuccessRate(action.Attributes.SuccessRate, initialState);
@@ -191,11 +184,11 @@ namespace Simulator.Engine
 
           // Success
           if (successState != null)
-            entries.Add(new RandomOutcome(successProbability, StateWithCondition(successState, Condition.Poor), Condition.Poor, true));
+            entries.Add(new RandomOutcome(successProbability, successState, Condition.Poor, true));
 
           // Failure
           if (failureState != null)
-            entries.Add(new RandomOutcome(1.0f - successProbability, StateWithCondition(failureState, Condition.Poor), Condition.Poor, false));
+            entries.Add(new RandomOutcome(1.0f - successProbability, failureState, Condition.Poor, false));
           break;
         case Condition.Good:
         case Condition.Poor:
@@ -203,11 +196,11 @@ namespace Simulator.Engine
 
           // Success
           if (successState != null)
-            entries.Add(new RandomOutcome(successProbability, StateWithCondition(successState, Condition.Normal), Condition.Normal, true));
+            entries.Add(new RandomOutcome(successProbability, successState, Condition.Normal, true));
 
           // Failure
           if (failureState != null)
-            entries.Add(new RandomOutcome(1.0f - successProbability, StateWithCondition(failureState, Condition.Normal), Condition.Normal, false));
+            entries.Add(new RandomOutcome(1.0f - successProbability, failureState, Condition.Normal, false));
           break;
         case Condition.Normal:
           // Normal can go to normal, good, or excellent.
@@ -215,17 +208,17 @@ namespace Simulator.Engine
           // Success
           if (successState != null)
           {
-            entries.Add(new RandomOutcome(kNormalProbability * successProbability, StateWithCondition(successState, Condition.Normal), Condition.Normal, true));
-            entries.Add(new RandomOutcome(kGoodProbability * successProbability, StateWithCondition(successState, Condition.Good), Condition.Good, true));
-            entries.Add(new RandomOutcome(kExcellentProbability * successProbability, StateWithCondition(successState, Condition.Excellent), Condition.Excellent, true));
+            entries.Add(new RandomOutcome(kNormalProbability * successProbability, successState, Condition.Normal, true));
+            entries.Add(new RandomOutcome(kGoodProbability * successProbability, successState, Condition.Good, true));
+            entries.Add(new RandomOutcome(kExcellentProbability * successProbability, successState, Condition.Excellent, true));
           }
 
           // Failure
           if (failureState != null)
           {
-            entries.Add(new RandomOutcome(kNormalProbability * (1.0f - successProbability), StateWithCondition(failureState, Condition.Normal), Condition.Normal, false));
-            entries.Add(new RandomOutcome(kGoodProbability * (1.0f - successProbability), StateWithCondition(failureState, Condition.Good), Condition.Good, false));
-            entries.Add(new RandomOutcome(kExcellentProbability * (1.0f - successProbability), StateWithCondition(failureState, Condition.Excellent), Condition.Excellent, false));
+            entries.Add(new RandomOutcome(kNormalProbability * (1.0f - successProbability), failureState, Condition.Normal, false));
+            entries.Add(new RandomOutcome(kGoodProbability * (1.0f - successProbability), failureState, Condition.Good, false));
+            entries.Add(new RandomOutcome(kExcellentProbability * (1.0f - successProbability), failureState, Condition.Excellent, false));
           }
           break;
       }

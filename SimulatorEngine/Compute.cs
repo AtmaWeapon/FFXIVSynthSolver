@@ -54,11 +54,23 @@ namespace Simulator.Engine
         return 1.0;
 
       double result = 0.0f;
-      while (RequiredEvents <= TotalEvents)
+      if (TotalEvents >= 2 * RequiredEvents)
       {
-        uint combinations = Binomial(TotalEvents, RequiredEvents);
-        result += (double)combinations * Math.Pow(p, RequiredEvents) * Math.Pow(1.0 - p, TotalEvents - RequiredEvents);
-        ++RequiredEvents;
+        for (uint i=0; i < RequiredEvents; ++i)
+        {
+          uint combinations = Binomial(TotalEvents, i);
+          result += (double)combinations * Math.Pow(p, i) * Math.Pow(1.0 - p, TotalEvents - i);
+        }
+        result = 1.0 - result;
+      }
+      else
+      {
+        while (RequiredEvents <= TotalEvents)
+        {
+          uint combinations = Binomial(TotalEvents, RequiredEvents);
+          result += (double)combinations * Math.Pow(p, RequiredEvents) * Math.Pow(1.0 - p, TotalEvents - RequiredEvents);
+          ++RequiredEvents;
+        }
       }
       return result;
     }

@@ -32,6 +32,9 @@ namespace Simulator
 
     private State initialState = null;
 
+    private SolidColorBrush enabledRadioForeground = null;
+    private SolidColorBrush disabledRadioForeground = null;
+
     private class RadioParams
     {
       public RadioParams(bool success, Engine.Condition condition)
@@ -75,6 +78,9 @@ namespace Simulator
       radioFailureGood.Tag = new RadioParams(false, Engine.Condition.Good);
       radioFailureNormal.Tag = new RadioParams(false, Engine.Condition.Normal);
       radioFailurePoor.Tag = new RadioParams(false, Engine.Condition.Poor);
+
+      enabledRadioForeground = new SolidColorBrush(Color.FromRgb(34, 34, 34));
+      disabledRadioForeground = new SolidColorBrush(Color.FromRgb(175, 175, 175));
 
       analyzer.Actions.AddAllActions();
 
@@ -144,48 +150,62 @@ namespace Simulator
       {
         case Engine.Condition.Poor:
         case Engine.Condition.Good:
-          radioFailureExcellent.IsEnabled = false;
-          radioFailureGood.IsEnabled = false;
-          radioFailurePoor.IsEnabled = false;
-          radioSuccessExcellent.IsEnabled = false;
-          radioSuccessGood.IsEnabled = false;
-          radioSuccessPoor.IsEnabled = false;
+          EnableRadio(radioFailureExcellent, false);
+          EnableRadio(radioFailureGood, false);
+          EnableRadio(radioFailurePoor, false);
+          EnableRadio(radioSuccessExcellent, false);
+          EnableRadio(radioSuccessGood, false);
+          EnableRadio(radioSuccessPoor, false);
 
-          radioFailureNormal.IsEnabled = true;
-          radioSuccessNormal.IsEnabled = true;
+          EnableRadio(radioFailureNormal, true);
+          EnableRadio(radioSuccessNormal, true);
 
           if (selectedRadio != null)
             selectedRadio.IsChecked = false;
           break;
         case Engine.Condition.Excellent:
-          radioFailurePoor.IsEnabled = true;
-          radioSuccessPoor.IsEnabled = true;
+          EnableRadio(radioFailurePoor, true);
+          EnableRadio(radioSuccessPoor, true);
 
-          radioFailureExcellent.IsEnabled = false;
-          radioFailureGood.IsEnabled = false;
-          radioFailureNormal.IsEnabled = false;
-          radioSuccessExcellent.IsEnabled = false;
-          radioSuccessGood.IsEnabled = false;
-          radioSuccessNormal.IsEnabled = false;
+          EnableRadio(radioFailureExcellent, false);
+          EnableRadio(radioFailureGood, false);
+          EnableRadio(radioSuccessExcellent, false);
+          EnableRadio(radioSuccessGood, false);
+          EnableRadio(radioFailureNormal, false);
+          EnableRadio(radioSuccessNormal, false);
 
           if (selectedRadio != null)
             selectedRadio.IsChecked = false;
           break;
         case Engine.Condition.Normal:
-          radioFailureExcellent.IsEnabled = true;
-          radioFailureGood.IsEnabled = true;
-          radioFailureNormal.IsEnabled = true;
-          radioSuccessExcellent.IsEnabled = true;
-          radioSuccessGood.IsEnabled = true;
-          radioSuccessNormal.IsEnabled = true;
+          EnableRadio(radioFailurePoor, false);
+          EnableRadio(radioSuccessPoor, false);
 
-          radioFailurePoor.IsEnabled = false;
-          radioSuccessPoor.IsEnabled = false;
+          EnableRadio(radioFailureExcellent, true);
+          EnableRadio(radioFailureGood, true);
+          EnableRadio(radioSuccessExcellent, true);
+          EnableRadio(radioSuccessGood, true);
+          EnableRadio(radioFailureNormal, true);
+          EnableRadio(radioSuccessNormal, true);
 
           if (selectedRadio != null)
             selectedRadio.IsChecked = false;
           break;
       }
+
+      if (!bestAction.CanFail)
+      {
+        EnableRadio(radioFailureExcellent, false);
+        EnableRadio(radioFailureGood, false);
+        EnableRadio(radioFailureNormal, false);
+        EnableRadio(radioFailurePoor, false);
+      }
+    }
+
+    private void EnableRadio(RadioButton button, bool enable)
+    {
+      button.IsEnabled = enable;
+      button.Foreground = (enable) ? enabledRadioForeground : disabledRadioForeground;
     }
 
     private void UpdateUIState(State state)
