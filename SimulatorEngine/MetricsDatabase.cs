@@ -108,7 +108,7 @@ namespace Simulator.Engine
       double cpct = c / cmax;
       double qpct = q / qmax;
 
-      return Math.Pow(psucc, 2.0) * (1.0 + pfail*Math.Log(1.0+turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
+      return Math.Pow(psucc, 3.0) * (1.0 + pfail*Math.Log(1.0+turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
     }
 
     public static double SimpleMetric(State state)

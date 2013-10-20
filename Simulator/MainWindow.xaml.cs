@@ -127,6 +127,7 @@ namespace Simulator
       Simulator.Engine.Action bestAction;
       if (analyzer.TryGetOptimalAction(currentState, out bestAction))
       {
+        SetAppState(AppState.Playback);
         AdvancePlayback();
       }
       else
@@ -193,7 +194,18 @@ namespace Simulator
           break;
       }
 
-      if (!bestAction.CanFail)
+      if (bestAction == null || state.Status != SynthesisStatus.IN_PROGRESS)
+      {
+        EnableRadio(radioFailureExcellent, false);
+        EnableRadio(radioFailureGood, false);
+        EnableRadio(radioFailureNormal, false);
+        EnableRadio(radioFailurePoor, false);
+        EnableRadio(radioSuccessExcellent, false);
+        EnableRadio(radioSuccessGood, false);
+        EnableRadio(radioSuccessNormal, false);
+        EnableRadio(radioSuccessPoor, false);
+      }
+      else if (!bestAction.CanFail)
       {
         EnableRadio(radioFailureExcellent, false);
         EnableRadio(radioFailureGood, false);
@@ -260,7 +272,6 @@ namespace Simulator
       }
       else
         UpdateUIStateForPlayback(currentState, null);
-
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -268,7 +279,11 @@ namespace Simulator
       if (appState == AppState.Idle)
         Close();
       else
+      {
         SetAppState(AppState.Idle);
+        currentState = initialState;
+        UpdateUIState(currentState);
+      }
     }
 
     void worker_StartAnalysis(object sender, DoWorkEventArgs e)
@@ -325,14 +340,14 @@ namespace Simulator
           comboBoxRecipe.IsEnabled = false;
 
           // Disable random outcome entry.
-          radioFailureExcellent.IsEnabled = false;
-          radioFailureGood.IsEnabled = false;
-          radioFailureNormal.IsEnabled = false;
-          radioFailurePoor.IsEnabled = false;
-          radioSuccessExcellent.IsEnabled = false;
-          radioSuccessGood.IsEnabled = false;
-          radioSuccessNormal.IsEnabled = false;
-          radioSuccessPoor.IsEnabled = false;
+          EnableRadio(radioFailureExcellent, false);
+          EnableRadio(radioFailureGood, false);
+          EnableRadio(radioFailureNormal, false);
+          EnableRadio(radioFailurePoor, false);
+          EnableRadio(radioSuccessExcellent, false);
+          EnableRadio(radioSuccessGood, false);
+          EnableRadio(radioSuccessNormal, false);
+          EnableRadio(radioSuccessPoor, false);
           break;
         case AppState.Analyzing:
           btnAccept.Content = "Analyzing...";
@@ -355,14 +370,14 @@ namespace Simulator
           txtRecipeQuality.IsEnabled = false;
 
           // Disable random outcome entry.
-          radioFailureExcellent.IsEnabled = false;
-          radioFailureGood.IsEnabled = false;
-          radioFailureNormal.IsEnabled = false;
-          radioFailurePoor.IsEnabled = false;
-          radioSuccessExcellent.IsEnabled = false;
-          radioSuccessGood.IsEnabled = false;
-          radioSuccessNormal.IsEnabled = false;
-          radioSuccessPoor.IsEnabled = false;
+          EnableRadio(radioFailureExcellent, false);
+          EnableRadio(radioFailureGood, false);
+          EnableRadio(radioFailureNormal, false);
+          EnableRadio(radioFailurePoor, false);
+          EnableRadio(radioSuccessExcellent, false);
+          EnableRadio(radioSuccessGood, false);
+          EnableRadio(radioSuccessNormal, false);
+          EnableRadio(radioSuccessPoor, false);
           break;
         case AppState.Playback:
           btnAccept.IsEnabled = false;
@@ -385,14 +400,14 @@ namespace Simulator
           txtRecipeQuality.IsEnabled = false;
 
           // Enable random outcome entry.
-          radioFailureExcellent.IsEnabled = true;
-          radioFailureGood.IsEnabled = true;
-          radioFailureNormal.IsEnabled = true;
-          radioFailurePoor.IsEnabled = true;
-          radioSuccessExcellent.IsEnabled = true;
-          radioSuccessGood.IsEnabled = true;
-          radioSuccessNormal.IsEnabled = true;
-          radioSuccessPoor.IsEnabled = true;
+          EnableRadio(radioFailureExcellent, true);
+          EnableRadio(radioFailureGood, true);
+          EnableRadio(radioFailureNormal, true);
+          EnableRadio(radioFailurePoor, true);
+          EnableRadio(radioSuccessExcellent, true);
+          EnableRadio(radioSuccessGood, true);
+          EnableRadio(radioSuccessNormal, true);
+          EnableRadio(radioSuccessPoor, true);
 
           Simulator.Engine.Action bestAction = analyzer.OptimalAction(currentState);
           UpdateUIStateForPlayback(currentState, bestAction);
