@@ -27,7 +27,7 @@ namespace Simulator
     private Stopwatch stopwatch;
     private BackgroundWorker worker;
     private AppState appState;
-    private UserDecisionNode activeNode;
+    private State currentState;
     private RadioButton selectedRadio;
 
     private State initialState = null;
@@ -57,7 +57,7 @@ namespace Simulator
       stopwatch = new Stopwatch();
       worker = new BackgroundWorker();
       appState = AppState.Uninitialized;
-      activeNode = null;
+      currentState = null;
 
       worker.DoWork += worker_StartAnalysis;
       worker.RunWorkerCompleted += worker_AnalysisComplete;
@@ -79,7 +79,6 @@ namespace Simulator
       analyzer.Actions.AddAllActions();
 
       analyzer.MaxAnalysisDepth = 8;
-      analyzer.PruneSuboptimalBranches = true;
 
       initialState = new State();
       initialState.Condition = Simulator.Engine.Condition.Normal;
@@ -94,6 +93,7 @@ namespace Simulator
       initialState.MaxQuality = 1053;
       initialState.SynthLevel = 20;
       initialState.CrafterLevel = 19;
+      currentState = new State(initialState);
 
       UpdateUIState(initialState);
 
@@ -115,19 +115,19 @@ namespace Simulator
     {
       if (appState == AppState.Idle)
       {
-        activeNode = new UserDecisionNode();
-        activeNode.originalState = initialState;
+        currentState = new State(initialState);
       }
 
-      if (activeNode.IsSolved)
+      Simulator.Engine.Action bestAction;
+      if (analyzer.TryGetOptimalAction(currentState, out bestAction))
       {
-        ChooseOptimalAction(false);
+        AdvancePlayback();
       }
       else
       {
         SetAppState(AppState.Analyzing);
 
-        worker.RunWorkerAsync(activeNode);
+        worker.RunWorkerAsync(currentState);
       }
     }
 
@@ -140,7 +140,7 @@ namespace Simulator
       else
         lblBestAction.Content = String.Empty;
 
-      switch (activeNode.originalState.Condition)
+      switch (state.Condition)
       {
         case Engine.Condition.Poor:
         case Engine.Condition.Good:
@@ -213,28 +213,34 @@ namespace Simulator
       lblBestAction.Content = "<Unknown>";
     }
 
-    private void ChooseOptimalAction(bool initializing)
+    private void AdvancePlayback()
     {
-      PreRandomDecisionNode optimalAction = activeNode.OptimalAction;
+      Simulator.Engine.Action optimalAction = analyzer.OptimalAction(currentState);
 
       RadioParams selectedParams = (RadioParams)selectedRadio.Tag;
       string statusString = (selectedParams.success) ? "Success" : "Failure";
       string conditionString = selectedParams.condition.ConditionString();
-      //txtStatusLog.AppendText(String.Format("{0}!  New condition = {1}.\n", statusString, conditionString));
-      PostRandomDecisionNode newActiveNode = optimalAction.FindMatchingOutcome(selectedParams.success, selectedParams.condition);
-      if (newActiveNode.interaction == null)
-        UpdateUIStateForPlayback(newActiveNode.newState, null);
+
+      if (selectedParams.success)
+        currentState = optimalAction.SuccessState(currentState);
       else
+        currentState = optimalAction.FailureState(currentState);
+      currentState.Condition = selectedParams.condition;
+
+      if (currentState.Status == SynthesisStatus.IN_PROGRESS)
       {
-        activeNode = newActiveNode.interaction;
-        UpdateUIStateForPlayback(newActiveNode.newState, activeNode.OptimalAction.originatingAction);
-        if (!newActiveNode.IsSolved)
+        if (!analyzer.TryGetOptimalAction(currentState, out optimalAction))
         {
           // We hit a leaf.  Kick off a new analysis.
           SetAppState(AppState.Analyzing);
-          worker.RunWorkerAsync(activeNode);
+          worker.RunWorkerAsync(currentState);
         }
+        else
+          UpdateUIStateForPlayback(currentState, optimalAction);
       }
+      else
+        UpdateUIStateForPlayback(currentState, null);
+
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -247,20 +253,20 @@ namespace Simulator
 
     void worker_StartAnalysis(object sender, DoWorkEventArgs e)
     {
- 	    UserDecisionNode root = (UserDecisionNode)e.Argument;
+      State state = (State)e.Argument;
       stopwatch.Reset();
       stopwatch.Start();
-      analyzer.Run(root);
-      e.Result = root;
+      analyzer.Run(state);
+      e.Result = state;
     }
     
     void worker_AnalysisComplete(object sender, RunWorkerCompletedEventArgs e)
     {
       stopwatch.Stop();
-      State state = activeNode.originalState;
+      State state = (State)e.Result;
 
       lblStatus.Content = String.Format("Solved {0:N0} states in {1:F2} seconds.", analyzer.NumStatesExamined, stopwatch.Elapsed.TotalSeconds);
-      activeNode = (UserDecisionNode)e.Result;
+      currentState = state;
 
       SetAppState(AppState.Playback);
     }
@@ -268,7 +274,7 @@ namespace Simulator
     private void radio_Checked(object sender, RoutedEventArgs e)
     {
       selectedRadio = (RadioButton)sender;
-      ChooseOptimalAction(false);
+      AdvancePlayback();
     }
 
     private void SetAppState(AppState newState)
@@ -358,7 +364,7 @@ namespace Simulator
           txtRecipeLevel.IsEnabled = false;
           txtRecipeQuality.IsEnabled = false;
 
-        // Enable random outcome entry.
+          // Enable random outcome entry.
           radioFailureExcellent.IsEnabled = true;
           radioFailureGood.IsEnabled = true;
           radioFailureNormal.IsEnabled = true;
@@ -368,7 +374,8 @@ namespace Simulator
           radioSuccessNormal.IsEnabled = true;
           radioSuccessPoor.IsEnabled = true;
 
-          UpdateUIStateForPlayback(activeNode.originalState, activeNode.OptimalAction.originatingAction);
+          Simulator.Engine.Action bestAction = analyzer.OptimalAction(currentState);
+          UpdateUIStateForPlayback(currentState, bestAction);
           break;
       }
 

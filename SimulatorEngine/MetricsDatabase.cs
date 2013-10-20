@@ -66,7 +66,7 @@ namespace Simulator.Engine
       double cpct = c / cmax;
       double qpct = q / qmax;
 
-      return psucc * (Math.Log(turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
+      return psucc * (Math.Log(1.0+turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
     }
 
     public static double ExponentialQualityPlusFailureWeightedCP3ExtraSafe(State state)
@@ -87,7 +87,7 @@ namespace Simulator.Engine
       double cpct = c / cmax;
       double qpct = q / qmax;
 
-      return Math.Pow(psucc, 2.0) * (1.0 + Math.Log(turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
+      return Math.Pow(psucc, 2.0) * (1.0 + Math.Log(1.0+turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
     }
 
     public static double ExponentialQualityPlusFailureWeightedCP3WithLogFailure(State state)
@@ -108,7 +108,7 @@ namespace Simulator.Engine
       double cpct = c / cmax;
       double qpct = q / qmax;
 
-      return Math.Pow(psucc, 2.0) * (1.0 + pfail*Math.Log(turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
+      return Math.Pow(psucc, 2.0) * (1.0 + pfail*Math.Log(1.0+turnsRemaining) * cpct + Math.Exp(0.5 + 2.0 * qpct));
     }
 
     public static double SimpleMetric(State state)

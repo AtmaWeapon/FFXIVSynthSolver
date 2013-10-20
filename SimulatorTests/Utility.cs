@@ -13,7 +13,7 @@ namespace Simulator.Tests
     public static Engine.State CreateDefaultState()
     {
       Engine.State result = new Engine.State();
-      result.Condition = Engine.Condition.Good;
+      result.Condition = Engine.Condition.Normal;
       result.Control = 102;
       result.Craftsmanship = 105;
       result.Durability = 70;

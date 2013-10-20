@@ -63,7 +63,6 @@
     <Compile Include="Analyzer.cs" />
     <Compile Include="BuffActions.cs" />
     <Compile Include="Compute.cs" />
-    <Compile Include="DecisionTree.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="MetricsDatabase.cs" />
     <Compile Include="ProgressionActions.cs" />

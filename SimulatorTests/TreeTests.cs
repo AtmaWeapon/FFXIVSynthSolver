@@ -23,22 +23,23 @@ namespace Simulator.Tests
       state.CP = 0;
       state.Durability = 10;
       state.Progress = state.MaxProgress - 1;
-      UserDecisionNode root = new UserDecisionNode();
-      root.originalState = state;
 
-      analyzer.Run(root);
+      analyzer.Run(state);
 
-      Assert.AreEqual<ActionType>(ActionType.Progress, root.OptimalAction.originatingAction.Attributes.Type);
+      Simulator.Engine.Action bestAction = analyzer.OptimalAction(state);
+      Assert.AreEqual<ActionType>(ActionType.Progress, bestAction.Attributes.Type);
     }
 
     [TestMethod]
     public void TestUrgentCompletion2()
     {
       Analyzer analyzer = new Analyzer();
-      analyzer.Actions.AddAction(new BasicSynthesis());
+      BasicSynthesis bs = new BasicSynthesis();
+      SteadyHand sh = new SteadyHand();
+      analyzer.Actions.AddAction(bs);
       analyzer.Actions.AddAction(new BasicTouch());
       analyzer.Actions.AddAction(new MastersMend());
-      analyzer.Actions.AddAction(new SteadyHand());
+      analyzer.Actions.AddAction(sh);
       analyzer.Actions.AddAction(new Observe());
 
       State state = Utility.CreateDefaultState();
@@ -47,37 +48,26 @@ namespace Simulator.Tests
       state.CP = Compute.CP(SynthAction<MastersMend>.Attributes.CP, state) - 1;
       state.Durability = 20;
 
-      uint progressGain = 30;
+      // Make sure exactly 2 Basic Synthesis' are required to finish the synth.
       state.Progress = 0;
-      state.MaxProgress = progressGain * 2;
-      UserDecisionNode root = new UserDecisionNode();
-      root.originalState = state;
+      state.MaxProgress = 2 * Compute.Progress(state, bs.Attributes.Efficiency);
 
-      analyzer.Run(root);
+      analyzer.Run(state);
 
-      foreach (PreRandomDecisionNode child in root.OptimalUserDecisions)
-        Assert.AreEqual<ActionType>(ActionType.Progress, child.originatingAction.Attributes.Type);
-    }
+      // The best sequence is Steady Hand -> Basic Synthesis -> Basic Synthesis
+      Simulator.Engine.Action bestAction = analyzer.OptimalAction(state);
+      Assert.AreEqual<Type>(typeof(SteadyHand), bestAction.GetType());
 
-    public void NodesUnsolvedAfterMaxDepth()
-    {
-      Analyzer analyzer = new Analyzer();
-      analyzer.Actions.AddAction(new BasicSynthesis());
-      analyzer.Actions.AddAction(new BasicTouch());
-      analyzer.Actions.AddAction(new MastersMend());
-      analyzer.Actions.AddAction(new SteadyHand());
-      analyzer.Actions.AddAction(new Observe());
+      state = sh.SuccessState(state);
+      bestAction = analyzer.OptimalAction(state);
+      Assert.AreEqual<Type>(typeof(BasicSynthesis), bestAction.GetType());
 
-      analyzer.MaxAnalysisDepth = 1;
-      State state = Utility.CreateDefaultState();
+      state = bs.SuccessState(state);
+      bestAction = analyzer.OptimalAction(state);
+      Assert.AreEqual<Type>(typeof(BasicSynthesis), bestAction.GetType());
 
-      UserDecisionNode root = new UserDecisionNode();
-      root.originalState = state;
-
-      analyzer.Run(root);
-
-      foreach (PreRandomDecisionNode child in root.choices)
-        Assert.IsFalse(child.IsSolved);
+      state = bs.SuccessState(state);
+      Assert.AreEqual(SynthesisStatus.COMPLETED, state.Status);
     }
 
     [TestMethod]
@@ -110,11 +100,10 @@ namespace Simulator.Tests
 
       analyzer.MaxAnalysisDepth = 1;
 
-      UserDecisionNode root = new UserDecisionNode();
-      root.originalState = initialState;
-      analyzer.Run(root);
+      analyzer.Run(initialState);
 
-      Assert.AreEqual<Type>(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
+      Simulator.Engine.Action bestAction = analyzer.OptimalAction(initialState);
+      Assert.AreEqual<Type>(typeof(MastersMend), bestAction.GetType());
    }
 
     [TestMethod]
@@ -148,14 +137,16 @@ namespace Simulator.Tests
 
       analyzer.MaxAnalysisDepth = 4;
 
-      UserDecisionNode root = new UserDecisionNode();
-      root.originalState = initialState;
-      analyzer.Run(root);
+      analyzer.Run(initialState);
 
-      root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
-      root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
-      root = root.Choose(typeof(BasicSynthesis), true, Condition.Normal);
-      Assert.AreEqual<Type>(typeof(MastersMend), root.OptimalAction.originatingAction.GetType());
+      BasicSynthesis basic = new BasicSynthesis();
+
+      initialState = basic.SuccessState(initialState);
+      initialState = basic.SuccessState(initialState);
+      initialState = basic.SuccessState(initialState);
+
+      Simulator.Engine.Action bestAction = analyzer.OptimalAction(initialState);
+      Assert.AreEqual<Type>(typeof(MastersMend), bestAction.GetType());
     }
   }
 }
