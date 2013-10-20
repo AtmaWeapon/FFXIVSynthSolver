@@ -163,8 +163,11 @@ namespace Simulator.Engine
     public int LevelSurplus
     {
       get 
-      { 
-        return (int)CrafterLevel - (int)SynthLevel; 
+      {
+        int result = (int)CrafterLevel - (int)SynthLevel;
+        if (IngenuityTurns > 0)
+          return result = Math.Max(result, 0);
+        return result;
       }
     }
 
@@ -299,10 +302,14 @@ namespace Simulator.Engine
 
     public void TickBuffs()
     {
-      steadyHand.TickBuff(this);
-      greatStrides.TickBuff(this);
-      manipulation.TickBuff(this);
-      ingenunity.TickBuff(this);
+      if (SteadyHandTurns > 0)
+        steadyHand.TickBuff(this);
+      if (GreatStridesTurns > 0)
+        greatStrides.TickBuff(this);
+      if (ManipulationTurns > 0)
+        manipulation.TickBuff(this);
+      if (IngenuityTurns > 0)
+        ingenunity.TickBuff(this);
     }
 
     public uint Step

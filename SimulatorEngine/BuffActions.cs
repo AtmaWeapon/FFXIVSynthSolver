@@ -23,21 +23,27 @@ namespace Simulator.Engine
                            });
     }
 
-    public uint Duration
+    public abstract uint GetTurnsRemaining(State state);
+    public abstract void SetTurnsRemaining(State state, uint turns);
+
+    public bool IsBuffActive(State state)
     {
-      get
-      {
-        return Attributes.BuffDuration;
-      }
+      return GetTurnsRemaining(state) > 0;
     }
 
-    public abstract bool IsBuffActive(State state);
-
     // Called when the Step advances while the buff is active.
-    public abstract void TickBuff(State state);
+    public virtual void TickBuff(State state)
+    {
+      uint remain = GetTurnsRemaining(state);
+      if (remain > 0)
+        SetTurnsRemaining(state, remain-1);
+    }
 
     // Called when a buff is applied for the first time.
-    public abstract void ApplyBuff(State state);
+    public virtual void ApplyBuff(State state)
+    {
+      SetTurnsRemaining(state, Attributes.BuffDuration + 1);
+    }
   }
 
   [SynthAction(ActionType.Buff, Name="Master's Mend", CP=92, BuffDuration=0)]
@@ -54,8 +60,8 @@ namespace Simulator.Engine
       state.Durability = Math.Min(state.Durability + 30, state.MaxDurability);
     }
 
-    public override bool IsBuffActive(State state) { return false; }
-    public override void TickBuff(State state) { }
+    public override uint GetTurnsRemaining(State state) { return 0; }
+    public override void SetTurnsRemaining(State state, uint turns) { }
   }
 
   [SynthAction(ActionType.Buff, Name = "Steady Hand", CP = 22, BuffDuration=5)]
@@ -79,27 +85,11 @@ namespace Simulator.Engine
                         return true;
                       });
     }
-
-    public override void ApplyBuff(State state)
-    {
-      state.SteadyHandTurns = Attributes.BuffDuration + 1;
-    }
-
-    public override void TickBuff(State state)
-    {
-      if (state.SteadyHandTurns == 0)
-        return;
-
-      --state.SteadyHandTurns;
-    }
-
-    public override bool IsBuffActive(State state)
-    {
-      return state.SteadyHandTurns > 0;
-    }
+    public override uint GetTurnsRemaining(State state) { return state.SteadyHandTurns; }
+    public override void SetTurnsRemaining(State state, uint turns) { state.SteadyHandTurns = turns; }
   }
 
-  [SynthAction(ActionType.Buff, Name = "Observe", CP = 14, BuffDuration=0, Disabled=true)]
+  [SynthAction(ActionType.Buff, Name = "Observe", CP = 14, BuffDuration=0)]
   public class Observe : BuffAction
   {
     // Observe only consumes CP (to give the condition a chance to change).
@@ -117,13 +107,11 @@ namespace Simulator.Engine
                         return !(s.LeadingAction is Observe);
                       });
     }
-
-    public override bool IsBuffActive(State state) { return false; }
-    public override void ApplyBuff(State state) { }
-    public override void TickBuff(State state) { }
+    public override uint GetTurnsRemaining(State state) { return 0; }
+    public override void SetTurnsRemaining(State state, uint turns) { }
   }
 
-  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration = 0, Disabled = true)]
+  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration = 0)]
   public class TricksOfTheTrade : BuffAction
   {
     public TricksOfTheTrade()
@@ -139,46 +127,43 @@ namespace Simulator.Engine
       state.CP = Math.Min(state.CP + 20, state.MaxCP);
     }
 
-    public override bool IsBuffActive(State state) { return false; }
-    public override void TickBuff(State state) { }
+    public override uint GetTurnsRemaining(State state) { return 0; }
+    public override void SetTurnsRemaining(State state, uint turns) { }
   }
 
   // TODO
   [SynthAction(ActionType.Buff, Name = "Inner Quiet", CP = 18, Disabled = true, BuffDuration=0)]
   public class InnerQuiet : BuffAction
   {
-    public override bool IsBuffActive(State state) { return false; }
-    public override void ApplyBuff(State state) { }
-    public override void TickBuff(State state) { }
+    public override uint GetTurnsRemaining(State state) { return 0; }
+    public override void SetTurnsRemaining(State state, uint turns) { }
   }
 
   // TODO
   [SynthAction(ActionType.Buff, Name = "Manipulation", CP = 88, BuffDuration = 3)]
   public class Manipulation : BuffAction
   {
-    public override bool IsBuffActive(State state) 
+    public override uint GetTurnsRemaining(State state)
     {
-      return state.ManipulationTurns > 0;
+      return state.ManipulationTurns;
     }
 
-    public override void ApplyBuff(State state)
+    public override void SetTurnsRemaining(State state, uint turns)
     {
-      // Assign it 1 more turn than it really has, so it can tick right after it's been applied.
-      state.ManipulationTurns = Attributes.BuffDuration + 1;
+      state.ManipulationTurns = turns;
     }
 
     public override void TickBuff(State state)
     {
-      if (state.ManipulationTurns == 0)
-        return;
+      base.TickBuff(state);
 
       // Only perform the actual effect if this was not the first tick.
-      if (--state.ManipulationTurns < Attributes.BuffDuration)
+      if (GetTurnsRemaining(state) <= Attributes.BuffDuration)
         state.Durability = Math.Min(state.MaxDurability, state.Durability + 10);
     }
   }
 
-  [SynthAction(ActionType.Buff, Name="Ingenuity", CP = 24, BuffDuration=3, Disabled=true)]
+  [SynthAction(ActionType.Buff, Name="Ingenuity", CP = 24, BuffDuration=3)]
   public class Ingenuity : BuffAction
   {
     public Ingenuity()
@@ -186,47 +171,33 @@ namespace Simulator.Engine
       // Only allow ingenuity to run if we're at least 2 levels below the synth
       usageChecks.Add(delegate(State state) { return state.LevelSurplus <= -2; });
     }
-    public override bool IsBuffActive(State state) 
-    { 
-      return state.IngenuityTurns > 0;
+    public override uint GetTurnsRemaining(State state)
+    {
+      return state.IngenuityTurns;
     }
 
-    public override void ApplyBuff(State state)
+    public override void SetTurnsRemaining(State state, uint turns)
     {
-      state.IngenuityTurns = Attributes.BuffDuration;
-    }
-
-    public override void TickBuff(State state)
-    {
-      if (state.IngenuityTurns == 0)
-        return;
-
-      --state.IngenuityTurns;
+      state.IngenuityTurns = turns;
     }
   }
 
-  [SynthAction(ActionType.Buff, Name = "Great Strides", CP = 32, BuffDuration = 3, Disabled=true)]
+  [SynthAction(ActionType.Buff, Name = "Great Strides", CP = 32, BuffDuration = 3)]
   public class GreatStrides : BuffAction
   {
     public GreatStrides()
     {
-    }
-    public override bool IsBuffActive(State state)
-    {
-      return state.GreatStridesTurns > 0;
+      usageChecks.Add(delegate(State state) { return state.Quality <= state.MaxQuality; });
     }
 
-    public override void ApplyBuff(State state)
+    public override uint GetTurnsRemaining(State state)
     {
-      state.GreatStridesTurns = Attributes.BuffDuration;
+      return state.GreatStridesTurns;
     }
 
-    public override void TickBuff(State state)
+    public override void SetTurnsRemaining(State state, uint turns)
     {
-      if (state.GreatStridesTurns == 0)
-        return;
-
-      --state.GreatStridesTurns;
+      state.GreatStridesTurns = turns;
     }
-  }
+    }
 }

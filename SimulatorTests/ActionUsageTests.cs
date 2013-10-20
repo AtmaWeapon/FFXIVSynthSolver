@@ -252,5 +252,100 @@ namespace Simulator.Tests
 
       Assert.IsTrue(steadyHand.CanUse(state));
     }
+
+    [TestMethod]
+    public void TestGreatStridesDuration()
+    {
+      Engine.Action greatStrides = new Engine.GreatStrides();
+      Engine.Action basicSynth = new Engine.BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.Quality = 142;
+      state.MaxQuality = 726;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+      state.Durability = 100;
+      state.MaxDurability = 100;
+      state.CrafterLevel = 16;
+      state.SynthLevel = 13;
+      state.Craftsmanship = 105;
+      state.Control = 102;
+      state.Condition = Condition.Normal;
+      state.CP = 55;
+      state.MaxCP = 233;
+
+      Assert.IsTrue(greatStrides.CanUse(state));
+      state = greatStrides.SuccessState(state);
+      for (uint i = greatStrides.Attributes.BuffDuration; i > 0; --i)
+      {
+        Assert.AreEqual<uint>(i, state.GreatStridesTurns);
+        state = basicSynth.SuccessState(state);
+      }
+      Assert.AreEqual<uint>(0U, state.GreatStridesTurns);
+    }
+
+    [TestMethod]
+    public void TestGreatStridesQualityMultiplier()
+    {
+      Engine.Action greatStrides = new Engine.GreatStrides();
+      Engine.Action basicTouch = new Engine.BasicTouch();
+
+      State state = Utility.CreateDefaultState();
+      state.Quality = 142;
+      state.MaxQuality = 726;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+      state.Durability = 20;
+      state.MaxDurability = 40;
+      state.CrafterLevel = 16;
+      state.SynthLevel = 13;
+      state.Craftsmanship = 105;
+      state.Control = 102;
+      state.Condition = Condition.Normal;
+      state.CP = 55;
+      state.MaxCP = 233;
+
+      Assert.IsTrue(greatStrides.CanUse(state));
+
+      // Figure out how much quality it normally gives, then use great strides
+      // and make sure the delta is double.
+      State baselineState = basicTouch.SuccessState(state);
+
+      State gsState = greatStrides.SuccessState(state);
+      State comparisonState = basicTouch.SuccessState(gsState);
+
+      uint baselineDelta = baselineState.Quality - state.Quality;
+      uint comparisonDelta = comparisonState.Quality - state.Quality;
+      Assert.AreEqual<uint>(baselineDelta * 2, comparisonDelta);
+    }
+
+    [TestMethod]
+    public void TestGreatStridesRemovedImmediatelyOnTouch()
+    {
+      Engine.Action greatStrides = new Engine.GreatStrides();
+      Engine.Action basicTouch = new Engine.BasicTouch();
+
+      State state = Utility.CreateDefaultState();
+      state.Quality = 142;
+      state.MaxQuality = 726;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+      state.Durability = 20;
+      state.MaxDurability = 40;
+      state.CrafterLevel = 16;
+      state.SynthLevel = 13;
+      state.Craftsmanship = 105;
+      state.Control = 102;
+      state.Condition = Condition.Normal;
+      state.CP = 55;
+      state.MaxCP = 233;
+
+      Assert.IsTrue(greatStrides.CanUse(state));
+
+      state = greatStrides.SuccessState(state);
+      Assert.AreEqual<uint>(3U, state.GreatStridesTurns);
+      state = basicTouch.SuccessState(state);
+      Assert.AreEqual<uint>(0U, state.GreatStridesTurns);
+    }
   }
 }
