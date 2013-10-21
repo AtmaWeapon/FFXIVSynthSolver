@@ -1,8 +1,30 @@
 ﻿<Window x:Class="Simulator.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="FFXIVSynthSolver (Alpha)" Height="620" Width="1100" Initialized="Window_Initialized" ResizeMode="NoResize">
-  <Grid>
+        Title="FFXIVSynthSolver (Alpha)" Height="673" Width="1415" Initialized="Window_Initialized" ResizeMode="NoResize">
+  <Window.Resources>
+    <SolidColorBrush x:Key="DisabledCheckForeground">
+      <SolidColorBrush.Color>
+        <Color A="255" R="175" G="175" B="175"/>
+      </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <SolidColorBrush x:Key="EnabledCheckForeground">
+      <SolidColorBrush.Color>
+        <Color A="255" R="238" G="225" B="197"/>
+      </SolidColorBrush.Color>
+    </SolidColorBrush>
+    <Style x:Key="FFXIVCheck" TargetType="CheckBox">
+      <Style.Triggers>
+        <Trigger Property="IsEnabled" Value="True">
+          <Setter Property="Foreground" Value="{StaticResource EnabledCheckForeground}"/>
+        </Trigger>
+        <Trigger Property="IsEnabled" Value="False">
+          <Setter Property="Foreground" Value="{StaticResource DisabledCheckForeground}"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </Window.Resources>
+  <Grid Margin="0,0,-6,-2">
     <Grid.Background>
       <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FF5C5C5C"/>
@@ -147,5 +169,67 @@
     <TextBox x:Name="txtRecipeQuality" HorizontalAlignment="Left" Height="26" Margin="1001,367,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" Background="{x:Null}" VerticalContentAlignment="Center" Foreground="#FFEEE1C5" FontSize="16" TextChanged="txtRecipeQuality_TextChanged"/>
     <TextBox x:Name="txtRecipeDifficulty" HorizontalAlignment="Left" Height="26" Margin="1001,393,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" Background="{x:Null}" VerticalContentAlignment="Center" Foreground="#FFEEE1C5" FontSize="16" TextChanged="txtRecipeDifficulty_TextChanged"/>
     <Label x:Name="lblStatus" Content="" HorizontalAlignment="Left" Height="26" Margin="29,502,0,0" VerticalAlignment="Top" Width="388" Foreground="#FFCCCCCC" VerticalContentAlignment="Center"/>
+    <Rectangle Fill="#FF555555" HorizontalAlignment="Left" Margin="1088,0,0,0" Stroke="Black" Width="10" RadiusX="2" RadiusY="2">
+      <Rectangle.Effect>
+        <DropShadowEffect/>
+      </Rectangle.Effect>
+    </Rectangle>
+    <Border Margin="1109,5,10,320" BorderBrush="#FFEEE1C5" BorderThickness="1" VerticalAlignment="Top" Padding="0,0,0,3">
+      <Grid>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 1 | Basic Synthesis" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 5 | Basic Touch" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 7 | Master's Mend" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 9 | Steady Hand" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 11 | Inner Quiet" HorizontalAlignment="Left" Margin="10,112,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 13 | Observe" HorizontalAlignment="Left" Margin="10,133,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 18 | Standard Touch" HorizontalAlignment="Left" Margin="10,155,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 21 | Great Strides" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 25 | Master's Mend II" HorizontalAlignment="Left" Margin="10,198,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 31 | Standard Synthesis" HorizontalAlignment="Left" Margin="10,219,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Lv 43 | Advanced Touch" HorizontalAlignment="Left" Margin="10,241,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <Label Content="Common Abilities" HorizontalAlignment="Center" Margin="0,2,0,0" VerticalAlignment="Top" Foreground="#FFEEE1C5"/>
+      </Grid>
+    </Border>
+    <Border Margin="1109,275,10,197" BorderBrush="#FFEEE1C5" BorderThickness="1" VerticalAlignment="Top" Padding="0,0,0,3">
+      <Grid>
+        <Label Content="Crossover Abilities (Lv. 15)" HorizontalAlignment="Center" Margin="0,2,0,0" VerticalAlignment="Top" Foreground="#FFEEE1C5"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Manipulation" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Rumination" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Ingenuity" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Hasty Touch" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Waste Not" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Careful Synthesis" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Tricks of the Trade" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Rapid Synthesis" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16"/>
+      </Grid>
+    </Border>
+
+    <Border Margin="1109,395,10,0" BorderBrush="#FFEEE1C5" BorderThickness="1" VerticalAlignment="Top" Padding="0,0,0,3">
+      <Grid>
+        <Label Content="Crossover Abilities (Lv. 37)" HorizontalAlignment="Center" Margin="0,2,0,0" VerticalAlignment="Top" Foreground="#FFEEE1C5"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Brand of Earth" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Brand of Fire" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Brand of Ice" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Brand of Wind" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Brand of Lightning" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Flawless Synthesis" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Steady Hand II" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Brand of Water" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+      </Grid>
+    </Border>
+
+    <Border Margin="1109,516,10,0" BorderBrush="#FFEEE1C5" BorderThickness="1" VerticalAlignment="Top" Padding="0,0,0,3">
+      <Grid>
+        <Label Content="Crossover Abilities (Lv. 50)" HorizontalAlignment="Center" Margin="0,2,0,0" VerticalAlignment="Top" Foreground="#FFEEE1C5"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Piece By Piece" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Ingenuity II" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Comfort Zone" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Innovation" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Waste Not II" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Byregot's Blessing" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Careful Synthesis II" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource FFXIVCheck}" Content="Reclaim" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+      </Grid>
+    </Border>
   </Grid>
 </Window>
