@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="FFXIVSynthSolver (Alpha)" Height="673" Width="1415" Initialized="Window_Initialized" ResizeMode="NoResize">
   <Window.Resources>
-    <SolidColorBrush x:Key="DisabledCheckForeground">
+    <SolidColorBrush x:Key="DisabledTextForeground">
       <SolidColorBrush.Color>
         <Color A="255" R="175" G="175" B="175"/>
       </SolidColorBrush.Color>
@@ -13,13 +13,28 @@
         <Color A="255" R="238" G="225" B="197"/>
       </SolidColorBrush.Color>
     </SolidColorBrush>
+    <SolidColorBrush x:Key="EnabledRadioForeground">
+      <SolidColorBrush.Color>
+        <Color A="255" R="34" G="34" B="34"/>
+      </SolidColorBrush.Color>
+    </SolidColorBrush>
     <Style x:Key="FFXIVCheck" TargetType="CheckBox">
       <Style.Triggers>
         <Trigger Property="IsEnabled" Value="True">
           <Setter Property="Foreground" Value="{StaticResource EnabledCheckForeground}"/>
         </Trigger>
         <Trigger Property="IsEnabled" Value="False">
-          <Setter Property="Foreground" Value="{StaticResource DisabledCheckForeground}"/>
+          <Setter Property="Foreground" Value="{StaticResource DisabledTextForeground}"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+    <Style x:Key="FFXIVRadio" TargetType="RadioButton">
+      <Style.Triggers>
+        <Trigger Property="IsEnabled" Value="True">
+          <Setter Property="Foreground" Value="{StaticResource EnabledRadioForeground}"/>
+        </Trigger>
+        <Trigger Property="IsEnabled" Value="False">
+          <Setter Property="Foreground" Value="{StaticResource DisabledTextForeground}"/>
         </Trigger>
       </Style.Triggers>
     </Style>
@@ -100,18 +115,18 @@
     <Label x:Name="lblBestAction" Content="Basic Synthesis" HorizontalAlignment="Left" Height="30" Margin="171,448,0,0" VerticalAlignment="Top" Width="187" Foreground="#FFCCCCCC" Padding="0" FontSize="20" VerticalContentAlignment="Center"/>
     <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="116" Margin="422,412,0,0" VerticalAlignment="Top" Width="181" Background="#FFEEE1C5">
       <StackPanel Margin="0,0,0,9">
-        <RadioButton x:Name="radioSuccessPoor" Content="Poor" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioSuccessNormal" Content="Normal" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioSuccessGood" Content="Good" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioSuccessExcellent" Content="Excellent" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioSuccessPoor" Content="Poor" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioSuccessNormal" Content="Normal" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioSuccessGood" Content="Good" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioSuccessExcellent" Content="Excellent" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
       </StackPanel>
     </Border>
     <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="116" Margin="603,412,0,0" VerticalAlignment="Top" Width="181" Background="#FFEEE1C5">
       <StackPanel Margin="0,0,0,9">
-        <RadioButton x:Name="radioFailurePoor" Content="Poor" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioFailureNormal" Content="Normal" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioFailureGood" Content="Good" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
-        <RadioButton x:Name="radioFailureExcellent" Content="Excellent" Foreground="#FF222222" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioFailurePoor" Content="Poor" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioFailureNormal" Content="Normal" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioFailureGood" Content="Good" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
+        <RadioButton Style="{StaticResource FFXIVRadio}" x:Name="radioFailureExcellent" Content="Excellent" FontSize="20" Margin="10,0,0,0" Checked="radio_Checked"/>
       </StackPanel>
     </Border>
     <Button x:Name="btnAccept" Content="Use Basic Synthesis" HorizontalAlignment="Left" Height="42" Margin="591,533,0,0" VerticalAlignment="Top" Width="193" Foreground="#FFCECECE" FontSize="20" BorderBrush="Black" BorderThickness="5" Click="AcceptButton_Click">
