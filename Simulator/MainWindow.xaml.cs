@@ -32,8 +32,7 @@ namespace Simulator
 
     private State initialState = null;
 
-    private SolidColorBrush enabledRadioForeground = null;
-    private SolidColorBrush disabledRadioForeground = null;
+    private List<CheckBox> abilityChecks = null;
 
     private class RadioParams
     {
@@ -61,6 +60,7 @@ namespace Simulator
       worker = new BackgroundWorker();
       appState = AppState.Uninitialized;
       currentState = null;
+      abilityChecks = new List<CheckBox>();
 
       worker.DoWork += worker_StartAnalysis;
       worker.RunWorkerCompleted += worker_AnalysisComplete;
@@ -78,11 +78,6 @@ namespace Simulator
       radioFailureGood.Tag = new RadioParams(false, Engine.Condition.Good);
       radioFailureNormal.Tag = new RadioParams(false, Engine.Condition.Normal);
       radioFailurePoor.Tag = new RadioParams(false, Engine.Condition.Poor);
-
-      enabledRadioForeground = new SolidColorBrush(Color.FromRgb(34, 34, 34));
-      disabledRadioForeground = new SolidColorBrush(Color.FromRgb(175, 175, 175));
-
-      analyzer.Actions.AddAllActions();
 
       analyzer.MaxAnalysisDepth = 8;
 
@@ -473,6 +468,27 @@ namespace Simulator
       {
         analyzer.MaxAnalysisDepth = (int)value;
       }
+    }
+
+    private void AbilityCheck_CheckChanged(object sender, RoutedEventArgs e)
+    {
+      CheckBox check = (CheckBox)sender;
+      if (check.Tag != null)
+      {
+        Simulator.Engine.Action action = (Simulator.Engine.Action)check.Tag;
+        if (action != null)
+        {
+          if (check.IsChecked.Value)
+            analyzer.Actions.AddAction(action);
+          else
+            analyzer.Actions.RemoveAction(action.GetType());
+        }
+      }
+    }
+
+    private void AbilityCheck_Loaded(object sender, RoutedEventArgs e)
+    {
+      abilityChecks.Add((CheckBox)sender);
     }
   }
 }
