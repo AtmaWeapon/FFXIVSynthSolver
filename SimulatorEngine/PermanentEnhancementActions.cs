@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  class PermanentEnhancementAction : Action
+  public class PermanentEnhancementAction : Action
   {
+    public override bool CanFail
+    {
+      get { return false; }
+    }
   }
 
-  [SynthAction(ActionType.PermanentEnhancement, "Inner Quiet", 18)]
+  [SynthAction(ActionType.PermanentEnhancement, ActionId.InnerQuiet, "Inner Quiet", 18)]
   [PermanentEnhancement]
   public class InnerQuiet : PermanentEnhancementAction
   {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -7,77 +8,135 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  public static class StateFieldAccess
+  public enum KnownStateField : int
   {
-    public static enum KnownStateField : int
-    {
-      Craftsmanship,
-      Control,
-      CP,
-      MaxCP,
-      Durability,
-      Progress,
-      MaxProgress,
-      SynthLevel,
-      Quality,
-      MaxQuality,
-      Condition,
-      External
-    }
+    Craftsmanship,
+    Control,
+    CP,
+    MaxCP,
+    Durability,
+    MaxDurability,
+    Progress,
+    MaxProgress,
+    CrafterLevel,
+    SynthLevel,
+    Quality,
+    MaxQuality,
+    Condition
+  }
 
+  internal static class StateFields
+  {
     private class FieldInfo
     {
-      public uint varIndex;
-      public uint bitOffset;
-      public uint fieldSize;
+      public uint offset;
+      public uint count;
     }
+    private static Dictionary<object, FieldInfo> fields;
+    private static uint bitsUsed = 0;
 
-    private static Dictionary<uint, uint> spaceMap;
-    private static FieldInfo[] knownFields;
-    private static List<FieldInfo> externalFields;
-    private static uint nextExternalField = 0;
-
-    static StateFieldAccess()
+    static StateFields()
     {
-      knownFields = new FieldInfo[11];
-      externalFields = new List<FieldInfo>();
-      spaceMap = new Dictionary<uint, uint>();
+      fields = new Dictionary<object, FieldInfo>();
     }
 
-    public static void RegisterField(KnownStateField type, uint numBits)
-    {
-      FieldInfo field = new FieldInfo();
-      knownFields[(int)type] = field;
-      field.bitOffset = nextBit;
-      field.varIndex = (uint)(nextBit % Marshal.SizeOf(typeof(ulong)));
-      field.fieldSize = numBits;
-
-      nextBit = field.bitOffset + field.fieldSize;
-    }
-
-    public static uint RegisterExternalField(uint numBits)
+    public static void RegisterField(object key, uint numBits)
     {
       FieldInfo info = new FieldInfo();
+      info.count = numBits;
+      info.offset = bitsUsed;
+      fields[key] = info;
+
+      bitsUsed += info.count;
     }
 
-    public static void SetValue(State state, KnownStateField type, State state, uint value)
+    public static void SetValue(ref StateStorage storage, object key, uint value)
     {
+      FieldInfo info = fields[key];
+      int lbyte = (int)info.offset / 8;
+      int lbit = (int)info.offset % 8;
 
+      int rbyte = (int)(info.offset + info.count) / 8;
+      int rbit = (int)(info.offset + info.count) % 8;
+      Debug.Assert(rbyte - lbyte <= 1);
+
+      if (rbyte == lbyte)
+      {
+        ModifyByte(ref storage, rbyte, lbit, rbit, (byte)value);
+      }
+      else
+      {
+        // _ _ _ _ _ X X X  |  X X _ _ _ _ _ _
+        //
+        // When writing into the left byte, cut off the last |rbit|
+        // bits.  In the above example, this would shift right by 2.
+        ModifyByte(ref storage, lbyte, lbit, 7, (byte)(value >> rbit));
+
+        // When writing into the right byte, keep only the last |rbit|
+        // bits, but move them all the way over to the left.
+        byte mask = (byte)((1 << rbit) - 1);
+        byte modvalue = (byte)(((byte)value & mask) << (8 - rbit));
+        ModifyByte(ref storage, rbyte, 0, rbit, modvalue);
+      }
     }
 
-    public static uint GetValue(State state, KnownStateField type)
+    public static uint GetValue(ref StateStorage storage, object key)
     {
-      return 0;
+      FieldInfo info = fields[key];
+      int lbyte = (int)info.offset / 8;
+      int lbit = (int)info.offset % 8;
+
+      int rbyte = (int)(info.offset + info.count) / 8;
+      int rbit = (int)(info.offset + info.count) % 8;
+      Debug.Assert(rbyte - lbyte <= 1);
+
+      unsafe
+      {
+        int count = (int)info.count;
+        fixed (byte* ptr = storage.storage)
+        {
+          if (lbyte == rbyte)
+          {
+            byte* byteptr = ptr + lbyte;
+            byte mask = (byte)(((1 << count) - 1) << rbit);
+            byte result = (byte)(*byteptr & mask);
+            return (uint)(result >> rbit);
+          }
+          else
+          {
+            ushort* shortptr = (ushort*)(ptr + lbyte);
+            rbit += 8;
+
+            ushort mask = (ushort)(((1 << count) - 1) << rbit);
+            ushort result = (ushort)(*shortptr & mask);
+            return (uint)(result >> rbit);
+          }
+        }
+      }
     }
 
-    public static void SetValue(State state, uint offset, uint numBits, uint value)
-    {
 
-    }
-
-    public static uint GetValue(State state, uint offset, uint numBits)
+    private static void ModifyByte(ref StateStorage storage, int byteoff, int lbit, int rbit, byte value)
     {
-      return 0;
+      unsafe
+      {
+        fixed (byte* ptr = storage.storage)
+        {
+          byte* modbyte = ptr + byteoff;
+
+          int numbits = rbit - lbit + 1;
+          byte mask1 = (byte)(((1 << numbits) - 1) << rbit);  // 0000000000011111000000
+          byte mask2 = (byte)~mask1;                          // 1111111111100000111111
+
+          // Clear the old value
+          *modbyte &= mask2;
+
+          byte assignmentMask = (byte)((byte)value << (int)lbit);
+          // Or in the new value
+          *modbyte |= assignmentMask;
+        }
+
+      }
     }
 
     public static int kCraftsmanshipOffset = 0;

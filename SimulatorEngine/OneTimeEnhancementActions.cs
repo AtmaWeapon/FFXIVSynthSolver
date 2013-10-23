@@ -11,7 +11,7 @@ namespace Simulator.Engine
     public override bool CanFail { get { return false; } }
   }
 
-  [SynthAction(ActionType.OneTimeEnhancement, "Master's Mend", 92)]
+  [SynthAction(ActionType.OneTimeEnhancement, ActionId.MastersMend, "Master's Mend", 92)]
   [OneTimeEnhancement]
   public class MastersMend : OneTimeEnhancementAction
   {
@@ -30,9 +30,9 @@ namespace Simulator.Engine
     }
   }
 
-  [SynthAction(ActionType.OneTimeEnhancement, "Observe", 14)]
+  [SynthAction(ActionType.OneTimeEnhancement, ActionId.Observe, "Observe", 14)]
   [OneTimeEnhancement]
-  public class Observe : BuffAction
+  public class Observe : OneTimeEnhancementAction
   {
     public override bool CanUse(State state)
     {
@@ -47,9 +47,9 @@ namespace Simulator.Engine
     }
   }
 
-  [SynthAction(ActionType.OneTimeEnhancement, "Tricks of the Trade", 0)]
+  [SynthAction(ActionType.OneTimeEnhancement, ActionId.TricksOfTheTrade, "Tricks of the Trade", 0)]
   [OneTimeEnhancement]
-  public class TricksOfTheTrade : BuffAction
+  public class TricksOfTheTrade : OneTimeEnhancementAction
   {
     public override bool CanUse(State state)
     {

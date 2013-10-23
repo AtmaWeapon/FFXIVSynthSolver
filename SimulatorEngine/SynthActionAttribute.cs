@@ -21,17 +21,20 @@ namespace Simulator.Engine
     private ActionType type = ActionType.Completion;
     private string name = String.Empty;
     private uint cp = 0;
+    private ActionId id;
     private bool disabled = false;
 
-    public SynthActionAttribute(ActionType type, string name, uint cp)
+    public SynthActionAttribute(ActionType type, ActionId id, string name, uint cp)
     {
       this.type = type;
       this.name = name;
       this.cp = cp;
+      this.id = id;
     }
 
     public uint CP { get { return cp; } }
     public string Name { get { return name; } }
+    public ActionId ActionId { get { return id; } }
 
     public bool Disabled
     {

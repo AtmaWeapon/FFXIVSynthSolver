@@ -150,7 +150,9 @@ namespace Simulator.Engine
 
     public static double SuccessRate(uint baseSuccessRate, State state)
     {
-      return Math.Min((double)baseSuccessRate/100.0 + state.SuccessBonus, 1.0);
+      if (SteadyHand.IsActive(state))
+        baseSuccessRate += 20;
+      return Math.Min((double)baseSuccessRate/100.0, 1.0);
     }
   }
 }

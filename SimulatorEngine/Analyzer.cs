@@ -167,14 +167,14 @@ namespace Simulator.Engine
       Action leadingAction = s.LeadingAction;
       Debug.WriteLine("CP: {0}/{1}, Dura: {2}/{3}, Progress: {4}/{5}, Quality: {6}/{7} ==> {8}",
                         s.CP, s.MaxCP, s.Durability, s.MaxDurability, s.Progress, s.MaxProgress,
-                        s.Quality, s.MaxQuality, leadingAction.Attributes.Name);
+                        s.Quality, s.MaxQuality, leadingAction.Name);
     }
 
     private List<RandomOutcome> GenerateRandomOutcomes(State initialState, Action action)
     {
-      double successProbability = Compute.SuccessRate(action.Attributes.SuccessRate, initialState);
-      State successState = action.SuccessState(initialState);
-      State failureState = action.FailureState(initialState);
+      double successProbability = Compute.SuccessRate(action.BaseSuccessRate, initialState);
+      State successState = action.ApplyAction(initialState, true);
+      State failureState = action.ApplyAction(initialState, false);
 
       List<RandomOutcome> entries = new List<RandomOutcome>();
       switch (initialState.Condition)

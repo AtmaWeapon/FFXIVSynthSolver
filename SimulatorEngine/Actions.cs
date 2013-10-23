@@ -24,6 +24,7 @@ namespace Simulator.Engine
   {
     private uint cp;
     private string name;
+    private ActionId id;
 
     public Action()
     {
@@ -33,12 +34,16 @@ namespace Simulator.Engine
 
       cp = attributes.CP;
       name = attributes.Name;
+      id = attributes.ActionId;
     }
 
     public string Name { get { return name; } }
     public uint RequiredCP { get { return cp; } }
+    public ActionId ActionId { get { return id; } }
 
     public abstract bool CanFail { get; }
+
+    public virtual uint BaseSuccessRate { get { return 100; } }
 
     public State ApplyAction(State oldState, bool success)
     {

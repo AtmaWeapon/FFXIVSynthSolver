@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -59,9 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionDatabase.cs" />
+    <Compile Include="ActionId.cs" />
     <Compile Include="Actions.cs" />
     <Compile Include="Analyzer.cs" />
-    <Compile Include="BuffActions.cs" />
     <Compile Include="Compute.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="FixedDurationEnhancementActions.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="OneTimeEnhancementActions.cs" />
     <Compile Include="PermanentEnhancementActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StateFields.cs" />
     <Compile Include="SynthActionAttribute.cs" />
     <Compile Include="SynthesisState.cs" />
   </ItemGroup>
