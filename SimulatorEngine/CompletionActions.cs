@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  public class CompletionAction : Action
+  public class CompletionAction : Ability
   {
     private CompletionFlags completionFlags;
     private uint efficiency;
@@ -25,6 +25,8 @@ namespace Simulator.Engine
     public uint BaseDurability { get { return 10; } }
 
     public uint BaseEfficiency { get { return efficiency; } }
+
+    public CompletionFlags CompletionFlags { get { return completionFlags; } }
 
     public override uint BaseSuccessRate { get { return successRate; } }
 
@@ -53,9 +55,9 @@ namespace Simulator.Engine
       return false;
     }
 
-    protected override void ApplyAction(State oldState, State newState, bool success)
+    protected override void ActivateInternal(State oldState, State newState, bool success)
     {
-      base.ApplyAction(oldState, newState, success);
+      base.ActivateInternal(oldState, newState, success);
 
       RemoveDurability(newState);
 
@@ -81,31 +83,31 @@ namespace Simulator.Engine
     }
   }
 
-  [SynthAction(ActionType.Completion, ActionId.BasicSynthesis, "Basic Synthesis", 0)]
+  [SynthAction(ActionType.Completion, AbilityId.BasicSynthesis, "Basic Synthesis", 0)]
   [CompletionAction(CompletionFlags.Progress, 100, 90)]
   public class BasicSynthesis : CompletionAction
   {
   }
 
-  [SynthAction(ActionType.Completion, ActionId.RapidSynthesis, "Rapid Synthesis", 0)]
+  [SynthAction(ActionType.Completion, AbilityId.RapidSynthesis, "Rapid Synthesis", 0)]
   [CompletionAction(CompletionFlags.Progress, 250, 50)]
   public class RapidSynthesis : CompletionAction
   {
   }
 
-  [SynthAction(ActionType.Completion, ActionId.BasicTouch, "Basic Touch", 18)]
+  [SynthAction(ActionType.Completion, AbilityId.BasicTouch, "Basic Touch", 18)]
   [CompletionAction(CompletionFlags.Quality | CompletionFlags.TouchAction, 100, 70)]
   public class BasicTouch : CompletionAction
   {
   }
 
-  [SynthAction(ActionType.Completion, ActionId.HastyTouch, "Hasty Touch", 0)]
+  [SynthAction(ActionType.Completion, AbilityId.HastyTouch, "Hasty Touch", 0)]
   [CompletionAction(CompletionFlags.Quality | CompletionFlags.TouchAction, 100, 50)]
   public class HastyTouch : CompletionAction
   {
   }
 
-  [SynthAction(ActionType.Completion, ActionId.StandardTouch, "Standard Touch", 32)]
+  [SynthAction(ActionType.Completion, AbilityId.StandardTouch, "Standard Touch", 32)]
   [CompletionAction(CompletionFlags.Quality | CompletionFlags.TouchAction, 125, 80)]
   public class StandardTouch : CompletionAction
   {

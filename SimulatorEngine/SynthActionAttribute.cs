@@ -11,8 +11,7 @@ namespace Simulator.Engine
   {
     Completion,
     OneTimeEnhancement,
-    FixedDurationEnhancement,
-    PermanentEnhancement
+    TemporaryEnhancement
   }
 
   [AttributeUsage(AttributeTargets.Class)]
@@ -21,10 +20,10 @@ namespace Simulator.Engine
     private ActionType type = ActionType.Completion;
     private string name = String.Empty;
     private uint cp = 0;
-    private ActionId id;
+    private AbilityId id;
     private bool disabled = false;
 
-    public SynthActionAttribute(ActionType type, ActionId id, string name, uint cp)
+    public SynthActionAttribute(ActionType type, AbilityId id, string name, uint cp)
     {
       this.type = type;
       this.name = name;
@@ -34,7 +33,8 @@ namespace Simulator.Engine
 
     public uint CP { get { return cp; } }
     public string Name { get { return name; } }
-    public ActionId ActionId { get { return id; } }
+    public AbilityId ActionId { get { return id; } }
+    public ActionType ActionType { get { return type; } }
 
     public bool Disabled
     {
@@ -77,20 +77,15 @@ namespace Simulator.Engine
   }
 
   [AttributeUsage(AttributeTargets.Class)]
-  public class FixedDurationEnhancementAttribute : Attribute
+  public class TemporaryEnhancementAttribute : Attribute
   {
     private uint duration;
-    public FixedDurationEnhancementAttribute(uint duration)
+    public TemporaryEnhancementAttribute(uint duration)
     {
       this.duration = duration;
     }
 
     public uint Duration { get { return duration; } }
-  }
-
-  [AttributeUsage(AttributeTargets.Class)]
-  public class PermanentEnhancementAttribute : Attribute
-  {
   }
 
   public class SynthAction<AttrType>
@@ -101,6 +96,20 @@ namespace Simulator.Engine
       object[] attributes = info.GetCustomAttributes(typeof(AttrType), false);
       Debug.Assert(attributes.Length == 1);
       return (AttrType)attributes[0];
+    }
+  }
+
+  public class SynthAction<AttrType, ObjType>
+  {
+    public static AttrType Attributes
+    {
+      get
+      {
+        Type info = typeof(ObjType);
+        object[] attributes = info.GetCustomAttributes(typeof(AttrType), false);
+        Debug.Assert(attributes.Length == 1);
+        return (AttrType)attributes[0];
+      }
     }
   }
 }

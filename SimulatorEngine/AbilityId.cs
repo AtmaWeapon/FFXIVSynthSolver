@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  public enum ActionId
+  public enum AbilityId
   {
     BasicSynthesis,
     RapidSynthesis,

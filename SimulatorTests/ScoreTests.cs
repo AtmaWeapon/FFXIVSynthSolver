@@ -33,7 +33,7 @@ namespace Simulator.Tests
       state.CrafterLevel = 17;
       state.SynthLevel = 19;
 
-      uint progress = Compute.Progress(state, (SynthAction<BasicSynthesis>.Attributes.Efficiency));
+      uint progress = Compute.Progress(state, (SynthAction<CompletionActionAttribute, BasicSynthesis>.Attributes.Efficiency));
       Assert.AreEqual<uint>(19, progress);
     }
 
@@ -100,8 +100,8 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestBasicTouchPreferredOverTricksOfTheTradeWithHighDurability()
     {
-      Simulator.Engine.Action tott = new TricksOfTheTrade();
-      Simulator.Engine.Action basicTouch = new BasicTouch();
+      Simulator.Engine.Ability tott = new TricksOfTheTrade();
+      Simulator.Engine.Ability basicTouch = new BasicTouch();
 
       State state = new State();
       state.Condition = Simulator.Engine.Condition.Good;
@@ -117,10 +117,10 @@ namespace Simulator.Tests
       state.SynthLevel = 20;
       state.CrafterLevel = 19;
 
-      State tottState = tott.SuccessState(state);
+      State tottState = tott.Activate(state, true);
       tottState.Condition = Condition.Normal;
 
-      State basicTouchState = basicTouch.SuccessState(state);
+      State basicTouchState = basicTouch.Activate(state, true);
       basicTouchState.Condition = Condition.Normal;
 
       Assert.IsTrue(basicTouchState.Score > tottState.Score);
@@ -129,9 +129,9 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestBasicTouchPreferredOverTricksOfTheTradeWithHighDurability2()
     {
-      Simulator.Engine.Action tott = new TricksOfTheTrade();
-      Simulator.Engine.Action basicTouch = new BasicTouch();
-      Simulator.Engine.Action steadyHand = new SteadyHand();
+      Simulator.Engine.Ability tott = new TricksOfTheTrade();
+      Simulator.Engine.Ability basicTouch = new BasicTouch();
+      Simulator.Engine.Ability steadyHand = new SteadyHand();
 
       State state = new State();
       state.Condition = Simulator.Engine.Condition.Good;
@@ -147,11 +147,11 @@ namespace Simulator.Tests
       state.SynthLevel = 20;
       state.CrafterLevel = 19;
 
-      state = steadyHand.SuccessState(state);
-      State tottState = tott.SuccessState(state);
+      state = steadyHand.Activate(state, true);
+      State tottState = tott.Activate(state, true);
       tottState.Condition = Condition.Normal;
 
-      State basicTouchState = basicTouch.SuccessState(state);
+      State basicTouchState = basicTouch.Activate(state, true);
       basicTouchState.Condition = Condition.Normal;
 
       Assert.IsTrue(basicTouchState.Score > tottState.Score);

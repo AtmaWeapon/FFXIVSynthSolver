@@ -60,16 +60,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionDatabase.cs" />
-    <Compile Include="ActionId.cs" />
-    <Compile Include="Actions.cs" />
+    <Compile Include="AbilityId.cs" />
+    <Compile Include="Abilities.cs" />
     <Compile Include="Analyzer.cs" />
     <Compile Include="Compute.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="FixedDurationEnhancementActions.cs" />
+    <Compile Include="TemporaryEnhancementActions.cs" />
     <Compile Include="MetricsDatabase.cs" />
     <Compile Include="CompletionActions.cs" />
     <Compile Include="OneTimeEnhancementActions.cs" />
-    <Compile Include="PermanentEnhancementActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateFields.cs" />
     <Compile Include="SynthActionAttribute.cs" />

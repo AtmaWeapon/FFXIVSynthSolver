@@ -20,13 +20,14 @@ namespace Simulator.Engine
   public delegate void StateOperator(State originalState, State newState);
   public delegate bool UsageCheck(State state);
 
-  public abstract class Action
+  public abstract class Ability
   {
     private uint cp;
     private string name;
-    private ActionId id;
+    private AbilityId id;
+    private ActionType type;
 
-    public Action()
+    public Ability()
     {
       object[] objAttributes = GetType().GetCustomAttributes(typeof(SynthActionAttribute), false);
       Debug.Assert(objAttributes.Length == 1);
@@ -35,33 +36,47 @@ namespace Simulator.Engine
       cp = attributes.CP;
       name = attributes.Name;
       id = attributes.ActionId;
+      type = attributes.ActionType;
     }
 
     public string Name { get { return name; } }
     public uint RequiredCP { get { return cp; } }
-    public ActionId ActionId { get { return id; } }
+    public AbilityId AbilityId { get { return id; } }
+    public ActionType ActionType { get { return type; } }
 
     public abstract bool CanFail { get; }
 
-    public virtual uint BaseSuccessRate { get { return 100; } }
-
-    public State ApplyAction(State oldState, bool success)
+    public State Activate(State oldState, bool success)
     {
       State newState = new State(oldState, this);
 
-      ApplyAction(oldState, newState, success);
-      return newState;
-    }
+      ActivateInternal(oldState, newState, success);
 
-    protected virtual void ApplyAction(State oldState, State newState, bool success)
-    {
-      Debug.Assert(newState.CP >= RequiredCP);
-      newState.CP -= RequiredCP;
+      // Don't use a foreach here, because if the effect wears off, the TickEnhancement
+      // function can call back in and remove itself from the list of active
+      // enhancements.
+      int i = 0;
+      while (i < newState.tempEffects.Count)
+      {
+        TemporaryEnhancementAbility effect = newState.tempEffects[i];
+        effect.TickEnhancement(newState);
+        ++i;
+      }
+
+      return newState;
     }
 
     public virtual bool CanUse(State state)
     {
       return (state.Status == SynthesisStatus.IN_PROGRESS && state.CP >= RequiredCP);
+    }
+
+    public virtual uint BaseSuccessRate { get { return 100; } }
+
+    protected virtual void ActivateInternal(State oldState, State newState, bool success)
+    {
+      Debug.Assert(newState.CP >= RequiredCP);
+      newState.CP -= RequiredCP;
     }
   }
 

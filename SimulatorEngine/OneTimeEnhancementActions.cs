@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  public abstract class OneTimeEnhancementAction : Action
+  public abstract class OneTimeEnhancementAction : Ability
   {
     public override bool CanFail { get { return false; } }
   }
 
-  [SynthAction(ActionType.OneTimeEnhancement, ActionId.MastersMend, "Master's Mend", 92)]
+  [SynthAction(ActionType.OneTimeEnhancement, AbilityId.MastersMend, "Master's Mend", 92)]
   [OneTimeEnhancement]
   public class MastersMend : OneTimeEnhancementAction
   {
@@ -24,13 +24,13 @@ namespace Simulator.Engine
       return (state.MaxDurability - state.Durability >= 30);
     }
 
-    protected override void ApplyAction(State oldState, State newState, bool success)
+    protected override void ActivateInternal(State oldState, State newState, bool success)
     {
       newState.Durability = Math.Min(newState.Durability + 30, newState.MaxDurability);
     }
   }
 
-  [SynthAction(ActionType.OneTimeEnhancement, ActionId.Observe, "Observe", 14)]
+  [SynthAction(ActionType.OneTimeEnhancement, AbilityId.Observe, "Observe", 14)]
   [OneTimeEnhancement]
   public class Observe : OneTimeEnhancementAction
   {
@@ -47,7 +47,7 @@ namespace Simulator.Engine
     }
   }
 
-  [SynthAction(ActionType.OneTimeEnhancement, ActionId.TricksOfTheTrade, "Tricks of the Trade", 0)]
+  [SynthAction(ActionType.OneTimeEnhancement, AbilityId.TricksOfTheTrade, "Tricks of the Trade", 0)]
   [OneTimeEnhancement]
   public class TricksOfTheTrade : OneTimeEnhancementAction
   {

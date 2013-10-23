@@ -27,14 +27,17 @@ namespace Simulator.Engine
     internal StateStorage storage;
 
     private State previousState;
-    private Action leadingAction;
+    private Ability leadingAction;
     private uint step;
     private bool scoreComputed = false;
     private double computedScore = 0.0;
 
+    internal List<TemporaryEnhancementAbility> tempEffects;
+
     public State()
     {
       storage = new StateStorage();
+      tempEffects = new List<TemporaryEnhancementAbility>();
       step = 1;
       previousState = null;
       leadingAction = null;
@@ -43,7 +46,7 @@ namespace Simulator.Engine
 
     // Makes a new state which was arrived at by performing an action from a
     // previous state.
-    public State(State oldState, Action leadingAction)
+    public State(State oldState, Ability leadingAction)
     {
       this.storage = oldState.storage;
 
@@ -90,14 +93,6 @@ namespace Simulator.Engine
       return storage.GetHashCode();
     }
 
-    public void TickBuffs()
-    {
-      SteadyHand.Tick(this);
-      GreatStrides.Tick(this);
-      Manipulation.Tick(this);
-      Ingenuity.Tick(this);
-    }
-
     public uint Step
     {
       get { return step; }
@@ -107,7 +102,7 @@ namespace Simulator.Engine
       get { return previousState; }
     }
 
-    public Action LeadingAction
+    public Ability LeadingAction
     {
       get { return leadingAction; }
     }
@@ -127,11 +122,11 @@ namespace Simulator.Engine
     {
       get 
       { 
-        return StateFields.GetKnownValue(ref storage, KnownStateField.Craftsmanship); 
+        return StateFields.GetValue(ref storage, KnownStateField.Craftsmanship); 
       }
       set 
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.Craftsmanship, value);
+        StateFields.SetValue(ref storage, KnownStateField.Craftsmanship, value);
         scoreComputed = false; 
       }
     }
@@ -140,11 +135,11 @@ namespace Simulator.Engine
     {
       get 
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.Control);
+        return StateFields.GetValue(ref storage, KnownStateField.Control);
       }
       set 
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.Control, value);
+        StateFields.SetValue(ref storage, KnownStateField.Control, value);
         scoreComputed = false;
       }
     }
@@ -152,11 +147,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.CP);
+        return StateFields.GetValue(ref storage, KnownStateField.CP);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.CP, value);
+        StateFields.SetValue(ref storage, KnownStateField.CP, value);
         scoreComputed = false;
       }
     }
@@ -164,11 +159,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.MaxCP);
+        return StateFields.GetValue(ref storage, KnownStateField.MaxCP);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.MaxCP, value);
+        StateFields.SetValue(ref storage, KnownStateField.MaxCP, value);
         scoreComputed = false;
       }
     }
@@ -180,11 +175,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.CrafterLevel);
+        return StateFields.GetValue(ref storage, KnownStateField.CrafterLevel);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.CrafterLevel, value);
+        StateFields.SetValue(ref storage, KnownStateField.CrafterLevel, value);
         scoreComputed = false;
       }
     }
@@ -192,11 +187,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.SynthLevel);
+        return StateFields.GetValue(ref storage, KnownStateField.SynthLevel);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.SynthLevel, value);
+        StateFields.SetValue(ref storage, KnownStateField.SynthLevel, value);
         scoreComputed = false;
       }
     }
@@ -206,11 +201,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.Durability);
+        return StateFields.GetValue(ref storage, KnownStateField.Durability);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.Durability, value);
+        StateFields.SetValue(ref storage, KnownStateField.Durability, value);
         scoreComputed = false;
       }
     }
@@ -218,11 +213,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.MaxDurability);
+        return StateFields.GetValue(ref storage, KnownStateField.MaxDurability);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.MaxDurability, value);
+        StateFields.SetValue(ref storage, KnownStateField.MaxDurability, value);
         scoreComputed = false;
       }
     }
@@ -230,11 +225,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.Quality);
+        return StateFields.GetValue(ref storage, KnownStateField.Quality);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.Quality, value);
+        StateFields.SetValue(ref storage, KnownStateField.Quality, value);
         scoreComputed = false;
       }
     }
@@ -242,11 +237,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.MaxQuality);
+        return StateFields.GetValue(ref storage, KnownStateField.MaxQuality);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.MaxQuality, value);
+        StateFields.SetValue(ref storage, KnownStateField.MaxQuality, value);
         scoreComputed = false;
       }
     }
@@ -254,11 +249,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.Progress);
+        return StateFields.GetValue(ref storage, KnownStateField.Progress);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.Progress, value);
+        StateFields.SetValue(ref storage, KnownStateField.Progress, value);
         scoreComputed = false;
       }
     }
@@ -266,11 +261,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return StateFields.GetKnownValue(ref storage, KnownStateField.MaxProgress);
+        return StateFields.GetValue(ref storage, KnownStateField.MaxProgress);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.MaxProgress, value);
+        StateFields.SetValue(ref storage, KnownStateField.MaxProgress, value);
         scoreComputed = false;
       }
     }
@@ -278,11 +273,11 @@ namespace Simulator.Engine
     {
       get
       {
-        return (Condition)StateFields.GetKnownValue(ref storage, KnownStateField.Condition);
+        return (Condition)StateFields.GetValue(ref storage, KnownStateField.Condition);
       }
       set
       {
-        StateFields.SetKnownValue(ref storage, KnownStateField.Condition, (uint)value);
+        StateFields.SetValue(ref storage, KnownStateField.Condition, (uint)value);
         scoreComputed = false;
       }
     }
