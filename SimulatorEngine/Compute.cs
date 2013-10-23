@@ -75,6 +75,11 @@ namespace Simulator.Engine
       return result;
     }
 
+    public static uint NumBitsRequired(uint value)
+    {
+      return (uint)Math.Ceiling(Math.Log((double)value, 2.0));
+    }
+
     public static double FailureProbability(State state) 
     {
       uint progressRemaining = state.MaxProgress - state.Progress;

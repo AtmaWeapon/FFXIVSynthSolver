@@ -46,24 +46,6 @@ namespace Simulator.Engine
     }
   }
 
-  [SynthAction(ActionType.Buff, Name="Master's Mend", CP=92, BuffDuration=0)]
-  public class MastersMend : BuffAction
-  {
-    public MastersMend()
-    {
-      // Don't allow Master's Mend to be used if it won't be fully effective.
-      usageChecks.Add(delegate(State state) { return (state.MaxDurability - state.Durability >= 30); });
-    }
-
-    public override void ApplyBuff(State state)
-    {
-      state.Durability = Math.Min(state.Durability + 30, state.MaxDurability);
-    }
-
-    public override uint GetTurnsRemaining(State state) { return 0; }
-    public override void SetTurnsRemaining(State state, uint turns) { }
-  }
-
   [SynthAction(ActionType.Buff, Name = "Steady Hand", CP = 22, BuffDuration=5)]
   public class SteadyHand : BuffAction
   {
@@ -87,48 +69,6 @@ namespace Simulator.Engine
     }
     public override uint GetTurnsRemaining(State state) { return state.SteadyHandTurns; }
     public override void SetTurnsRemaining(State state, uint turns) { state.SteadyHandTurns = turns; }
-  }
-
-  [SynthAction(ActionType.Buff, Name = "Observe", CP = 14, BuffDuration=0)]
-  public class Observe : BuffAction
-  {
-    // Observe only consumes CP (to give the condition a chance to change).
-    // It doesn't actually apply any buff or do anything.  Because the entire point
-    // is to make the condition better, don't allow it to be considered if the 
-    // condition is Good or Excellent.
-    public Observe()
-    {
-      usageChecks.Add(delegate(State s) { return (s.Condition == Condition.Poor); });
-      usageChecks.Add(delegate(State s)
-                      {
-                        // Don't let Observe run first.
-                        if (s.Step == 1)
-                          return false;
-                        return !(s.LeadingAction is Observe);
-                      });
-    }
-    public override uint GetTurnsRemaining(State state) { return 0; }
-    public override void SetTurnsRemaining(State state, uint turns) { }
-  }
-
-  [SynthAction(ActionType.Buff, Name = "Tricks of the Trade", CP = 0, BuffDuration = 0)]
-  public class TricksOfTheTrade : BuffAction
-  {
-    public TricksOfTheTrade()
-    {
-      // By definition the ability is disabled unless Condition==Good.
-      usageChecks.Add(delegate(State state) { return state.Condition == Condition.Good; });
-      // Only use Tricks of the trade if we actually  need the full 20 CP gain.
-      usageChecks.Add(delegate(State state) { return state.MaxCP - state.CP >= 20; });
-    }
-
-    public override void ApplyBuff(State state)
-    {
-      state.CP = Math.Min(state.CP + 20, state.MaxCP);
-    }
-
-    public override uint GetTurnsRemaining(State state) { return 0; }
-    public override void SetTurnsRemaining(State state, uint turns) { }
   }
 
   // TODO
@@ -199,5 +139,5 @@ namespace Simulator.Engine
     {
       state.GreatStridesTurns = turns;
     }
-    }
+  }
 }
