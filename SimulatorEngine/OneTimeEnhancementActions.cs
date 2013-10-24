@@ -26,6 +26,8 @@ namespace Simulator.Engine
 
     protected override void ActivateInternal(State oldState, State newState, bool success)
     {
+      base.ActivateInternal(oldState, newState, success);
+
       newState.Durability = Math.Min(newState.Durability + 30, newState.MaxDurability);
     }
   }

@@ -48,6 +48,9 @@ namespace Simulator.Engine
 
     public override bool CanUse(State state)
     {
+      if (!base.CanUse(state))
+        return false;
+
       if ((completionFlags & CompletionFlags.Quality) != 0 && state.Quality < state.MaxQuality)
         return true;
       if ((completionFlags & CompletionFlags.Progress) != 0 && state.Progress < state.MaxProgress)

@@ -38,6 +38,9 @@ namespace Simulator.Tests
       State success = action.Activate(state, true);
       State failure = action.Activate(state, false);
 
+      // Test that we can use it even with 0 CP
+      TestBlocks.TestCanUseWithCP(action, state, 0);
+
       // Test that it doesn't use any CP
       Assert.AreEqual<uint>(state.CP, success.CP);
       Assert.AreEqual<uint>(state.CP, failure.CP);
@@ -65,6 +68,9 @@ namespace Simulator.Tests
       BasicTouch action = new BasicTouch();
 
       State state = Utility.CreateDefaultState();
+
+      // Test that if not enough CP, we can't use it
+      TestBlocks.TestCannotUseWithCP(action, state, 0);
 
       State success = action.Activate(state, true);
       State failure = action.Activate(state, false);
@@ -148,8 +154,7 @@ namespace Simulator.Tests
       for (int i = 5; i > 0; --i)
       {
         Assert.AreEqual<uint>((uint)i, SteadyHand.GetTurnsRemaining(afterSH));
-        double bonus = Compute.SuccessRate(sh.BaseSuccessRate, afterSH) - Compute.SuccessRate(sh.BaseSuccessRate, state);
-        Assert.AreEqual<double>(0.2, bonus);
+        Assert.IsTrue(Compute.SuccessRate(ht.BaseSuccessRate, afterSH) > Compute.SuccessRate(ht.BaseSuccessRate, state));
 
         // Make sure we can't use SH while SH is up.
         Assert.IsFalse(sh.CanUse(afterSH));
@@ -189,8 +194,7 @@ namespace Simulator.Tests
       Assert.IsTrue(observe.CanUse(state));
       State newState = observe.Activate(state, true);
 
-      Assert.IsFalse(observe.CanUse(newState));
-      // Make sure Steady Hand uses the right amount of TP.
+      // Make sure Observe uses the right amount of CP.
       Assert.AreEqual<uint>(state.CP - observe.RequiredCP, newState.CP);
     }
 

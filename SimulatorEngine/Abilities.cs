@@ -48,6 +48,9 @@ namespace Simulator.Engine
 
     public State Activate(State oldState, bool success)
     {
+      if (!CanFail && !success)
+        return null;
+
       State newState = new State(oldState, this);
 
       ActivateInternal(oldState, newState, success);

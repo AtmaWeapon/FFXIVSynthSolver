@@ -52,6 +52,7 @@ namespace Simulator.Engine
       // Set the number of turns to duration+1 so that we can tick it on the first turn
       // and avoid confusing logic surrounding whether or not the buff was just applied.
       SetTurnsRemaining(newState, duration+1);
+      newState.tempEffects.Add(this);
     }
 
     public virtual void TickEnhancement(State state)
@@ -59,6 +60,9 @@ namespace Simulator.Engine
       uint turns = GetTurnsRemaining(state);
 
       SetTurnsRemaining(state, turns - 1);
+
+      if (turns == 1)
+        state.tempEffects.Remove(this);
     }
   }
 

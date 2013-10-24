@@ -77,7 +77,9 @@ namespace Simulator.Engine
 
     public static uint NumBitsRequired(uint value)
     {
-      return (uint)Math.Ceiling(Math.Log((double)value, 2.0));
+      // This is the number of bits required for the range [0, value], so there are
+      // actually a total of |value+1| values represented by this range.
+      return (uint)Math.Ceiling(Math.Log((double)(value+1), 2.0));
     }
 
     public static double FailureProbability(State state) 

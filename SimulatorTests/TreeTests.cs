@@ -39,10 +39,10 @@ namespace Simulator.Tests
       BasicSynthesis bs = new BasicSynthesis();
       SteadyHand sh = new SteadyHand();
       analyzer.Actions.AddAction(bs);
-      analyzer.Actions.AddAction(new BasicTouch());
-      analyzer.Actions.AddAction(new MastersMend());
+      //analyzer.Actions.AddAction(new BasicTouch());
+      //analyzer.Actions.AddAction(new MastersMend());
       analyzer.Actions.AddAction(sh);
-      analyzer.Actions.AddAction(new Observe());
+      //analyzer.Actions.AddAction(new Observe());
 
       State state = Utility.CreateDefaultState();
 

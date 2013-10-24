@@ -67,7 +67,11 @@ namespace Simulator.Engine
           if (attr.Duration == 0)
             RegisterField(baseattr.ActionId, 31);
           else
-            RegisterField(baseattr.ActionId, attr.Duration);
+          {
+            // We always initialize the duration with MaxDuration+1, so that we can tick
+            // the ability on the first turn.  So make sure we have enough bits for this.
+            RegisterField(baseattr.ActionId, attr.Duration + 1);
+          }
         }
       }
     }
