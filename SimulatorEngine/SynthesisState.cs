@@ -203,11 +203,6 @@ namespace Simulator.Engine
       set { Assign(ref w2, kSteadyHandOffset, kSteadyHandLength, value); }
     }
 
-    public double SuccessBonus
-    {
-      get { return (SteadyHandTurns > 0) ? 0.2 : 0.0; }
-    }
-
     public SynthesisStatus Status
     {
       get
