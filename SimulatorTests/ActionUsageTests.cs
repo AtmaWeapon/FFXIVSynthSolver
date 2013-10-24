@@ -199,6 +199,23 @@ namespace Simulator.Tests
     }
 
     [TestMethod]
+    public void TestManipulationWithTenDurabilityBusts()
+    {
+      Manipulation manipulation = new Manipulation();
+      BasicSynthesis basic = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.Durability = 10;
+      State s2 = manipulation.Activate(state, true);
+      Assert.AreEqual<uint>(10, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.IN_PROGRESS, s2.Status);
+
+      s2 = basic.Activate(s2, true);
+      Assert.AreEqual<uint>(0, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.BUSTED, s2.Status);
+    }
+
+    [TestMethod]
     public void TestManipulation()
     {
       Manipulation manipulation = new Manipulation();

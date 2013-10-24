@@ -258,8 +258,6 @@ namespace Simulator.Engine
     private State previousState;
     private Ability leadingAction;
     private uint step;
-    private bool scoreComputed = false;
-    private double computedScore = 0.0;
 
     internal List<TemporaryEnhancementAbility> tempEffects;
 
@@ -270,7 +268,6 @@ namespace Simulator.Engine
       step = 1;
       previousState = null;
       leadingAction = null;
-      computedScore = 0.0;
     }
 
     // Makes a new state which was arrived at by performing an action from a
@@ -281,8 +278,6 @@ namespace Simulator.Engine
 
       this.previousState = oldState;    // do we need to clone here?
       this.leadingAction = leadingAction;
-      this.scoreComputed = oldState.scoreComputed;
-      this.computedScore = oldState.computedScore;
 
       this.step = oldState.step + 1;
       tempEffects = new List<TemporaryEnhancementAbility>(oldState.tempEffects);
@@ -297,8 +292,6 @@ namespace Simulator.Engine
 
       this.previousState = oldState.previousState;    // do we need to clone here?
       this.leadingAction = oldState.leadingAction;
-      this.scoreComputed = oldState.scoreComputed;
-      this.computedScore = oldState.computedScore;
       this.step = oldState.step;
       tempEffects = new List<TemporaryEnhancementAbility>(oldState.tempEffects);
     }
@@ -358,7 +351,6 @@ namespace Simulator.Engine
       set 
       {
         details.Craftsmanship = value;
-        scoreComputed = false; 
       }
     }
 
@@ -371,7 +363,6 @@ namespace Simulator.Engine
       set 
       {
         details.Control = value;
-        scoreComputed = false;
       }
     }
     public uint CP
@@ -383,7 +374,6 @@ namespace Simulator.Engine
       set
       {
         details.CP = value;
-        scoreComputed = false;
       }
     }
     public uint MaxCP
@@ -395,7 +385,6 @@ namespace Simulator.Engine
       set
       {
         details.MaxCP = value;
-        scoreComputed = false;
       }
     }
     public int LevelSurplus
@@ -411,7 +400,6 @@ namespace Simulator.Engine
       set
       {
         details.CrafterLevel = value;
-        scoreComputed = false;
       }
     }
     public uint SynthLevel
@@ -423,7 +411,6 @@ namespace Simulator.Engine
       set
       {
         details.SynthLevel = value;
-        scoreComputed = false;
       }
     }
 
@@ -437,7 +424,6 @@ namespace Simulator.Engine
       set
       {
         details.Durability = value;
-        scoreComputed = false;
       }
     }
     public uint MaxDurability
@@ -449,7 +435,6 @@ namespace Simulator.Engine
       set
       {
         details.MaxDurability = value;
-        scoreComputed = false;
       }
     }
     public uint Quality
@@ -461,7 +446,6 @@ namespace Simulator.Engine
       set
       {
         details.Quality = value;
-        scoreComputed = false;
       }
     }
     public uint MaxQuality
@@ -473,7 +457,6 @@ namespace Simulator.Engine
       set
       {
         details.MaxQuality = value;
-        scoreComputed = false;
       }
     }
     public uint Progress
@@ -485,7 +468,6 @@ namespace Simulator.Engine
       set
       {
         details.Progress = value;
-        scoreComputed = false;
       }
     }
     public uint MaxProgress
@@ -497,7 +479,6 @@ namespace Simulator.Engine
       set
       {
         details.MaxProgress = value;
-        scoreComputed = false;
       }
     }
     public Condition Condition
@@ -509,7 +490,6 @@ namespace Simulator.Engine
       set
       {
         details.Condition = value;
-        scoreComputed = false;
       }
     }
 
@@ -517,12 +497,7 @@ namespace Simulator.Engine
     {
       get 
       {
-        if (!scoreComputed)
-        {
-          scoreComputed = true;
-          computedScore = Compute.StateScore(this);
-        }
-        return computedScore;
+        return Compute.StateScore(this);
       }
     }
 

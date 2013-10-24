@@ -56,6 +56,7 @@ namespace Simulator
     public MainWindow()
     {
       analyzer = new Analyzer();
+      analyzer.LogFile = "D:\\branch_log2.txt";
       stopwatch = new Stopwatch();
       worker = new BackgroundWorker();
       appState = AppState.Uninitialized;

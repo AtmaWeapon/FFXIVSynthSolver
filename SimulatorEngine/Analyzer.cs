@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace Simulator.Engine
     private int numDepthLimit = 0;
     private ActionDatabase actions = new ActionDatabase();
     private Dictionary<State, SolvedScoreNode> solvedStates;
+    private StreamWriter logWriter;
+    private uint indentLevel = 0;
+    private uint lineNumber = 0;
 
     private uint baseStep = 1;
 
@@ -44,6 +48,16 @@ namespace Simulator.Engine
       public State state;
       public Condition condition;
       public bool success;
+    }
+
+    public string LogFile
+    {
+      set
+      {
+        if (logWriter != null)
+          logWriter.Close();
+        logWriter = File.CreateText(value);
+      }
     }
 
     public int MaxAnalysisDepth
@@ -85,6 +99,93 @@ namespace Simulator.Engine
       return true;
     }
 
+    private void LogIndents()
+    {
+      if (logWriter == null)
+        return;
+
+      for (int i = 0; i < indentLevel; ++i)
+        logWriter.Write("  ");
+    }
+
+    private void LogState(State s)
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      logWriter.WriteLine("CP: {0}/{1}, Dura: {2}/{3}, Progress: {4}/{5}, Quality: {6}/{7}",
+                          s.CP, s.MaxCP, s.Durability, s.MaxDurability, s.Progress, s.MaxProgress,
+                          s.Quality, s.MaxQuality);
+    }
+
+    private void LogOutcome(Engine.Ability action, RandomOutcome outcome)
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      logWriter.WriteLine("{0} -> {1}.  Probability = {2}", action.Name, outcome.success ? "Success!" : "Failure!", outcome.probability);
+    }
+
+    private void LogScore(double score)
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      logWriter.WriteLine("Final Score: {0}", score);
+    }
+
+    private void LogQuickSolve(SolvedScoreNode node)
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      if (node.bestAction == null)
+        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction=None!", node.score);
+      else
+        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction={1}", node.score, node.bestAction.Name);
+    }
+
+    private void LogSlowSolve(SolvedScoreNode node)
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      if (node.bestAction == null)
+        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction=None!", node.score);
+      else
+        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction={1}", node.score, node.bestAction.Name);
+    }
+
+    private void LogLeafSolve(double score)
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      logWriter.WriteLine("Node leaf solved!  Score={0}", score);
+    }
+
+    private void LogDepthLimit()
+    {
+      if (logWriter == null)
+        return;
+
+      ++lineNumber;
+      LogIndents();
+      logWriter.WriteLine("Depth limit reached.");
+    }
+
     public void Run(State state)
     {
       // The base step allows us to resume a deep calculation from the middle of the tree, 
@@ -106,6 +207,7 @@ namespace Simulator.Engine
 
     private SolvedScoreNode SimulateAllLegalActions(State state)
     {
+      LogState(state);
       SolvedScoreNode solved = new SolvedScoreNode();
       solved.bestAction = null;
       solved.score = 0.0;
@@ -129,13 +231,17 @@ namespace Simulator.Engine
 
     private double SimulateActionUsed(State state, Ability action)
     {
+      ++indentLevel;
       double stateScore = 0.0;
       List<RandomOutcome> outcomes = GenerateRandomOutcomes(state, action);
       foreach (RandomOutcome outcome in outcomes)
       {
+        LogOutcome(action, outcome);
+        ++indentLevel;
         SolvedScoreNode solvedScore;
         if (solvedStates.TryGetValue(outcome.state, out solvedScore))
         {
+          LogQuickSolve(solvedScore);
           stateScore += outcome.probability * solvedScore.score;
           ++numQuickSolved;
         }
@@ -144,22 +250,28 @@ namespace Simulator.Engine
           if (outcome.state.Status == SynthesisStatus.IN_PROGRESS)
           {
             solvedScore = SimulateAllLegalActions(outcome.state);
+            LogSlowSolve(solvedScore);
             stateScore += outcome.probability * solvedScore.score;
             ++numSlowSolved;
           }
           else
           {
             stateScore += outcome.probability * outcome.state.Score;
+            LogLeafSolve(outcome.state.Score);
             ++numLeafSolved;
           }
         }
         else
         {
+          LogDepthLimit();
           stateScore += outcome.probability * outcome.state.Score;
           ++numDepthLimit;
         }
+        --indentLevel;
       }
 
+      LogScore(stateScore);
+      --indentLevel;
       return stateScore;
     }
     private void PrintTransition(State s)

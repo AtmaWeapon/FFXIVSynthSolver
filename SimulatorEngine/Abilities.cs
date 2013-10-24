@@ -55,15 +55,18 @@ namespace Simulator.Engine
 
       ActivateInternal(oldState, newState, success);
 
-      // Don't use a foreach here, because if the effect wears off, the TickEnhancement
-      // function can call back in and remove itself from the list of active
-      // enhancements.
-      int i = 0;
-      while (i < newState.tempEffects.Count)
+      if (newState.Status == SynthesisStatus.IN_PROGRESS)
       {
-        TemporaryEnhancementAbility effect = newState.tempEffects[i];
-        effect.TickEnhancement(newState);
-        ++i;
+        // Don't use a foreach here, because if the effect wears off, the TickEnhancement
+        // function can call back in and remove itself from the list of active
+        // enhancements.
+        int i = 0;
+        while (i < newState.tempEffects.Count)
+        {
+          TemporaryEnhancementAbility effect = newState.tempEffects[i];
+          effect.TickEnhancement(newState);
+          ++i;
+        }
       }
 
       return newState;
