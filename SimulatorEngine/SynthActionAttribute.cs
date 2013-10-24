@@ -92,8 +92,14 @@ namespace Simulator.Engine
   {
     public static AttrType Attributes(object obj)
     {
-      Type info = obj.GetType();
-      object[] attributes = info.GetCustomAttributes(typeof(AttrType), false);
+      return Attributes(obj.GetType());
+    }
+
+    public static AttrType Attributes(Type objType)
+    {
+      object[] attributes = objType.GetCustomAttributes(typeof(AttrType), false);
+      if (attributes.Length == 0)
+        return default(AttrType);
       Debug.Assert(attributes.Length == 1);
       return (AttrType)attributes[0];
     }
@@ -105,10 +111,7 @@ namespace Simulator.Engine
     {
       get
       {
-        Type info = typeof(ObjType);
-        object[] attributes = info.GetCustomAttributes(typeof(AttrType), false);
-        Debug.Assert(attributes.Length == 1);
-        return (AttrType)attributes[0];
+        return SynthAction<AttrType>.Attributes(typeof(ObjType));
       }
     }
   }
