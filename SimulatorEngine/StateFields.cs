@@ -99,7 +99,17 @@ namespace Simulator.Engine
       }
       else
       {
-        ModifyShort(ref storage, lbyte, lbit, 8 + rbit, (ushort)value);
+        // _ _ _ _ _ X X X  |  X X _ _ _ _ _ _
+        //
+        // When writing into the left byte, cut off the last |rbit|
+        // bits.  In the above example, this would shift right by 2.
+        ModifyByte(ref storage, lbyte, lbit, 7, (byte)(value >> (rbit+1)));
+
+        // When writing into the right byte, keep only the last |rbit|
+        // bits, but move them all the way over to the left.
+        byte mask = (byte)((1 << (rbit+1)) - 1);
+        byte modvalue = (byte)((byte)value & mask);
+        ModifyByte(ref storage, rbyte, 0, rbit, modvalue);
       }
     }
 
@@ -113,50 +123,33 @@ namespace Simulator.Engine
       int rbit = (int)(info.offset + info.count - 1) % 8;
       Debug.Assert(rbyte - lbyte <= 1);
 
-      unsafe
+      if (lbyte == rbyte)
       {
-        int count = (int)info.count;
-        fixed (byte* ptr = storage.storage)
-        {
-          if (lbyte == rbyte)
-          {
-            byte* byteptr = ptr + lbyte;
-            byte mask = (byte)(((1 << count) - 1) << (int)(7 - rbit));
-            byte result = (byte)(*byteptr & mask);
-            return (uint)(result >> (7 - rbit));
-          }
-          else
-          {
-            ushort* shortptr = (ushort*)(ptr + lbyte);
-            rbit += 8;
-
-            ushort mask = (ushort)(((1 << count) - 1) << (int)(15 - rbit));
-            ushort result = (ushort)(*shortptr & mask);
-            return (uint)(result >> (15 - rbit));
-          }
-        }
+        return ReadFromBytePacked(ref storage, lbyte, lbit, rbit);
+      }
+      else
+      {
+        // _ _ _ _ _ X X X  |  X X _ _ _ _ _ _
+        //
+        // When reading from the left byte, cut off the last |rbit|
+        // bits.  In the above example, this would shift right by 2.
+        uint high = ReadFromBytePacked(ref storage, lbyte, lbit, 7);
+        uint low = ReadFromBytePacked(ref storage, rbyte, 0, rbit);
+        return (high << (rbit+1)) | low;
       }
     }
 
-    private static void ModifyShort(ref StateStorage storage, int byteoff, int lbit, int rbit, ushort value)
+    private static uint ReadFromBytePacked(ref StateStorage storage, int byteoff, int lbit, int rbit)
     {
       unsafe
       {
+        int count = rbit - lbit + 1;
         fixed (byte* ptr = storage.storage)
         {
-          byte* modbyte = ptr + byteoff;
-          ushort* modshort = (ushort*)modbyte;
-
-          int numbits = rbit - lbit + 1;
-          ushort mask1 = (ushort)(((1 << numbits) - 1) << (int)(15 - rbit));   // 0000000000011111000000
-          ushort mask2 = (ushort)~mask1;                                       // 1111111111100000111111
-
-          // Clear the old value
-          *modshort &= mask2;
-
-          ushort assignmentMask = (ushort)((ushort)value << (int)(15 - rbit));
-          // Or in the new value
-          *modshort |= assignmentMask;
+          byte* byteptr = ptr + byteoff;
+          byte mask = (byte)(((1 << count) - 1) << (int)(7 - rbit));
+          byte result = (byte)(*byteptr & mask);
+          return (uint)(result >> (7 - rbit));
         }
       }
     }
