@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,14 +84,26 @@ namespace Simulator.Engine
       newState.tempEffects.Add(this);
     }
 
-    public virtual void TickEnhancement(State state)
+    public void TickEnhancement(State state)
     {
       uint turns = GetTurnsRemaining(state);
+      Debug.Assert(turns > 0);
+
+      // If this enhancement was not just applied on this same turn, apply
+      // the periodic affect
+      if (turns <= duration)
+        ApplyPeriodicEffect(state);
 
       SetTurnsRemaining(state, turns - 1);
 
+      // If we initially had 1 turn going into this tick, then we're now done.
       if (turns == 1)
         state.tempEffects.Remove(this);
+    }
+
+    protected virtual void ApplyPeriodicEffect(State state)
+    {
+
     }
   }
 
@@ -140,12 +153,9 @@ namespace Simulator.Engine
       state.details.ManipulationTurns = turns;
     }
 
-    public override void TickEnhancement(State state)
+    protected override void ApplyPeriodicEffect(State state)
     {
-      base.TickEnhancement(state);
-
-      if (GetTurnsRemaining(state) > 0)
-        state.Durability = Math.Min(state.MaxDurability, state.Durability + 10);
+      state.Durability = Math.Min(state.MaxDurability, state.Durability + 10);
     }
   }
 

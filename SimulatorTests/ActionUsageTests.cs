@@ -213,6 +213,9 @@ namespace Simulator.Tests
       State s1 = manipulation.Activate(state, true);
       Assert.AreEqual<uint>(manipulation.Duration, Manipulation.GetTurnsRemaining(s1));
 
+      // Verify that the durability has not changed simply as a result of activating manipulation.
+      Assert.AreEqual<uint>(state.Durability, s1.Durability);
+
       // Verify that Manipulation can't be used if it's already up.
       Assert.IsFalse(manipulation.CanUse(s1));
 
