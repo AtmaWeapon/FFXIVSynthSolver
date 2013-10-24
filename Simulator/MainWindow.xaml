@@ -209,14 +209,14 @@
     </Rectangle>
     <Border Margin="1109,5,10,320" BorderBrush="#FFEEE1C5" BorderThickness="1" VerticalAlignment="Top" Padding="0,0,0,3">
       <Grid>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 1 | Basic Synthesis" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource BasicSynthesis}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 5 | Basic Touch" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource BasicTouch}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 7 | Master's Mend" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource MastersMend}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 9 | Steady Hand" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource SteadyHand}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 1 | Basic Synthesis" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource BasicSynthesis}" IsChecked="true"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 5 | Basic Touch" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource BasicTouch}" IsChecked="true"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 7 | Master's Mend" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource MastersMend}" IsChecked="true"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 9 | Steady Hand" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource SteadyHand}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 11 | Inner Quiet" HorizontalAlignment="Left" Margin="10,112,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False" Tag="{StaticResource InnerQuiet}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 13 | Observe" HorizontalAlignment="Left" Margin="10,133,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False" Tag="{StaticResource Observe}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 18 | Standard Touch" HorizontalAlignment="Left" Margin="10,155,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource StandardTouch}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 21 | Great Strides" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource GreatStrides}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 18 | Standard Touch" HorizontalAlignment="Left" Margin="10,155,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource StandardTouch}" IsChecked="true"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 21 | Great Strides" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource GreatStrides}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 25 | Master's Mend II" HorizontalAlignment="Left" Margin="10,198,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 31 | Standard Synthesis" HorizontalAlignment="Left" Margin="10,219,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 43 | Advanced Touch" HorizontalAlignment="Left" Margin="10,241,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
@@ -226,14 +226,14 @@
     <Border Margin="1109,275,10,197" BorderBrush="#FFEEE1C5" BorderThickness="1" VerticalAlignment="Top" Padding="0,0,0,3">
       <Grid>
         <Label Content="Crossover Abilities (Lv. 15)" HorizontalAlignment="Center" Margin="0,2,0,0" VerticalAlignment="Top" Foreground="#FFEEE1C5"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Manipulation" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource Manipulation}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Manipulation" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource Manipulation}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Rumination" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Ingenuity" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource Ingenuity}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Hasty Touch" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource HastyTouch}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Ingenuity" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource Ingenuity}" IsChecked="true"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Hasty Touch" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource HastyTouch}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Waste Not" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Careful Synthesis" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Tricks of the Trade" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False" Tag="{StaticResource TricksOfTheTrade}"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Rapid Synthesis" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource RapidSynthesis}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Rapid Synthesis" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource RapidSynthesis}" IsChecked="true"/>
       </Grid>
     </Border>
 

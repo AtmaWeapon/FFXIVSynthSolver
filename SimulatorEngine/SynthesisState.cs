@@ -230,8 +230,6 @@ namespace Simulator.Engine
     private State previousState;
     private Action leadingAction;
     private uint step;
-    private bool scoreComputed = false;
-    private double computedScore = 0.0;
 
     // It's a bit hackish to store these here, but actions are immutable so it's not
     // necessarily wrong to store static copies, just awkward.  It would be nice if
@@ -255,7 +253,6 @@ namespace Simulator.Engine
       step = 1;
       previousState = null;
       leadingAction = null;
-      computedScore = 0.0;
     }
 
     // Makes a new state which was arrived at by performing an action from a
@@ -266,8 +263,6 @@ namespace Simulator.Engine
 
       this.previousState = oldState;    // do we need to clone here?
       this.leadingAction = leadingAction;
-      this.scoreComputed = oldState.scoreComputed;
-      this.computedScore = oldState.computedScore;
 
       this.step = oldState.step + 1;
     }
@@ -281,8 +276,6 @@ namespace Simulator.Engine
 
       this.previousState = oldState.previousState;    // do we need to clone here?
       this.leadingAction = oldState.leadingAction;
-      this.scoreComputed = oldState.scoreComputed;
-      this.computedScore = oldState.computedScore;
       this.step = oldState.step;
     }
 
@@ -340,23 +333,23 @@ namespace Simulator.Engine
     public uint Craftsmanship
     {
       get { return details.Craftsmanship; }
-      set { details.Craftsmanship = value; scoreComputed = false; }
+      set { details.Craftsmanship = value; }
     }
 
     public uint Control
     {
       get { return details.Control; }
-      set { details.Control = value; scoreComputed = false; }
+      set { details.Control = value; }
     }
     public uint CP
     {
       get { return details.CP; }
-      set { details.CP = value; scoreComputed = false; }
+      set { details.CP = value; }
     }
     public uint MaxCP
     {
       get { return details.MaxCP; }
-      set { details.MaxCP = value; scoreComputed = false; }
+      set { details.MaxCP = value; }
     }
     public int LevelSurplus
     {
@@ -365,12 +358,12 @@ namespace Simulator.Engine
     public uint CrafterLevel
     {
       get { return details.CrafterLevel; }
-      set { details.CrafterLevel = value; scoreComputed = false; }
+      set { details.CrafterLevel = value; }
     }
     public uint SynthLevel
     {
       get { return details.SynthLevel; }
-      set { details.SynthLevel = value; scoreComputed = false; }
+      set { details.SynthLevel = value; }
     }
     public double SuccessBonus
     {
@@ -381,72 +374,67 @@ namespace Simulator.Engine
     public uint Durability
     {
       get { return details.Durability; }
-      set { details.Durability = value; scoreComputed = false; }
+      set { details.Durability = value; }
     }
     public uint MaxDurability
     {
       get { return details.MaxDurability; }
-      set { details.MaxDurability = value; scoreComputed = false; }
+      set { details.MaxDurability = value; }
     }
     public uint Quality
     {
       get { return details.Quality; }
-      set { details.Quality = value; scoreComputed = false; }
+      set { details.Quality = value; }
     }
     public uint MaxQuality
     {
       get { return details.MaxQuality; }
-      set { details.MaxQuality = value; scoreComputed = false; }
+      set { details.MaxQuality = value; }
     }
     public uint Progress
     {
       get { return details.Progress; }
-      set { details.Progress = value; scoreComputed = false; }
+      set { details.Progress = value; }
     }
     public uint MaxProgress
     {
       get { return details.MaxProgress; }
-      set { details.MaxProgress = value; scoreComputed = false; }
+      set { details.MaxProgress = value; }
     }
     public Condition Condition
     {
       get { return details.Condition; }
-      set { details.Condition = value; scoreComputed = false; }
+      set { details.Condition = value; }
     }
 
     public uint ManipulationTurns
     {
       get { return details.ManipulationTurns; }
-      set { details.ManipulationTurns = value; scoreComputed = false; }
+      set { details.ManipulationTurns = value; }
     }
 
     public uint GreatStridesTurns
     {
       get { return details.GreatStridesTurns; }
-      set { details.GreatStridesTurns = value; scoreComputed = false; }
+      set { details.GreatStridesTurns = value; }
     }
 
     public uint IngenuityTurns
     {
       get { return details.IngenuityTurns; }
-      set { details.IngenuityTurns = value; scoreComputed = false; }
+      set { details.IngenuityTurns = value; }
     }
 
     public uint SteadyHandTurns
     {
       get { return details.SteadyHandTurns; }
-      set { details.SteadyHandTurns = value; scoreComputed = false; }
+      set { details.SteadyHandTurns = value; }
     }
     public double Score
     {
       get 
       {
-        if (!scoreComputed)
-        {
-          scoreComputed = true;
-          computedScore = Compute.StateScore(this);
-        }
-        return computedScore;
+        return Compute.StateScore(this);
       }
     }
 
