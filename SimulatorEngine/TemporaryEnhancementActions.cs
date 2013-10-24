@@ -37,12 +37,40 @@ namespace Simulator.Engine
 
     public uint GetTurnsRemaining(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId);
+      switch (AbilityId)
+      {
+        case Engine.AbilityId.GreatStrides:
+          return state.details.GreatStridesTurns;
+        case Engine.AbilityId.Ingenuity:
+          return state.details.IngenuityTurns;
+        case Engine.AbilityId.Manipulation:
+          return state.details.ManipulationTurns;
+        case Engine.AbilityId.SteadyHand:
+          return state.details.SteadyHandTurns;
+        default:
+          throw new InvalidOperationException();
+      }
     }
 
     public void SetTurnsRemaining(State state, uint value)
     {
-      StateFields.SetValue(ref state.storage, AbilityId, value);
+      switch (AbilityId)
+      {
+        case Engine.AbilityId.GreatStrides:
+          state.details.GreatStridesTurns = value;
+          break;
+        case Engine.AbilityId.Ingenuity:
+          state.details.IngenuityTurns = value;
+          break;
+        case Engine.AbilityId.Manipulation:
+          state.details.ManipulationTurns = value;
+          break;
+        case Engine.AbilityId.SteadyHand:
+          state.details.SteadyHandTurns = value;
+          break;
+        default:
+          throw new InvalidOperationException();
+      }
     }
 
     protected override void ActivateInternal(State oldState, State newState, bool success)
@@ -78,17 +106,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.SteadyHand) > 0;
+      return state.details.SteadyHandTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.SteadyHand);
+      return state.details.SteadyHandTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      StateFields.SetValue(ref state.storage, AbilityId.SteadyHand, turns);
+      state.details.SteadyHandTurns = turns;
     }
   }
 
@@ -99,17 +127,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.Manipulation) > 0;
+      return state.details.ManipulationTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.Manipulation);
+      return state.details.ManipulationTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      StateFields.SetValue(ref state.storage, AbilityId.Manipulation, turns);
+      state.details.ManipulationTurns = turns;
     }
 
     public override void TickEnhancement(State state)
@@ -127,17 +155,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.Ingenuity) > 0;
+      return state.details.IngenuityTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.Ingenuity);
+      return state.details.IngenuityTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      StateFields.SetValue(ref state.storage, AbilityId.Ingenuity, turns);
+      state.details.IngenuityTurns = turns;
     }
 
     public override bool CanUse(State state)
@@ -155,17 +183,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.GreatStrides) > 0;
+      return state.details.GreatStridesTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return StateFields.GetValue(ref state.storage, AbilityId.GreatStrides);
+      return state.details.GreatStridesTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      StateFields.SetValue(ref state.storage, AbilityId.GreatStrides, turns);
+      state.details.GreatStridesTurns = turns;
     }
 
     public override bool CanUse(State state)
