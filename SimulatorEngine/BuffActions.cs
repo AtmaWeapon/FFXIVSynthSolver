@@ -67,24 +67,6 @@ namespace Simulator.Engine
   [SynthAction(ActionType.Buff, Name = "Steady Hand", CP = 22, BuffDuration=5)]
   public class SteadyHand : BuffAction
   {
-    public SteadyHand()
-    {
-      // Don't allow Steady hand with < 50 durability (since it would waste one of its procs on
-      // restoring durability) unless we're in a bind and we need progress quickly.
-      usageChecks.Add(delegate(State state)
-                      {
-                        if (state.Durability >= 50)
-                          return true;
-                        // If we have enough CP to restore durability, it's not urgent so don't
-                        // allow Steady hand to be used.
-                        if (state.CP >= Compute.CP(92, state))
-                          return false;
-
-                        // Otherwise either we must use SH for safety reasons, or there's no additional harm
-                        // in doing so, so allow it to be used.
-                        return true;
-                      });
-    }
     public override uint GetTurnsRemaining(State state) { return state.SteadyHandTurns; }
     public override void SetTurnsRemaining(State state, uint turns) { state.SteadyHandTurns = turns; }
   }
@@ -158,7 +140,7 @@ namespace Simulator.Engine
       base.TickBuff(state);
 
       // Only perform the actual effect if this was not the first tick.
-      if (GetTurnsRemaining(state) <= Attributes.BuffDuration)
+      if (GetTurnsRemaining(state) < Attributes.BuffDuration)
         state.Durability = Math.Min(state.MaxDurability, state.Durability + 10);
     }
   }

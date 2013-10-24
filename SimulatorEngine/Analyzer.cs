@@ -177,51 +177,9 @@ namespace Simulator.Engine
       State failureState = action.FailureState(initialState);
 
       List<RandomOutcome> entries = new List<RandomOutcome>();
-      switch (initialState.Condition)
-      {
-        case Condition.Excellent:
-          // Excellent can only go to poor.
-
-          // Success
-          if (successState != null)
-            entries.Add(new RandomOutcome(successProbability, successState, Condition.Poor, true));
-
-          // Failure
-          if (failureState != null)
-            entries.Add(new RandomOutcome(1.0f - successProbability, failureState, Condition.Poor, false));
-          break;
-        case Condition.Good:
-        case Condition.Poor:
-          // Good and poor can both only go to normal.
-
-          // Success
-          if (successState != null)
-            entries.Add(new RandomOutcome(successProbability, successState, Condition.Normal, true));
-
-          // Failure
-          if (failureState != null)
-            entries.Add(new RandomOutcome(1.0f - successProbability, failureState, Condition.Normal, false));
-          break;
-        case Condition.Normal:
-          // Normal can go to normal, good, or excellent.
-
-          // Success
-          if (successState != null)
-          {
-            entries.Add(new RandomOutcome(kNormalProbability * successProbability, successState, Condition.Normal, true));
-            entries.Add(new RandomOutcome(kGoodProbability * successProbability, successState, Condition.Good, true));
-            entries.Add(new RandomOutcome(kExcellentProbability * successProbability, successState, Condition.Excellent, true));
-          }
-
-          // Failure
-          if (failureState != null)
-          {
-            entries.Add(new RandomOutcome(kNormalProbability * (1.0f - successProbability), failureState, Condition.Normal, false));
-            entries.Add(new RandomOutcome(kGoodProbability * (1.0f - successProbability), failureState, Condition.Good, false));
-            entries.Add(new RandomOutcome(kExcellentProbability * (1.0f - successProbability), failureState, Condition.Excellent, false));
-          }
-          break;
-      }
+      entries.Add(new RandomOutcome(successProbability, successState, Condition.Normal, true));
+      if (failureState != null)
+        entries.Add(new RandomOutcome(1.0 - successProbability, failureState, Condition.Normal, false));
       return entries;
     }
   }
