@@ -109,8 +109,8 @@ namespace Simulator.Engine
       int lbyte = (int)info.offset / 8;
       int lbit = (int)info.offset % 8;
 
-      int rbyte = (int)(info.offset + info.count) / 8;
-      int rbit = (int)(info.offset + info.count) % 8;
+      int rbyte = (int)(info.offset + info.count - 1) / 8;
+      int rbit = (int)(info.offset + info.count - 1) % 8;
       Debug.Assert(rbyte - lbyte <= 1);
 
       unsafe
@@ -121,18 +121,18 @@ namespace Simulator.Engine
           if (lbyte == rbyte)
           {
             byte* byteptr = ptr + lbyte;
-            byte mask = (byte)(((1 << count) - 1) << rbit);
+            byte mask = (byte)(((1 << count) - 1) << (int)(7 - rbit));
             byte result = (byte)(*byteptr & mask);
-            return (uint)(result >> rbit);
+            return (uint)(result >> (7 - rbit));
           }
           else
           {
             ushort* shortptr = (ushort*)(ptr + lbyte);
             rbit += 8;
 
-            ushort mask = (ushort)(((1 << count) - 1) << rbit);
+            ushort mask = (ushort)(((1 << count) - 1) << (int)(15 - rbit));
             ushort result = (ushort)(*shortptr & mask);
-            return (uint)(result >> rbit);
+            return (uint)(result >> (15 - rbit));
           }
         }
       }
@@ -149,7 +149,7 @@ namespace Simulator.Engine
 
           int numbits = rbit - lbit + 1;
           ushort mask1 = (ushort)(((1 << numbits) - 1) << (int)(15 - rbit));   // 0000000000011111000000
-          ushort mask2 = (ushort)~mask1;                                      // 1111111111100000111111
+          ushort mask2 = (ushort)~mask1;                                       // 1111111111100000111111
 
           // Clear the old value
           *modshort &= mask2;

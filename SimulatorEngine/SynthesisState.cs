@@ -56,6 +56,7 @@ namespace Simulator.Engine
       this.computedScore = oldState.computedScore;
 
       this.step = oldState.step + 1;
+      tempEffects = new List<TemporaryEnhancementAbility>(oldState.tempEffects);
     }
 
     // Makes an exact copy of the original state
@@ -70,6 +71,7 @@ namespace Simulator.Engine
       this.scoreComputed = oldState.scoreComputed;
       this.computedScore = oldState.computedScore;
       this.step = oldState.step;
+      tempEffects = new List<TemporaryEnhancementAbility>(oldState.tempEffects);
     }
 
     public override bool Equals(object obj)
