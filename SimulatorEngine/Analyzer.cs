@@ -176,14 +176,14 @@ namespace Simulator.Engine
       logWriter.WriteLine("Node leaf solved!  Score={0}", score);
     }
 
-    private void LogDepthLimit()
+    private void LogDepthLimit(double score)
     {
       if (logWriter == null)
         return;
 
       ++lineNumber;
       LogIndents();
-      logWriter.WriteLine("Depth limit reached.");
+      logWriter.WriteLine("Depth limit reached.  Computed score={0}", score);
     }
 
     public void Run(State state)
@@ -263,7 +263,7 @@ namespace Simulator.Engine
         }
         else
         {
-          LogDepthLimit();
+          LogDepthLimit(outcome.state.Score);
           stateScore += outcome.probability * outcome.state.Score;
           ++numDepthLimit;
         }

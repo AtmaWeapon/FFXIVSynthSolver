@@ -65,7 +65,8 @@ namespace Simulator.Engine
         {
           TemporaryEnhancementAbility effect = newState.tempEffects[i];
           effect.TickEnhancement(newState);
-          ++i;
+          if (effect.GetTurnsRemaining(newState) > 0)
+            ++i;
         }
       }
 

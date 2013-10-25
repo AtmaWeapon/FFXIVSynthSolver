@@ -216,6 +216,42 @@ namespace Simulator.Tests
     }
 
     [TestMethod]
+    public void TestManipulationWithTouchDoesntChangeDurability()
+    {
+      Manipulation manipulation = new Manipulation();
+      BasicTouch touch = new BasicTouch();
+
+      State state = Utility.CreateDefaultState();
+      state.Durability = 20;
+      State s2 = manipulation.Activate(state, true);
+      Assert.AreEqual<uint>(20, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.IN_PROGRESS, s2.Status);
+
+      s2 = touch.Activate(s2, true);
+      Assert.AreEqual<uint>(20, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.IN_PROGRESS, s2.Status);
+    }
+
+    [TestMethod]
+    public void TestSubsequentAbilitiesStillTickAfterOneWearsOff()
+    {
+      Manipulation manipulation = new Manipulation();
+      GreatStrides strides = new GreatStrides();
+      BasicTouch touch = new BasicTouch();
+
+      State state = Utility.CreateDefaultState();
+      state.Durability = 20;
+      State s2 = strides.Activate(state, true);
+      s2 = manipulation.Activate(s2, true);
+
+      GreatStrides.SetTurnsRemaining(s2, 1);
+
+      s2 = touch.Activate(s2, true);
+      // Make sure Manipulation still ticked even though great strides wore off.
+      Assert.AreEqual<uint>(20, s2.Durability);
+    }
+
+    [TestMethod]
     public void TestManipulation()
     {
       Manipulation manipulation = new Manipulation();
