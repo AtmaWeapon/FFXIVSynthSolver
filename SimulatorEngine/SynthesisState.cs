@@ -21,52 +21,72 @@ namespace Simulator.Engine
   {
     public ulong w1;
     public ulong w2;
+    public ulong w3;
 
     public ulong RawWord1 { get { return w1; } }
     public ulong RawWord2 { get { return w2; } }
+
+    public ulong RawWord3 { get { return w3; } }
 
     /* 
        | max progress (7 bits) | progress (7 bits) | max durability (7 bits) | durability (7 bits) | maxcp (9 bits) | cp (9 bits) | control (9 bits) | craftsmanship (9 bits) |
      */
 
-    public static readonly int kCraftsmanshipOffset = 0;
-    public static readonly int kCraftsmanshipLength = 9;
-    public static readonly int kControlOffset = kCraftsmanshipOffset + kCraftsmanshipLength;
-    public static readonly int kControlLength = 9;
-    public static readonly int kCPOffset = kControlOffset + kControlLength;
-    public static readonly int kCPLength = 9;
-    public static readonly int kMaxCPOffset = kCPOffset + kCPLength;
-    public static readonly int kMaxCPLength = 9;
-    public static readonly int kDurabilityOffset = kMaxCPOffset + kMaxCPLength;
-    public static readonly int kDurabilityLength = 7;
-    public static readonly int kMaxDurabilityOffset = kDurabilityOffset + kDurabilityLength;
-    public static readonly int kMaxDurabilityLength = 7;
-    public static readonly int kProgressOffset = kMaxDurabilityOffset + kMaxDurabilityLength;
-    public static readonly int kProgressLength = 7;
-    public static readonly int kMaxProgressOffset = kProgressOffset + kProgressLength;
-    public static readonly int kMaxProgressLength = 7;
+    private static readonly int kCraftsmanshipOffset = 0;
+    private static readonly int kCraftsmanshipLength = 9;
+    private static readonly int kControlOffset = kCraftsmanshipOffset + kCraftsmanshipLength;
+    private static readonly int kControlLength = 9;
+    private static readonly int kCPOffset = kControlOffset + kControlLength;
+    private static readonly int kCPLength = 9;
+    private static readonly int kMaxCPOffset = kCPOffset + kCPLength;
+    private static readonly int kMaxCPLength = 9;
+    private static readonly int kDurabilityOffset = kMaxCPOffset + kMaxCPLength;
+    private static readonly int kDurabilityLength = 7;
+    private static readonly int kMaxDurabilityOffset = kDurabilityOffset + kDurabilityLength;
+    private static readonly int kMaxDurabilityLength = 7;
+    private static readonly int kProgressOffset = kMaxDurabilityOffset + kMaxDurabilityLength;
+    private static readonly int kProgressLength = 7;
+    private static readonly int kMaxProgressOffset = kProgressOffset + kProgressLength;
+    private static readonly int kMaxProgressLength = 7;
 
     /* 
        | steady hand (3 bits) | ingenuity (2 bits) | great strides (2 bits) | manipulation (2 bits) | condition (2 bits) | crafter level (6 bits) | synth level (6 bits) |
      */
-    public static readonly int kSynthLevelOffset = 0;
-    public static readonly int kSynthLevelLength = 6;
-    public static readonly int kQualityOffset = kSynthLevelOffset + kSynthLevelLength;
-    public static readonly int kQualityLength = 11;
-    public static readonly int kMaxQualityOffset = kQualityOffset + kQualityLength;
-    public static readonly int kMaxQualityLength = 11;
-    public static readonly int kCrafterLevelOffset = kMaxQualityOffset + kMaxQualityLength;
-    public static readonly int kCrafterLevelLength = 6;
-    public static readonly int kConditionOffset = kCrafterLevelOffset + kCrafterLevelLength;
-    public static readonly int kConditionLength = 2;
-    public static readonly int kManipulationOffset = kConditionOffset + kConditionLength;
-    public static readonly int kManipulationLength = 3;
-    public static readonly int kGreatStridesOffset = kManipulationOffset + kManipulationLength;
-    public static readonly int kGreatStridesLength = 3;
-    public static readonly int kIngenuityOffset = kGreatStridesOffset + kGreatStridesLength;
-    public static readonly int kIngenuityLength = 3;
-    public static readonly int kSteadyHandOffset = kIngenuityOffset + kIngenuityLength;
-    public static readonly int kSteadyHandLength = 3;
+    private static readonly int kSynthLevelOffset = 0;
+    private static readonly int kSynthLevelLength = 6;
+    private static readonly int kQualityOffset = kSynthLevelOffset + kSynthLevelLength;
+    private static readonly int kQualityLength = 11;
+    private static readonly int kMaxQualityOffset = kQualityOffset + kQualityLength;
+    private static readonly int kMaxQualityLength = 11;
+    private static readonly int kCrafterLevelOffset = kMaxQualityOffset + kMaxQualityLength;
+    private static readonly int kCrafterLevelLength = 6;
+    private static readonly int kConditionOffset = kCrafterLevelOffset + kCrafterLevelLength;
+    private static readonly int kConditionLength = 2;
+    private static readonly int kManipulationOffset = kConditionOffset + kConditionLength;
+    private static readonly int kManipulationLength = 3;
+    private static readonly int kGreatStridesOffset = kManipulationOffset + kManipulationLength;
+    private static readonly int kGreatStridesLength = 3;
+    private static readonly int kIngenuityOffset = kGreatStridesOffset + kGreatStridesLength;
+    private static readonly int kIngenuityLength = 3;
+    private static readonly int kSteadyHandOffset = kIngenuityOffset + kIngenuityLength;
+    private static readonly int kSteadyHandLength = 3;
+    private static readonly int kInnerQuietOffset = kSteadyHandOffset + kSteadyHandLength;
+    private static readonly int kInnerQuietLength = 6;
+    private static readonly int kWasteNotOffset = kInnerQuietOffset + kInnerQuietLength;
+    private static readonly int kWasteNotLength = 3;
+    private static readonly int kSteadyHand2Offset = kWasteNotOffset + kWasteNotLength;
+    private static readonly int kSteadyHand2Length = 3;
+    private static readonly int kIngenuity2Offset = kSteadyHand2Offset + kSteadyHand2Length;
+    private static readonly int kIngenuity2Length = 3;
+
+
+    private static readonly int kComfortZoneOffset = 0;
+    private static readonly int kComfortZoneLength = 4;
+    private static readonly int kInnovationOffset = kComfortZoneOffset + kComfortZoneLength;
+    private static readonly int kInnovationLength = 3;
+    private static readonly int kWasteNot2Offset = kInnovationOffset + kInnovationLength;
+    private static readonly int kWasteNot2Length = 4;
+
 
     private uint Retrieve(ulong bitfield, int bitoffset, int bitlength)
     {
@@ -201,6 +221,78 @@ namespace Simulator.Engine
     {
       get { return Retrieve(w2, kSteadyHandOffset, kSteadyHandLength); }
       set { Assign(ref w2, kSteadyHandOffset, kSteadyHandLength, value); }
+    }
+
+    private uint InnerQuietValue
+    {
+      get { return Retrieve(w2, kInnerQuietOffset, kInnerQuietLength); }
+      set { Assign(ref w2, kInnerQuietOffset, kInnerQuietLength, value); }
+    }
+
+    public uint InnerQuietStacks
+    {
+      get 
+      {
+        // The lowest bit is the active flag.
+        return InnerQuietValue >> 1;
+      }
+      set 
+      {
+        uint iqvalue = InnerQuietValue;
+        iqvalue = (iqvalue & 0x1) | (value << 1);
+        InnerQuietValue = iqvalue;
+      }
+    }
+
+    public bool InnerQuietIsActive
+    {
+      get
+      {
+        return ((InnerQuietValue & 0x1) == 1) ? true : false;
+      }
+      set
+      {
+        uint iqvalue = InnerQuietValue;
+        iqvalue &= 0xFFFFFFFE;
+        if (value)
+          iqvalue |= 0x1;
+      }
+    }
+
+    public uint WasteNotTurns
+    {
+      get { return Retrieve(w2, kWasteNotOffset, kWasteNotLength); }
+      set { Assign(ref w2, kWasteNotOffset, kWasteNotLength, value); }
+    }
+
+    public uint SteadyHand2Turns
+    {
+      get { return Retrieve(w2, kSteadyHand2Offset, kSteadyHand2Length); }
+      set { Assign(ref w2, kSteadyHand2Offset, kSteadyHand2Length, value); }
+    }
+
+    public uint Ingenuity2Turns
+    {
+      get { return Retrieve(w2, kIngenuity2Offset, kIngenuity2Length); }
+      set { Assign(ref w2, kIngenuity2Offset, kIngenuity2Length, value); }
+    }
+
+    public uint ComfortZoneTurns
+    {
+      get { return Retrieve(w3, kComfortZoneOffset, kComfortZoneLength); }
+      set { Assign(ref w3, kComfortZoneOffset, kComfortZoneLength, value); }
+    }
+
+    public uint InnovationTurns
+    {
+      get { return Retrieve(w3, kInnovationOffset, kInnovationLength); }
+      set { Assign(ref w3, kInnovationOffset, kInnovationLength, value); }
+    }
+
+    public uint WasteNot2Turns
+    {
+      get { return Retrieve(w3, kWasteNot2Offset, kWasteNot2Length); }
+      set { Assign(ref w3, kWasteNot2Offset, kWasteNot2Length, value); }
     }
 
     public SynthesisStatus Status
@@ -344,48 +436,24 @@ namespace Simulator.Engine
     }
     public uint Craftsmanship
     {
-      get 
-      { 
-        return details.Craftsmanship; 
-      }
-      set 
-      {
-        details.Craftsmanship = value;
-      }
+      get { return details.Craftsmanship; }
+      set { details.Craftsmanship = value; }
     }
 
     public uint Control
     {
-      get 
-      {
-        return details.Control;
-      }
-      set 
-      {
-        details.Control = value;
-      }
+      get { return details.Control; }
+      set { details.Control = value; }
     }
     public uint CP
     {
-      get
-      {
-        return details.CP;
-      }
-      set
-      {
-        details.CP = value;
-      }
+      get { return details.CP; }
+      set { details.CP = value; }
     }
     public uint MaxCP
     {
-      get
-      {
-        return details.MaxCP;
-      }
-      set
-      {
-        details.MaxCP = value;
-      }
+      get { return details.MaxCP; }
+      set { details.MaxCP = value; }
     }
     public int LevelSurplus
     {
@@ -393,105 +461,125 @@ namespace Simulator.Engine
     }
     public uint CrafterLevel
     {
-      get
-      {
-        return details.CrafterLevel;
-      }
-      set
-      {
-        details.CrafterLevel = value;
-      }
+      get { return details.CrafterLevel; }
+      set { details.CrafterLevel = value; }
     }
     public uint SynthLevel
     {
-      get
-      {
-        return details.SynthLevel;
-      }
-      set
-      {
-        details.SynthLevel = value;
-      }
+      get { return details.SynthLevel; }
+      set { details.SynthLevel = value; }
     }
 
     // The synthesis' stats in this state.
     public uint Durability
     {
-      get
-      {
-        return details.Durability;
-      }
-      set
-      {
-        details.Durability = value;
-      }
+      get { return details.Durability; }
+      set { details.Durability = value; }
     }
     public uint MaxDurability
     {
-      get
-      {
-        return details.MaxDurability;
-      }
-      set
-      {
-        details.MaxDurability = value;
-      }
+      get { return details.MaxDurability; }
+      set { details.MaxDurability = value; }
     }
     public uint Quality
     {
-      get
-      {
-        return details.Quality;
-      }
-      set
-      {
-        details.Quality = value;
-      }
+      get { return details.Quality; }
+      set { details.Quality = value; }
     }
     public uint MaxQuality
     {
-      get
-      {
-        return details.MaxQuality;
-      }
-      set
-      {
-        details.MaxQuality = value;
-      }
+      get { return details.MaxQuality; }
+      set { details.MaxQuality = value; }
     }
     public uint Progress
     {
-      get
-      {
-        return details.Progress;
-      }
-      set
-      {
-        details.Progress = value;
-      }
+      get { return details.Progress; }
+      set { details.Progress = value; }
     }
-    public uint MaxProgress
+    public uint MaxProgress 
     {
-      get
-      {
-        return details.MaxProgress;
-      }
-      set
-      {
-        details.MaxProgress = value;
-      }
+      get { return details.MaxProgress; }
+      set { details.MaxProgress = value; }
     }
+
     public Condition Condition
     {
-      get
-      {
-        return (Condition)details.Condition;
-      }
-      set
-      {
-        details.Condition = value;
-      }
+      get { return details.Condition; }
+      set { details.Condition = value; }
     }
+
+    public uint ManipulationTurns
+    {
+      get { return details.ManipulationTurns; }
+      set { details.ManipulationTurns = value; }
+    }
+
+    public uint GreatStridesTurns
+    {
+      get { return details.GreatStridesTurns; }
+      set { details.GreatStridesTurns = value; }
+    }
+
+    public uint IngenuityTurns
+    {
+      get { return details.IngenuityTurns; }
+      set { details.IngenuityTurns = value; }
+    }
+
+    public uint SteadyHandTurns
+    {
+      get { return details.SteadyHandTurns; }
+      set { details.SteadyHandTurns = value; }
+    }
+
+    public uint InnerQuietStacks
+    {
+      get { return details.InnerQuietStacks; }
+      set { details.InnerQuietStacks = value; }
+    }
+
+    public bool InnerQuietIsActive
+    {
+      get { return details.InnerQuietIsActive; }
+      set { details.InnerQuietIsActive = value; }
+    }
+
+    public uint WasteNotTurns
+    {
+      get { return details.WasteNotTurns; }
+      set { details.WasteNotTurns = value; }
+    }
+
+    public uint SteadyHand2Turns
+    {
+      get { return details.SteadyHand2Turns; }
+      set { details.SteadyHand2Turns = value; }
+    }
+
+    public uint Ingenuity2Turns
+    {
+      get { return details.Ingenuity2Turns; }
+      set { details.Ingenuity2Turns = value; }
+    }
+
+    public uint ComfortZoneTurns
+    {
+      get { return details.ComfortZoneTurns; }
+      set { details.ComfortZoneTurns = value; }
+    }
+
+    public uint InnovationTurns
+    {
+      get { return details.InnovationTurns; }
+      set { details.InnovationTurns = value; }
+    }
+
+    public uint WasteNot2Turns
+    {
+      get { return details.WasteNot2Turns; }
+      set { details.WasteNot2Turns = value; }
+    }
+
 
     public double Score
     {

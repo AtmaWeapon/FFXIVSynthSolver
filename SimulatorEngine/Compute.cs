@@ -38,11 +38,6 @@ namespace Simulator.Engine
       Buffer.BlockCopy(binomials, 0, bincoeff, (int)kMaxFactorial*i*sizeof(int), binomials.Length*sizeof(int));
     }
 
-    public static uint DurabilityLoss(uint baseDurability, State state)
-    {
-      return baseDurability;
-    }
-
     public static uint Binomial(uint m, uint n)
     {
       return bincoeff[m, n];
@@ -125,7 +120,7 @@ namespace Simulator.Engine
 
     public static uint Quality(State state, uint efficiency)
     {
-      return RawQuality(state.Condition, state.Control, efficiency, state.LevelSurplus);
+      return RawQuality(state.Condition, Compute.Control(state), efficiency, state.LevelSurplus);
     }
 
     public static uint RawQuality(Condition condition, uint control, uint efficiency, int levelSurplus)
@@ -150,11 +145,28 @@ namespace Simulator.Engine
       return baseCP;
     }
 
+    public static uint DurabilityLoss(uint baseDurability, State state)
+    {
+      if (state.WasteNotTurns > 0 || state.WasteNot2Turns > 0)
+        return 5;
+      else
+        return 10;
+    }
+
     public static double SuccessRate(uint baseSuccessRate, State state)
     {
       if (SteadyHand.IsActive(state))
         baseSuccessRate += 20;
-      return Math.Min((double)baseSuccessRate/100.0, 1.0);
+      baseSuccessRate = Math.Min(100, baseSuccessRate);
+      return (double)baseSuccessRate / 100.0;
+    }
+
+    public static uint Control(State state)
+    {
+      if (!InnerQuiet.IsActive(state))
+        return state.Control;
+
+      return (uint)Math.Floor((1.0 + 0.2 * (double)state.InnerQuietStacks) * (double)state.Control);
     }
   }
 }

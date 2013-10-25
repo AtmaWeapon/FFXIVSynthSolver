@@ -111,6 +111,15 @@ namespace Simulator.Engine
   [TemporaryEnhancement(0)]
   public class InnerQuiet : TemporaryEnhancementAbility
   {
+    public static bool IsActive(State state)
+    {
+      return state.InnerQuietIsActive;
+    }
+
+    public static uint InnerQuietStacks(State state)
+    {
+      return state.InnerQuietStacks;
+    }
   }
 
   [SynthAction(ActionType.TemporaryEnhancement, AbilityId.SteadyHand, "Steady Hand", 22)]
@@ -119,17 +128,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return state.details.SteadyHandTurns > 0;
+      return state.SteadyHandTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return state.details.SteadyHandTurns;
+      return state.SteadyHandTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      state.details.SteadyHandTurns = turns;
+      state.SteadyHandTurns = turns;
     }
   }
 
@@ -140,17 +149,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return state.details.ManipulationTurns > 0;
+      return state.ManipulationTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return state.details.ManipulationTurns;
+      return state.ManipulationTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      state.details.ManipulationTurns = turns;
+      state.ManipulationTurns = turns;
     }
 
     protected override void ApplyPeriodicEffect(State state)
@@ -165,12 +174,12 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return state.details.IngenuityTurns > 0;
+      return state.IngenuityTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return state.details.IngenuityTurns;
+      return state.IngenuityTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
@@ -193,17 +202,17 @@ namespace Simulator.Engine
   {
     public static bool IsActive(State state)
     {
-      return state.details.GreatStridesTurns > 0;
+      return state.GreatStridesTurns > 0;
     }
 
     public static new uint GetTurnsRemaining(State state)
     {
-      return state.details.GreatStridesTurns;
+      return state.GreatStridesTurns;
     }
 
     public static new void SetTurnsRemaining(State state, uint turns)
     {
-      state.details.GreatStridesTurns = turns;
+      state.GreatStridesTurns = turns;
     }
 
     public override bool CanUse(State state)

@@ -130,7 +130,7 @@ namespace Simulator.Engine
       double qpct = q / qmax;
 
       double BasicTouchCP = 18;
-      double BasicTouchQuality = Compute.RawQuality(Condition.Normal, state.Control, 100, state.LevelSurplus);
+      double BasicTouchQuality = Compute.RawQuality(Condition.Normal, Compute.Control(state), 100, state.LevelSurplus);
       double dQdC = (BasicTouchQuality/qmax) / (BasicTouchCP/cmax);
       return psucc * (cpct*dQdC + qpct);
     }
