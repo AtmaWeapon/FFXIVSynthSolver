@@ -408,5 +408,94 @@ namespace Simulator.Tests
       state = basicTouch.Activate(state, true);
       Assert.AreEqual<uint>(0U, GreatStrides.GetTurnsRemaining(state));
     }
+
+    [TestMethod]
+    public void TestIngenuityTurns()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      state = ingenuity.Activate(state, true);
+      for (int i = 0; i < ingenuity.Duration; ++i)
+      {
+        Assert.AreEqual(ingenuity.Duration - i, Ingenuity.GetTurnsRemaining(state));
+        state = bs.Activate(state, true);
+      }
+      Assert.AreEqual<uint>(0, Ingenuity.GetTurnsRemaining(state));
+      Assert.IsFalse(Ingenuity.IsActive(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuityLevelReduction()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.AreEqual<int>(-5, Compute.LevelSurplus(state));
+      state = ingenuity.Activate(state, true);
+      Assert.AreEqual<int>(0, Compute.LevelSurplus(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuityBelowLevelCantBeUsed()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 25;
+      state.SynthLevel = 20;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.IsFalse(ingenuity.CanUse(state));
+    }
+
+    [TestMethod]
+    public void TestLargerQualityGainsWithIngeuity()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint qbase = Compute.Quality(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint qing = Compute.Quality(state, 100);
+
+      Assert.IsTrue(qing > qbase);
+    }
+
+    [TestMethod]
+    public void TestLargerProgressGainsWithIngenuity()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint pbase = Compute.Progress(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint ping = Compute.Progress(state, 100);
+
+      Assert.IsTrue(ping > pbase);
+    }
   }
 }

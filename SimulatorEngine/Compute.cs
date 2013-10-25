@@ -115,12 +115,19 @@ namespace Simulator.Engine
 
     public static uint Progress(State state, uint efficiency)
     {
-      return RawProgress(state.Craftsmanship, efficiency, state.LevelSurplus);
+      return RawProgress(state.Craftsmanship, efficiency, Compute.LevelSurplus(state));
     }
 
     public static uint Quality(State state, uint efficiency)
     {
-      return RawQuality(state.Condition, Compute.Control(state), efficiency, state.LevelSurplus);
+      return RawQuality(state.Condition, Compute.Control(state), efficiency, Compute.LevelSurplus(state));
+    }
+
+    public static int LevelSurplus(State state)
+    {
+      if (Ingenuity.IsActive(state))
+        return Math.Max(state.LevelSurplus, 0);
+      return state.LevelSurplus;
     }
 
     public static uint RawQuality(Condition condition, uint control, uint efficiency, int levelSurplus)
