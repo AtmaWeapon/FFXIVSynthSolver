@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Simulator.Engine;
 
 namespace Simulator.Tests
 {
@@ -9,7 +10,7 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestCraftsmanship()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.Craftsmanship);
 
       details.Craftsmanship = 50U;
@@ -20,14 +21,12 @@ namespace Simulator.Tests
 
       details.Craftsmanship = 0U;
       Assert.AreEqual<uint>(0, details.Craftsmanship);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestControl()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.Control);
 
       details.Control = 50U;
@@ -38,14 +37,12 @@ namespace Simulator.Tests
 
       details.Control = 0U;
       Assert.AreEqual<uint>(0, details.Control);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestDurability()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.Durability);
 
       details.Durability = 50U;
@@ -56,14 +53,12 @@ namespace Simulator.Tests
 
       details.Durability = 0U;
       Assert.AreEqual<uint>(0, details.Durability);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestMaxDurability()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.MaxDurability);
 
       details.MaxDurability = 50U;
@@ -74,14 +69,12 @@ namespace Simulator.Tests
 
       details.MaxDurability = 0U;
       Assert.AreEqual<uint>(0, details.MaxDurability);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestCP()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.CP);
 
       details.CP = 100U;
@@ -92,14 +85,12 @@ namespace Simulator.Tests
 
       details.CP = 0U;
       Assert.AreEqual<uint>(0, details.CP);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestMaxCP()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.MaxCP);
 
       details.MaxCP = 100U;
@@ -110,14 +101,12 @@ namespace Simulator.Tests
 
       details.MaxCP = 0U;
       Assert.AreEqual<uint>(0, details.MaxCP);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestProgress()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.Progress);
 
       details.Progress = 60U;
@@ -128,14 +117,12 @@ namespace Simulator.Tests
 
       details.Progress = 0U;
       Assert.AreEqual<uint>(0, details.Progress);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestMaxProgress()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.MaxProgress);
 
       details.MaxProgress = 60U;
@@ -146,14 +133,12 @@ namespace Simulator.Tests
 
       details.MaxProgress = 0U;
       Assert.AreEqual<uint>(0, details.MaxProgress);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestMultipleStatAssignment1()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
 
       details.Control = 115U;
       details.CP = 235U;
@@ -177,7 +162,7 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestCrafterLevel()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.CrafterLevel);
 
       details.CrafterLevel = 40U;
@@ -188,14 +173,12 @@ namespace Simulator.Tests
 
       details.CrafterLevel = 0U;
       Assert.AreEqual<uint>(0, details.CrafterLevel);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestSynthLevel()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.SynthLevel);
 
       details.SynthLevel = 40U;
@@ -206,14 +189,12 @@ namespace Simulator.Tests
 
       details.SynthLevel = 0U;
       Assert.AreEqual<uint>(0, details.SynthLevel);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestQuality()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.Quality);
 
       details.Quality = 215U;
@@ -224,14 +205,12 @@ namespace Simulator.Tests
 
       details.Quality = 0U;
       Assert.AreEqual<uint>(0, details.Quality);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestMaxQuality()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<uint>(0, details.MaxQuality);
 
       details.MaxQuality = 215U;
@@ -242,14 +221,12 @@ namespace Simulator.Tests
 
       details.MaxQuality = 0U;
       Assert.AreEqual<uint>(0, details.MaxQuality);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestCondition()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
       Assert.AreEqual<Engine.Condition>(Engine.Condition.Normal, details.Condition);
 
       details.Condition = Engine.Condition.Poor;
@@ -260,106 +237,84 @@ namespace Simulator.Tests
 
       details.Condition = Engine.Condition.Normal;
       Assert.AreEqual<Engine.Condition>(Engine.Condition.Normal, details.Condition);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
     }
 
     [TestMethod]
     public void TestManipulationTurns()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
-      Assert.AreEqual<uint>(0, details.ManipulationTurns);
+      State details = new State();
+      Assert.AreEqual<uint>(0, Manipulation.GetTurnsRemaining(details));
 
-      details.ManipulationTurns = 3U;
-      Assert.AreEqual<uint>(3, details.ManipulationTurns);
-
-      details.ManipulationTurns = 2U;
-      Assert.AreEqual<uint>(2, details.ManipulationTurns);
-
-      details.ManipulationTurns = 0U;
-      Assert.AreEqual<uint>(0, details.ManipulationTurns);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
+      for (int i = 3; i >= 0; --i)
+      {
+        Manipulation.SetTurnsRemaining(details, (uint)i);
+        Assert.AreEqual<uint>((uint)i, Manipulation.GetTurnsRemaining(details));
+      }
     }
 
     [TestMethod]
     public void TestGreatStridesTurns()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
-      Assert.AreEqual<uint>(0, details.GreatStridesTurns);
+      State details = new State();
+      Assert.AreEqual<uint>(0, GreatStrides.GetTurnsRemaining(details));
 
-      details.GreatStridesTurns = 3U;
-      Assert.AreEqual<uint>(3, details.GreatStridesTurns);
-
-      details.GreatStridesTurns = 2U;
-      Assert.AreEqual<uint>(2, details.GreatStridesTurns);
-
-      details.GreatStridesTurns = 0U;
-      Assert.AreEqual<uint>(0, details.GreatStridesTurns);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
+      for (int i = 3; i >= 0; --i)
+      {
+        GreatStrides.SetTurnsRemaining(details, (uint)i);
+        Assert.AreEqual<uint>((uint)i, GreatStrides.GetTurnsRemaining(details));
+      }
     }
 
     [TestMethod]
     public void TestIngenuityTurns()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
-      Assert.AreEqual<uint>(0, details.IngenuityTurns);
+      State details = new State();
+      Assert.AreEqual<uint>(0, Ingenuity.GetTurnsRemaining(details));
 
-      details.IngenuityTurns = 3U;
-      Assert.AreEqual<uint>(3, details.IngenuityTurns);
-
-      details.IngenuityTurns = 2U;
-      Assert.AreEqual<uint>(2, details.IngenuityTurns);
-
-      details.IngenuityTurns = 0U;
-      Assert.AreEqual<uint>(0, details.IngenuityTurns);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
+      for (int i = 3; i >= 0; --i)
+      {
+        Ingenuity.SetTurnsRemaining(details, (uint)i);
+        Assert.AreEqual<uint>((uint)i, Ingenuity.GetTurnsRemaining(details));
+      }
     }
 
     [TestMethod]
     public void TestSteadyHandTurns()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
-      Assert.AreEqual<uint>(0, details.SteadyHandTurns);
+      State details = new State();
+      Assert.AreEqual<uint>(0, SteadyHand.GetTurnsRemaining(details));
 
-      details.SteadyHandTurns = 5U;
-      Assert.AreEqual<uint>(5, details.SteadyHandTurns);
-
-      details.SteadyHandTurns = 2U;
-      Assert.AreEqual<uint>(2, details.SteadyHandTurns);
-
-      details.SteadyHandTurns = 0U;
-      Assert.AreEqual<uint>(0, details.SteadyHandTurns);
-      Assert.AreEqual<ulong>(0, details.RawWord1);
-      Assert.AreEqual<ulong>(0, details.RawWord2);
+      for (int i = 5; i >= 0; --i)
+      {
+        SteadyHand.SetTurnsRemaining(details, (uint)i);
+        Assert.AreEqual<uint>((uint)i, SteadyHand.GetTurnsRemaining(details));
+      }
     }
 
     [TestMethod]
     public void TestMultipleStatAssignment2()
     {
-      Engine.StateDetails details = new Engine.StateDetails();
+      State details = new State();
 
       details.CrafterLevel = 13U;
       details.SynthLevel = 40U;
       details.Quality = 1215U;
       details.MaxQuality = 923U;
       details.Condition = Engine.Condition.Excellent;
-      details.ManipulationTurns = 2U;
-      details.GreatStridesTurns = 3U;
-      details.IngenuityTurns = 1U;
-      details.SteadyHandTurns = 4U;
+      Manipulation.SetTurnsRemaining(details, 2);
+      GreatStrides.SetTurnsRemaining(details, 3);
+      Ingenuity.SetTurnsRemaining(details, 1);
+      SteadyHand.SetTurnsRemaining(details, 4);
 
       Assert.AreEqual<uint>(13, details.CrafterLevel);
       Assert.AreEqual<uint>(40, details.SynthLevel);
       Assert.AreEqual<uint>(1215, details.Quality);
       Assert.AreEqual<uint>(923, details.MaxQuality);
       Assert.AreEqual<Engine.Condition>(Engine.Condition.Excellent, details.Condition);
-      Assert.AreEqual<uint>(2, details.ManipulationTurns);
-      Assert.AreEqual<uint>(3, details.GreatStridesTurns);
-      Assert.AreEqual<uint>(1, details.IngenuityTurns);
-      Assert.AreEqual<uint>(4, details.SteadyHandTurns);
+      Assert.AreEqual<uint>(2, Manipulation.GetTurnsRemaining(details));
+      Assert.AreEqual<uint>(3, GreatStrides.GetTurnsRemaining(details));
+      Assert.AreEqual<uint>(1, Ingenuity.GetTurnsRemaining(details));
+      Assert.AreEqual<uint>(4, SteadyHand.GetTurnsRemaining(details));
     }
 
     [TestMethod]

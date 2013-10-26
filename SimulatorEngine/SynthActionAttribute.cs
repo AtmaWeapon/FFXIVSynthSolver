@@ -9,80 +9,32 @@ namespace Simulator.Engine
 {
   public enum ActionType
   {
-    Progress,
-    Quality,
-    Buff
+    Completion,
+    OneTimeEnhancement,
+    TemporaryEnhancement
   }
 
   [AttributeUsage(AttributeTargets.Class)]
   public class SynthActionAttribute : Attribute
   {
-    private ActionType type = ActionType.Progress;
-    private uint cp = 0;
+    private ActionType type = ActionType.Completion;
     private string name = String.Empty;
-    private uint efficiency = 0;
-    private uint durability = 10;
-    private uint successRate = 100;
-    private uint buffDuration = 0;
+    private uint cp = 0;
+    private AbilityId id;
     private bool disabled = false;
 
-    public SynthActionAttribute(ActionType type)
+    public SynthActionAttribute(ActionType type, AbilityId id, string name, uint cp)
     {
       this.type = type;
-      if (type == ActionType.Buff)
-      {
-        this.durability = 0;
-        this.successRate = 100;
-        this.efficiency = 0;
-      }
-      else
-      {
-        this.durability = 10;
-        this.successRate = 0;
-        this.efficiency = 100;
-      }
+      this.name = name;
+      this.cp = cp;
+      this.id = id;
     }
 
-    public ActionType Type
-    {
-      get { return type; }
-    }
-
-    public uint CP
-    {
-      get { return cp; }
-      set { cp = value; }
-    }
-
-    public string Name
-    {
-      get { return name; }
-      set { name = value; }
-    }
-
-    public uint Efficiency
-    {
-      get { return efficiency; }
-      set { efficiency = value; }
-    }
-
-    public uint BuffDuration
-    {
-      get { return buffDuration; }
-      set { buffDuration = value; }
-    }
-
-    public uint Durability
-    {
-      get { return durability; }
-      set { durability = value; }
-    }
-
-    public uint SuccessRate
-    {
-      get { return successRate; }
-      set { successRate = value; }
-    }
+    public uint CP { get { return cp; } }
+    public string Name { get { return name; } }
+    public AbilityId ActionId { get { return id; } }
+    public ActionType ActionType { get { return type; } }
 
     public bool Disabled
     {
@@ -91,16 +43,75 @@ namespace Simulator.Engine
     }
   }
 
-  public class SynthAction<T>
+  [Flags]
+  public enum CompletionFlags
   {
-    public static SynthActionAttribute Attributes
+    Progress = 0x1,
+    Quality = 0x2,
+    TouchAction = 0x4
+  }
+
+  [AttributeUsage(AttributeTargets.Class)]
+  public class CompletionActionAttribute : Attribute
+  {
+    private CompletionFlags completionFlags;
+    private uint efficiency;
+    private uint successRate;
+
+    public CompletionActionAttribute(CompletionFlags completionFlags, uint efficiency, uint successRate)
+    {
+      this.completionFlags = completionFlags;
+      this.efficiency = efficiency;
+      this.successRate = successRate;
+    }
+
+    public CompletionFlags CompletionFlags { get { return completionFlags; } }
+    public uint Efficiency { get { return efficiency; } }
+    public uint SuccessRate { get { return successRate; } }
+  }
+
+  [AttributeUsage(AttributeTargets.Class)]
+  public class OneTimeEnhancementAttribute : Attribute
+  {
+    
+  }
+
+  [AttributeUsage(AttributeTargets.Class)]
+  public class TemporaryEnhancementAttribute : Attribute
+  {
+    private uint duration;
+    public TemporaryEnhancementAttribute(uint duration)
+    {
+      this.duration = duration;
+    }
+
+    public uint Duration { get { return duration; } }
+  }
+
+  public class SynthAction<AttrType>
+  {
+    public static AttrType Attributes(object obj)
+    {
+      return Attributes(obj.GetType());
+    }
+
+    public static AttrType Attributes(Type objType)
+    {
+      object[] attributes = objType.GetCustomAttributes(typeof(AttrType), false);
+      if (attributes.Length == 0)
+        return default(AttrType);
+      Debug.Assert(attributes.Length == 1);
+      return (AttrType)attributes[0];
+    }
+  }
+
+  public class SynthAction<AttrType, ObjType>
+  {
+    public static AttrType Attributes
     {
       get
       {
-        Type info = typeof(T);
-        object[] attributes = info.GetCustomAttributes(typeof(SynthActionAttribute), false);
-        Debug.Assert(attributes.Length == 1);
-        return (SynthActionAttribute)attributes[0];
+        return SynthAction<AttrType>.Attributes(typeof(ObjType));
       }
     }
   }

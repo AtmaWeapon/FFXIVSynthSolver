@@ -119,7 +119,7 @@ namespace Simulator
         currentState = new State(initialState);
       }
 
-      Simulator.Engine.Action bestAction;
+      Simulator.Engine.Ability bestAction;
       if (analyzer.TryGetOptimalAction(currentState, out bestAction))
       {
         SetAppState(AppState.Playback);
@@ -133,12 +133,12 @@ namespace Simulator
       }
     }
 
-    private void UpdateUIStateForPlayback(State state, Simulator.Engine.Action bestAction)
+    private void UpdateUIStateForPlayback(State state, Simulator.Engine.Ability bestAction)
     {
       UpdateUIState(state);
 
       if (bestAction != null)
-        lblBestAction.Content = bestAction.Attributes.Name;
+        lblBestAction.Content = bestAction.Name;
       else
         lblBestAction.Content = String.Empty;
 
@@ -236,16 +236,13 @@ namespace Simulator
 
     private void AdvancePlayback()
     {
-      Simulator.Engine.Action optimalAction = analyzer.OptimalAction(currentState);
+      Simulator.Engine.Ability optimalAction = analyzer.OptimalAction(currentState);
 
       RadioParams selectedParams = (RadioParams)selectedRadio.Tag;
       string statusString = (selectedParams.success) ? "Success" : "Failure";
       string conditionString = selectedParams.condition.ConditionString();
 
-      if (selectedParams.success)
-        currentState = optimalAction.SuccessState(currentState);
-      else
-        currentState = optimalAction.FailureState(currentState);
+      currentState = optimalAction.Activate(currentState, selectedParams.success);
       currentState.Condition = selectedParams.condition;
 
       if (currentState.Status == SynthesisStatus.IN_PROGRESS)
@@ -398,7 +395,7 @@ namespace Simulator
           radioSuccessNormal.IsEnabled = true;
           radioSuccessPoor.IsEnabled = true;
 
-          Simulator.Engine.Action bestAction = analyzer.OptimalAction(currentState);
+          Simulator.Engine.Ability bestAction = analyzer.OptimalAction(currentState);
           UpdateUIStateForPlayback(currentState, bestAction);
           break;
       }
@@ -475,7 +472,7 @@ namespace Simulator
       CheckBox check = (CheckBox)sender;
       if (check.Tag != null)
       {
-        Simulator.Engine.Action action = (Simulator.Engine.Action)check.Tag;
+        Simulator.Engine.Ability action = (Simulator.Engine.Ability)check.Tag;
         if (action != null)
         {
           if (check.IsChecked.Value)

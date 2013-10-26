@@ -38,11 +38,6 @@ namespace Simulator.Engine
       Buffer.BlockCopy(binomials, 0, bincoeff, (int)kMaxFactorial*i*sizeof(int), binomials.Length*sizeof(int));
     }
 
-    public static uint DurabilityLoss(uint baseDurability, State state)
-    {
-      return baseDurability;
-    }
-
     public static uint Binomial(uint m, uint n)
     {
       return bincoeff[m, n];
@@ -73,6 +68,13 @@ namespace Simulator.Engine
         }
       }
       return result;
+    }
+
+    public static uint NumBitsRequired(uint value)
+    {
+      // This is the number of bits required for the range [0, value], so there are
+      // actually a total of |value+1| values represented by this range.
+      return (uint)Math.Ceiling(Math.Log((double)(value+1), 2.0));
     }
 
     public static double FailureProbability(State state) 
@@ -113,12 +115,21 @@ namespace Simulator.Engine
 
     public static uint Progress(State state, uint efficiency)
     {
-      return RawProgress(state.Craftsmanship, efficiency, state.LevelSurplus);
+      return RawProgress(state.Craftsmanship, efficiency, Compute.LevelSurplus(state));
     }
 
     public static uint Quality(State state, uint efficiency)
     {
-      return RawQuality(state.Condition, state.Control, efficiency, state.LevelSurplus);
+      return RawQuality(state.Condition, Compute.Control(state), efficiency, Compute.LevelSurplus(state));
+    }
+
+    public static int LevelSurplus(State state)
+    {
+      if (Ingenuity2.IsActive(state))
+        return Math.Max(state.LevelSurplus, 3);
+      else if (Ingenuity.IsActive(state))
+        return Math.Max(state.LevelSurplus, 0);
+      return state.LevelSurplus;
     }
 
     public static uint RawQuality(Condition condition, uint control, uint efficiency, int levelSurplus)
@@ -143,9 +154,32 @@ namespace Simulator.Engine
       return baseCP;
     }
 
+    public static uint DurabilityLoss(uint baseDurability, State state)
+    {
+      if (WasteNot.IsActive(state) || WasteNot2.IsActive(state))
+        return 5;
+      else
+        return 10;
+    }
+
     public static double SuccessRate(uint baseSuccessRate, State state)
     {
-      return Math.Min((double)baseSuccessRate/100.0 + state.SuccessBonus, 1.0);
+      if (SteadyHand2.IsActive(state))
+        baseSuccessRate += 30;
+      else if (SteadyHand.IsActive(state))
+        baseSuccessRate += 20;
+      baseSuccessRate = Math.Min(100, baseSuccessRate);
+      return (double)baseSuccessRate / 100.0;
+    }
+
+    public static uint Control(State state)
+    {
+      if (!InnerQuiet.IsActive(state))
+        return state.Control;
+
+      double iqfactor = (1.0 + 0.2 * (double)state.InnerQuietStacks);
+      double innofactor = (state.InnovationTurns > 0) ? 1.5 : 1.0;
+      return (uint)Math.Floor(iqfactor * innofactor * state.Control);
     }
   }
 }

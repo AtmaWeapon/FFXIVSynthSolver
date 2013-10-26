@@ -17,6 +17,12 @@
     <engine:Manipulation x:Key="Manipulation"/>
     <engine:Ingenuity x:Key="Ingenuity"/>
     <engine:GreatStrides x:Key="GreatStrides"/>
+    <engine:WasteNot x:Key="WasteNot"/>
+    <engine:WasteNot2 x:Key="WasteNot2"/>
+    <engine:SteadyHand2 x:Key="SteadyHand2"/>
+    <engine:Innovation x:Key="Innovation"/>
+    <engine:Ingenuity2 x:Key="Ingenuity2"/>
+    <engine:ComfortZone x:Key="ComfortZone"/>
 
     <SolidColorBrush x:Key="DisabledTextForeground">
       <SolidColorBrush.Color>
@@ -213,7 +219,7 @@
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 5 | Basic Touch" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource BasicTouch}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 7 | Master's Mend" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource MastersMend}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 9 | Steady Hand" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource SteadyHand}" IsChecked="true"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 11 | Inner Quiet" HorizontalAlignment="Left" Margin="10,112,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False" Tag="{StaticResource InnerQuiet}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 11 | Inner Quiet" HorizontalAlignment="Left" Margin="10,112,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource InnerQuiet}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 13 | Observe" HorizontalAlignment="Left" Margin="10,133,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False" Tag="{StaticResource Observe}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 18 | Standard Touch" HorizontalAlignment="Left" Margin="10,155,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource StandardTouch}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Lv 21 | Great Strides" HorizontalAlignment="Left" Margin="10,177,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource GreatStrides}" IsChecked="true"/>
@@ -230,7 +236,7 @@
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Rumination" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Ingenuity" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource Ingenuity}" IsChecked="true"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Hasty Touch" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource HastyTouch}" IsChecked="true"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Waste Not" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Waste Not" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource WasteNot}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Careful Synthesis" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Tricks of the Trade" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False" Tag="{StaticResource TricksOfTheTrade}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Rapid Synthesis" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource RapidSynthesis}" IsChecked="true"/>
@@ -246,7 +252,7 @@
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Brand of Wind" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Brand of Lightning" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Flawless Synthesis" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Steady Hand II" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Steady Hand II" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" Tag="{StaticResource SteadyHand2}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Brand of Water" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
       </Grid>
     </Border>
@@ -255,10 +261,10 @@
       <Grid>
         <Label Content="Crossover Abilities (Lv. 50)" HorizontalAlignment="Center" Margin="0,2,0,0" VerticalAlignment="Top" Foreground="#FFEEE1C5"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Piece By Piece" HorizontalAlignment="Left" Margin="10,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Ingenuity II" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Comfort Zone" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Innovation" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
-        <CheckBox Style="{StaticResource AbilityCheck}" Content="Waste Not II" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Ingenuity II" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" FontSize="16"  Tag="{StaticResource Ingenuity2}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Comfort Zone" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" FontSize="16"  Tag="{StaticResource ComfortZone}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Innovation" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" FontSize="16"  Tag="{StaticResource Innovation}"/>
+        <CheckBox Style="{StaticResource AbilityCheck}" Content="Waste Not II" HorizontalAlignment="Left" Margin="130,28,0,0" VerticalAlignment="Top" FontSize="16"  Tag="{StaticResource WasteNot2}"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Byregot's Blessing" HorizontalAlignment="Left" Margin="130,49,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Careful Synthesis II" HorizontalAlignment="Left" Margin="130,70,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>
         <CheckBox Style="{StaticResource AbilityCheck}" Content="Reclaim" HorizontalAlignment="Left" Margin="130,91,0,0" VerticalAlignment="Top" FontSize="16" IsEnabled="False"/>

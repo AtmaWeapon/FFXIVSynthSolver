@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Simulator.Engine
 {
-  public class ActionDatabase : IEnumerable<Action>
+  public class ActionDatabase : IEnumerable<Ability>
   {
-    private Dictionary<Type, Action> actions;
+    private Dictionary<Type, Ability> actions;
 
     public ActionDatabase()
     {
-      actions = new Dictionary<Type, Action>();
+      actions = new Dictionary<Type, Ability>();
     }
 
     public void AddAllActions()
@@ -29,13 +29,13 @@ namespace Simulator.Engine
           if (!attribute.Disabled)
           {
             object action = info.GetConstructor(Type.EmptyTypes).Invoke(null);
-            AddAction((Action)action);
+            AddAction((Ability)action);
           }
         }
       }
     }
 
-    public void AddAction(Action action)
+    public void AddAction(Ability action)
     {
       actions.Add(action.GetType(), action);
     }
@@ -45,7 +45,7 @@ namespace Simulator.Engine
       actions.Remove(t);
     }
 
-    public IEnumerator<Action> GetEnumerator()
+    public IEnumerator<Ability> GetEnumerator()
     {
       return actions.Values.GetEnumerator();
     }

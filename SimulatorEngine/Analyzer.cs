@@ -31,7 +31,7 @@ namespace Simulator.Engine
     {
       public double score;
       public State state;
-      public Action bestAction;
+      public Ability bestAction;
     }
 
     private class RandomOutcome
@@ -50,12 +50,6 @@ namespace Simulator.Engine
       public bool success;
     }
 
-    public int MaxAnalysisDepth
-    {
-      get { return maxAnalysisDepth; }
-      set { maxAnalysisDepth = value; }
-    }
-
     public string LogFile
     {
       set
@@ -64,6 +58,12 @@ namespace Simulator.Engine
           logWriter.Close();
         logWriter = File.CreateText(value);
       }
+    }
+
+    public int MaxAnalysisDepth
+    {
+      get { return maxAnalysisDepth; }
+      set { maxAnalysisDepth = value; }
     }
 
     public ActionDatabase Actions { get { return actions; } }
@@ -83,13 +83,13 @@ namespace Simulator.Engine
       solvedStates = new Dictionary<State, SolvedScoreNode>();
     }
 
-    public Action OptimalAction(State state)
+    public Ability OptimalAction(State state)
     {
       SolvedScoreNode node = solvedStates[state];
       return node.bestAction;
     }
 
-    public bool TryGetOptimalAction(State state, out Action action)
+    public bool TryGetOptimalAction(State state, out Ability action)
     {
       SolvedScoreNode node;
       action = null;
@@ -97,25 +97,6 @@ namespace Simulator.Engine
         return false;
       action = node.bestAction;
       return true;
-    }
-
-    public void Run(State state)
-    {
-      // The base step allows us to resume a deep calculation from the middle of the tree, 
-      // and ensure we can still travel an *additional* MaxAnalysisDepth nodes deep from
-      // an arbitrary starting point.
-      this.baseStep = state.Step;
-
-      numSlowSolved = numLeafSolved = numQuickSolved = 0;
-
-      SolvedScoreNode solvedScore = null;
-      if (solvedStates.TryGetValue(state, out solvedScore))
-      {
-        ++numQuickSolved;
-        return;
-      }
-
-      SimulateAllLegalActions(state);
     }
 
     private void LogIndents()
@@ -139,14 +120,14 @@ namespace Simulator.Engine
                           s.Quality, s.MaxQuality);
     }
 
-    private void LogOutcome(Engine.Action action, RandomOutcome outcome)
+    private void LogOutcome(Engine.Ability action, RandomOutcome outcome)
     {
       if (logWriter == null)
         return;
 
       ++lineNumber;
       LogIndents();
-      logWriter.WriteLine("{0} -> {1}.  Probability = {2}", action.Attributes.Name, outcome.success ? "Success!" : "Failure!", outcome.probability);
+      logWriter.WriteLine("{0} -> {1}.  Probability = {2}", action.Name, outcome.success ? "Success!" : "Failure!", outcome.probability);
     }
 
     private void LogScore(double score)
@@ -169,7 +150,7 @@ namespace Simulator.Engine
       if (node.bestAction == null)
         logWriter.WriteLine("Node slow solved!  Score={0}, bestAction=None!", node.score);
       else
-        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction={1}", node.score, node.bestAction.Attributes.Name);
+        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction={1}", node.score, node.bestAction.Name);
     }
 
     private void LogSlowSolve(SolvedScoreNode node)
@@ -182,7 +163,7 @@ namespace Simulator.Engine
       if (node.bestAction == null)
         logWriter.WriteLine("Node slow solved!  Score={0}, bestAction=None!", node.score);
       else
-        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction={1}", node.score, node.bestAction.Attributes.Name);
+        logWriter.WriteLine("Node slow solved!  Score={0}, bestAction={1}", node.score, node.bestAction.Name);
     }
 
     private void LogLeafSolve(double score)
@@ -205,6 +186,25 @@ namespace Simulator.Engine
       logWriter.WriteLine("Depth limit reached.  Computed score={0}", score);
     }
 
+    public void Run(State state)
+    {
+      // The base step allows us to resume a deep calculation from the middle of the tree, 
+      // and ensure we can still travel an *additional* MaxAnalysisDepth nodes deep from
+      // an arbitrary starting point.
+      this.baseStep = state.Step;
+
+      numSlowSolved = numLeafSolved = numQuickSolved = 0;
+
+      SolvedScoreNode solvedScore = null;
+      if (solvedStates.TryGetValue(state, out solvedScore))
+      {
+        ++numQuickSolved;
+        return;
+      }
+
+      SimulateAllLegalActions(state);
+    }
+
     private SolvedScoreNode SimulateAllLegalActions(State state)
     {
       LogState(state);
@@ -212,7 +212,7 @@ namespace Simulator.Engine
       solved.bestAction = null;
       solved.score = 0.0;
       solved.state = state;
-      foreach (Action action in actions)
+      foreach (Ability action in actions)
       {
         if (!action.CanUse(state))
           continue;
@@ -229,7 +229,7 @@ namespace Simulator.Engine
       return solved;
     }
 
-    private double SimulateActionUsed(State state, Action action)
+    private double SimulateActionUsed(State state, Ability action)
     {
       ++indentLevel;
       double stateScore = 0.0;
@@ -276,17 +276,17 @@ namespace Simulator.Engine
     }
     private void PrintTransition(State s)
     {
-      Action leadingAction = s.LeadingAction;
+      Ability leadingAction = s.LeadingAction;
       Debug.WriteLine("CP: {0}/{1}, Dura: {2}/{3}, Progress: {4}/{5}, Quality: {6}/{7} ==> {8}",
                         s.CP, s.MaxCP, s.Durability, s.MaxDurability, s.Progress, s.MaxProgress,
-                        s.Quality, s.MaxQuality, leadingAction.Attributes.Name);
+                        s.Quality, s.MaxQuality, leadingAction.Name);
     }
 
-    private List<RandomOutcome> GenerateRandomOutcomes(State initialState, Action action)
+    private List<RandomOutcome> GenerateRandomOutcomes(State initialState, Ability action)
     {
-      double successProbability = Compute.SuccessRate(action.Attributes.SuccessRate, initialState);
-      State successState = action.SuccessState(initialState);
-      State failureState = action.FailureState(initialState);
+      double successProbability = Compute.SuccessRate(action.BaseSuccessRate, initialState);
+      State successState = action.Activate(initialState, true);
+      State failureState = action.Activate(initialState, false);
 
       List<RandomOutcome> entries = new List<RandomOutcome>();
       entries.Add(new RandomOutcome(successProbability, successState, Condition.Normal, true));

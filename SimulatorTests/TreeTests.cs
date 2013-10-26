@@ -26,8 +26,10 @@ namespace Simulator.Tests
 
       analyzer.Run(state);
 
-      Simulator.Engine.Action bestAction = analyzer.OptimalAction(state);
-      Assert.AreEqual<ActionType>(ActionType.Progress, bestAction.Attributes.Type);
+      Ability bestAction = analyzer.OptimalAction(state);
+      Assert.AreEqual<ActionType>(ActionType.Completion, bestAction.ActionType);
+      CompletionAction completion = (CompletionAction)bestAction;
+      Assert.AreNotEqual<uint>(0, (uint)(CompletionFlags.Progress & completion.CompletionFlags));
     }
 
     [TestMethod]
@@ -37,36 +39,36 @@ namespace Simulator.Tests
       BasicSynthesis bs = new BasicSynthesis();
       SteadyHand sh = new SteadyHand();
       analyzer.Actions.AddAction(bs);
-      analyzer.Actions.AddAction(new BasicTouch());
-      analyzer.Actions.AddAction(new MastersMend());
+      //analyzer.Actions.AddAction(new BasicTouch());
+      //analyzer.Actions.AddAction(new MastersMend());
       analyzer.Actions.AddAction(sh);
-      analyzer.Actions.AddAction(new Observe());
+      //analyzer.Actions.AddAction(new Observe());
 
       State state = Utility.CreateDefaultState();
 
       // Make sure we don't have enough CP to run Master's Mend.
-      state.CP = Compute.CP(SynthAction<MastersMend>.Attributes.CP, state) - 1;
+      state.CP = Compute.CP(SynthAction<SynthActionAttribute, MastersMend>.Attributes.CP, state) - 1;
       state.Durability = 20;
 
       // Make sure exactly 2 Basic Synthesis' are required to finish the synth.
       state.Progress = 0;
-      state.MaxProgress = 2 * Compute.Progress(state, bs.Attributes.Efficiency);
+      state.MaxProgress = 2 * Compute.Progress(state, bs.BaseEfficiency);
 
       analyzer.Run(state);
 
       // The best sequence is Steady Hand -> Basic Synthesis -> Basic Synthesis
-      Simulator.Engine.Action bestAction = analyzer.OptimalAction(state);
+      Simulator.Engine.Ability bestAction = analyzer.OptimalAction(state);
       Assert.AreEqual<Type>(typeof(SteadyHand), bestAction.GetType());
 
-      state = sh.SuccessState(state);
+      state = sh.Activate(state, true);
       bestAction = analyzer.OptimalAction(state);
       Assert.AreEqual<Type>(typeof(BasicSynthesis), bestAction.GetType());
 
-      state = bs.SuccessState(state);
+      state = bs.Activate(state, true);
       bestAction = analyzer.OptimalAction(state);
       Assert.AreEqual<Type>(typeof(BasicSynthesis), bestAction.GetType());
 
-      state = bs.SuccessState(state);
+      state = bs.Activate(state, true);
       Assert.AreEqual(SynthesisStatus.COMPLETED, state.Status);
     }
 
@@ -102,7 +104,7 @@ namespace Simulator.Tests
 
       analyzer.Run(initialState);
 
-      Simulator.Engine.Action bestAction = analyzer.OptimalAction(initialState);
+      Simulator.Engine.Ability bestAction = analyzer.OptimalAction(initialState);
       Assert.AreEqual<Type>(typeof(MastersMend), bestAction.GetType());
    }
 
@@ -141,11 +143,11 @@ namespace Simulator.Tests
 
       BasicSynthesis basic = new BasicSynthesis();
 
-      initialState = basic.SuccessState(initialState);
-      initialState = basic.SuccessState(initialState);
-      initialState = basic.SuccessState(initialState);
+      initialState = basic.Activate(initialState, true);
+      initialState = basic.Activate(initialState, true);
+      initialState = basic.Activate(initialState, true);
 
-      Simulator.Engine.Action bestAction = analyzer.OptimalAction(initialState);
+      Simulator.Engine.Ability bestAction = analyzer.OptimalAction(initialState);
       Assert.AreEqual<Type>(typeof(MastersMend), bestAction.GetType());
     }
   }

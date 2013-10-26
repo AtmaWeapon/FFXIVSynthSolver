@@ -16,13 +16,13 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestStepIncrement()
     {
-      Engine.Action action = new Engine.BasicSynthesis();
+      Engine.Ability action = new Engine.BasicSynthesis();
       State state = Utility.CreateDefaultState();
 
       Assert.AreEqual<uint>(1, state.Step);
 
-      State success = action.SuccessState(state);
-      State failure = action.FailureState(state);
+      State success = action.Activate(state, true);
+      State failure = action.Activate(state, false);
 
       Assert.AreEqual<uint>(2, success.Step);
       Assert.AreEqual<uint>(2, failure.Step);
@@ -31,24 +31,27 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestBasicSynthesis()
     {
-      Engine.Action action = new Engine.BasicSynthesis();
+      BasicSynthesis action = new BasicSynthesis();
 
       State state = Utility.CreateDefaultState();
 
-      State success = action.SuccessState(state);
-      State failure = action.FailureState(state);
+      State success = action.Activate(state, true);
+      State failure = action.Activate(state, false);
+
+      // Test that we can use it even with 0 CP
+      TestBlocks.TestCanUseWithCP(action, state, 0);
 
       // Test that it doesn't use any CP
       Assert.AreEqual<uint>(state.CP, success.CP);
       Assert.AreEqual<uint>(state.CP, failure.CP);
 
       // Test that it uses the correct amount of durability.
-      Assert.AreEqual<uint>(state.Durability - action.Attributes.Durability, success.Durability);
-      Assert.AreEqual<uint>(state.Durability - action.Attributes.Durability, failure.Durability);
+      Assert.AreEqual<uint>(state.Durability - action.BaseDurability, success.Durability);
+      Assert.AreEqual<uint>(state.Durability - action.BaseDurability, failure.Durability);
 
       // Test that failure does not increase progress, but success does.
       Assert.AreEqual<uint>(state.Progress, failure.Progress);
-      Assert.AreEqual<uint>(state.Progress + Compute.Progress(state, action.Attributes.Efficiency), success.Progress);
+      Assert.AreEqual<uint>(state.Progress + Compute.Progress(state, action.BaseEfficiency), success.Progress);
 
       // Test that nothing changed except durability, progress, and condition.
       success.Condition = failure.Condition = state.Condition;
@@ -62,24 +65,27 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestBasicTouch()
     {
-      Engine.Action action = new Engine.BasicTouch();
+      BasicTouch action = new BasicTouch();
 
       State state = Utility.CreateDefaultState();
 
-      State success = action.SuccessState(state);
-      State failure = action.FailureState(state);
+      // Test that if not enough CP, we can't use it
+      TestBlocks.TestCannotUseWithCP(action, state, 0);
+
+      State success = action.Activate(state, true);
+      State failure = action.Activate(state, false);
 
       // Test that it uses the correct amount of CP
-      Assert.AreEqual<uint>(state.CP - action.Attributes.CP, success.CP);
-      Assert.AreEqual<uint>(state.CP - action.Attributes.CP, failure.CP);
+      Assert.AreEqual<uint>(state.CP - action.RequiredCP, success.CP);
+      Assert.AreEqual<uint>(state.CP - action.RequiredCP, failure.CP);
 
       // Test that it uses the correct amount of durability.
-      Assert.AreEqual<uint>(state.Durability - action.Attributes.Durability, success.Durability);
-      Assert.AreEqual<uint>(state.Durability - action.Attributes.Durability, failure.Durability);
+      Assert.AreEqual<uint>(state.Durability - action.BaseDurability, success.Durability);
+      Assert.AreEqual<uint>(state.Durability - action.BaseDurability, failure.Durability);
 
       // Test that failure does not increase quality, but success does.
       Assert.AreEqual<uint>(state.Quality, failure.Quality);
-      Assert.AreEqual<uint>(state.Quality + Compute.Quality(state, action.Attributes.Efficiency), success.Quality);
+      Assert.AreEqual<uint>(state.Quality + Compute.Quality(state, action.BaseEfficiency), success.Quality);
 
       // Test that nothing changed except durability, quality, CP, and condition.
       success.Condition = failure.Condition = state.Condition;
@@ -93,17 +99,17 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestMastersMend()
     {
-      Engine.Action action = new Engine.MastersMend();
+      Engine.Ability action = new Engine.MastersMend();
 
       State state = Utility.CreateDefaultState();
 
       state.MaxDurability = 70;
       state.Durability = 40;
 
-      State success = action.SuccessState(state);
+      State success = action.Activate(state, true);
 
       // Test that it uses the correct amount of CP
-      Assert.AreEqual<uint>(state.CP - action.Attributes.CP, success.CP);
+      Assert.AreEqual<uint>(state.CP - action.RequiredCP, success.CP);
 
       // Test that it increases durability by 30.
       Assert.AreEqual<uint>(state.Durability+30, success.Durability);
@@ -124,8 +130,8 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestSteadyHand()
     {
-      Engine.Action sh = new Engine.SteadyHand();
-      Engine.Action bs = new Engine.BasicSynthesis();
+      SteadyHand sh = new SteadyHand();
+      HastyTouch ht = new HastyTouch();
 
       State state = Utility.CreateDefaultState();
 
@@ -137,33 +143,33 @@ namespace Simulator.Tests
       // Make sure we can actually use SH
       Assert.IsTrue(sh.CanUse(state));
 
-      State afterSH = sh.SuccessState(state);
+      State afterSH = sh.Activate(state, true);
       // Make sure Steady Hand uses the right amount of TP.
-      Assert.AreEqual<uint>(state.CP - sh.Attributes.CP, afterSH.CP);
+      Assert.AreEqual<uint>(state.CP - sh.RequiredCP, afterSH.CP);
 
       // Test that the buff is up, and is active for the correct number of turns.
-      Assert.AreEqual<uint>(sh.Attributes.BuffDuration, afterSH.SteadyHandTurns);
+      Assert.AreEqual<uint>(sh.Duration, SteadyHand.GetTurnsRemaining(afterSH));
 
       // Use Basic Synthesis 5 times, and make sure the success bonus decreases.
       for (int i = 5; i > 0; --i)
       {
-        Assert.AreEqual<uint>((uint)i, afterSH.SteadyHandTurns);
-        Assert.AreEqual<double>(0.2, afterSH.SuccessBonus);
+        Assert.AreEqual<uint>((uint)i, SteadyHand.GetTurnsRemaining(afterSH));
+        Assert.IsTrue(Compute.SuccessRate(ht.BaseSuccessRate, afterSH) > Compute.SuccessRate(ht.BaseSuccessRate, state));
 
         // Make sure we can't use SH while SH is up.
         Assert.IsFalse(sh.CanUse(afterSH));
 
-        afterSH = bs.SuccessState(afterSH);
+        afterSH = ht.Activate(afterSH, true);
       }
-      Assert.AreEqual<uint>(0, afterSH.SteadyHandTurns);
-      Assert.AreEqual<double>(0, afterSH.SuccessBonus);
+      Assert.AreEqual<uint>(0, SteadyHand.GetTurnsRemaining(afterSH));
+      Assert.AreEqual<double>(Compute.SuccessRate(sh.BaseSuccessRate, state), Compute.SuccessRate(sh.BaseSuccessRate, afterSH));
     }
 
     [TestMethod]
     public void TestObserve()
     {
-      Engine.Action observe = new Engine.Observe();
-      Engine.Action basic = new Engine.BasicSynthesis();
+      Engine.Ability observe = new Engine.Observe();
+      Engine.Ability basic = new Engine.BasicSynthesis();
 
       State state = Utility.CreateDefaultState();
 
@@ -171,7 +177,7 @@ namespace Simulator.Tests
       Assert.IsFalse(observe.CanUse(state));
 
       // Use Basic Synthesis so that observe becomes useable.
-      state = basic.SuccessState(state);
+      state = basic.Activate(state, true);
 
       // Test the condition requirement for Observe
       state.Condition = Condition.Poor;
@@ -186,54 +192,109 @@ namespace Simulator.Tests
       // Test that observe can't be run twice in a row.
       state.Condition = Condition.Poor;
       Assert.IsTrue(observe.CanUse(state));
-      State newState = observe.SuccessState(state);
+      State newState = observe.Activate(state, true);
 
-      Assert.IsFalse(observe.CanUse(newState));
-      // Make sure Steady Hand uses the right amount of TP.
-      Assert.AreEqual<uint>(state.CP - observe.Attributes.CP, newState.CP);
+      // Make sure Observe uses the right amount of CP.
+      Assert.AreEqual<uint>(state.CP - observe.RequiredCP, newState.CP);
+    }
+
+    [TestMethod]
+    public void TestManipulationWithTenDurabilityBusts()
+    {
+      Manipulation manipulation = new Manipulation();
+      BasicSynthesis basic = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.Durability = 10;
+      State s2 = manipulation.Activate(state, true);
+      Assert.AreEqual<uint>(10, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.IN_PROGRESS, s2.Status);
+
+      s2 = basic.Activate(s2, true);
+      Assert.AreEqual<uint>(0, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.BUSTED, s2.Status);
+    }
+
+    [TestMethod]
+    public void TestManipulationWithTouchDoesntChangeDurability()
+    {
+      Manipulation manipulation = new Manipulation();
+      BasicTouch touch = new BasicTouch();
+
+      State state = Utility.CreateDefaultState();
+      state.Durability = 20;
+      State s2 = manipulation.Activate(state, true);
+      Assert.AreEqual<uint>(20, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.IN_PROGRESS, s2.Status);
+
+      s2 = touch.Activate(s2, true);
+      Assert.AreEqual<uint>(20, s2.Durability);
+      Assert.AreEqual(SynthesisStatus.IN_PROGRESS, s2.Status);
+    }
+
+    [TestMethod]
+    public void TestSubsequentAbilitiesStillTickAfterOneWearsOff()
+    {
+      Manipulation manipulation = new Manipulation();
+      GreatStrides strides = new GreatStrides();
+      BasicTouch touch = new BasicTouch();
+
+      State state = Utility.CreateDefaultState();
+      state.Durability = 20;
+      State s2 = strides.Activate(state, true);
+      s2 = manipulation.Activate(s2, true);
+
+      GreatStrides.SetTurnsRemaining(s2, 1);
+
+      s2 = touch.Activate(s2, true);
+      // Make sure Manipulation still ticked even though great strides wore off.
+      Assert.AreEqual<uint>(20, s2.Durability);
     }
 
     [TestMethod]
     public void TestManipulation()
     {
-      Engine.Action manipulation = new Engine.Manipulation();
-      Engine.Action basic = new Engine.BasicSynthesis();
-      Engine.Action steadyHand = new Engine.SteadyHand();
+      Manipulation manipulation = new Manipulation();
+      BasicSynthesis basic = new BasicSynthesis();
+      SteadyHand steadyHand = new SteadyHand();
 
       State state = Utility.CreateDefaultState();
       state.Durability = 30;
       state.MaxDurability = 60;
 
       // Verify that Manipulation can be activated successfully.
-      State s1 = manipulation.SuccessState(state);
-      Assert.AreEqual<uint>(manipulation.Attributes.BuffDuration, s1.ManipulationTurns);
+      State s1 = manipulation.Activate(state, true);
+      Assert.AreEqual<uint>(manipulation.Duration, Manipulation.GetTurnsRemaining(s1));
+
+      // Verify that the durability has not changed simply as a result of activating manipulation.
+      Assert.AreEqual<uint>(state.Durability, s1.Durability);
 
       // Verify that Manipulation can't be used if it's already up.
       Assert.IsFalse(manipulation.CanUse(s1));
 
       // Verify that using Basic Synthesis with Manipulation up doesn't decrease the durability.
-      State s2 = basic.SuccessState(s1);
+      State s2 = basic.Activate(s1, true);
       Assert.AreEqual<uint>(s1.Durability, s2.Durability);
-      Assert.AreEqual<uint>(2, s2.ManipulationTurns);
+      Assert.AreEqual<uint>(2, Manipulation.GetTurnsRemaining(s2));
       Assert.IsFalse(manipulation.CanUse(s2));
 
       // Verify that using Steady hand with Manipulation up causes the durability to increase by 10.
-      State s3 = steadyHand.SuccessState(s2);
+      State s3 = steadyHand.Activate(s2, true);
       Assert.AreEqual<uint>(s2.Durability + 10, s3.Durability);
-      Assert.AreEqual<uint>(1, s3.ManipulationTurns);
+      Assert.AreEqual<uint>(1, Manipulation.GetTurnsRemaining(s3));
       Assert.IsFalse(manipulation.CanUse(s3));
 
       // Use another Basic Synthesis so we can verify that the buff de-activates.
-      State s4 = basic.SuccessState(s3);
+      State s4 = basic.Activate(s3, true);
       Assert.IsTrue(manipulation.CanUse(s4));
     }
 
     [TestMethod]
     public void TestSteadyHandCanBeUsedWhenMightAsWell()
     {
-      Engine.Action basicSynth = new Engine.BasicSynthesis();
-      Engine.Action basicTouch = new Engine.BasicSynthesis();
-      Engine.Action steadyHand = new Engine.SteadyHand();
+      Engine.Ability basicSynth = new Engine.BasicSynthesis();
+      Engine.Ability basicTouch = new Engine.BasicSynthesis();
+      Engine.Ability steadyHand = new Engine.SteadyHand();
 
       State state = Utility.CreateDefaultState();
       state.Quality = 142;
@@ -256,8 +317,8 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestGreatStridesDuration()
     {
-      Engine.Action greatStrides = new Engine.GreatStrides();
-      Engine.Action basicSynth = new Engine.BasicSynthesis();
+      GreatStrides greatStrides = new GreatStrides();
+      BasicSynthesis basicSynth = new BasicSynthesis();
 
       State state = Utility.CreateDefaultState();
       state.Quality = 142;
@@ -275,20 +336,20 @@ namespace Simulator.Tests
       state.MaxCP = 233;
 
       Assert.IsTrue(greatStrides.CanUse(state));
-      state = greatStrides.SuccessState(state);
-      for (uint i = greatStrides.Attributes.BuffDuration; i > 0; --i)
+      state = greatStrides.Activate(state, true);
+      for (uint i = greatStrides.Duration; i > 0; --i)
       {
-        Assert.AreEqual<uint>(i, state.GreatStridesTurns);
-        state = basicSynth.SuccessState(state);
+        Assert.AreEqual<uint>(i, GreatStrides.GetTurnsRemaining(state));
+        state = basicSynth.Activate(state, true);
       }
-      Assert.AreEqual<uint>(0U, state.GreatStridesTurns);
+      Assert.AreEqual<uint>(0U, GreatStrides.GetTurnsRemaining(state));
     }
 
     [TestMethod]
     public void TestGreatStridesQualityMultiplier()
     {
-      Engine.Action greatStrides = new Engine.GreatStrides();
-      Engine.Action basicTouch = new Engine.BasicTouch();
+      Engine.Ability greatStrides = new Engine.GreatStrides();
+      Engine.Ability basicTouch = new Engine.BasicTouch();
 
       State state = Utility.CreateDefaultState();
       state.Quality = 142;
@@ -309,10 +370,10 @@ namespace Simulator.Tests
 
       // Figure out how much quality it normally gives, then use great strides
       // and make sure the delta is double.
-      State baselineState = basicTouch.SuccessState(state);
+      State baselineState = basicTouch.Activate(state, true);
 
-      State gsState = greatStrides.SuccessState(state);
-      State comparisonState = basicTouch.SuccessState(gsState);
+      State gsState = greatStrides.Activate(state, true);
+      State comparisonState = basicTouch.Activate(gsState, true);
 
       uint baselineDelta = baselineState.Quality - state.Quality;
       uint comparisonDelta = comparisonState.Quality - state.Quality;
@@ -322,8 +383,8 @@ namespace Simulator.Tests
     [TestMethod]
     public void TestGreatStridesRemovedImmediatelyOnTouch()
     {
-      Engine.Action greatStrides = new Engine.GreatStrides();
-      Engine.Action basicTouch = new Engine.BasicTouch();
+      GreatStrides greatStrides = new GreatStrides();
+      BasicTouch basicTouch = new BasicTouch();
 
       State state = Utility.CreateDefaultState();
       state.Quality = 142;
@@ -342,10 +403,339 @@ namespace Simulator.Tests
 
       Assert.IsTrue(greatStrides.CanUse(state));
 
-      state = greatStrides.SuccessState(state);
-      Assert.AreEqual<uint>(3U, state.GreatStridesTurns);
-      state = basicTouch.SuccessState(state);
-      Assert.AreEqual<uint>(0U, state.GreatStridesTurns);
+      state = greatStrides.Activate(state, true);
+      Assert.AreEqual<uint>(3U, GreatStrides.GetTurnsRemaining(state));
+      state = basicTouch.Activate(state, true);
+      Assert.AreEqual<uint>(0U, GreatStrides.GetTurnsRemaining(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuityTurns()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      state = ingenuity.Activate(state, true);
+      for (int i = 0; i < ingenuity.Duration; ++i)
+      {
+        Assert.AreEqual(ingenuity.Duration - i, Ingenuity.GetTurnsRemaining(state));
+        state = bs.Activate(state, true);
+      }
+      Assert.AreEqual<uint>(0, Ingenuity.GetTurnsRemaining(state));
+      Assert.IsFalse(Ingenuity.IsActive(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuityLevelReduction()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.AreEqual<int>(-5, Compute.LevelSurplus(state));
+      state = ingenuity.Activate(state, true);
+      Assert.AreEqual<int>(0, Compute.LevelSurplus(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuityBelowLevelCantBeUsed()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 25;
+      state.SynthLevel = 20;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.IsFalse(ingenuity.CanUse(state));
+    }
+
+    [TestMethod]
+    public void TestLargerQualityGainsWithIngeuity()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint qbase = Compute.Quality(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint qing = Compute.Quality(state, 100);
+
+      Assert.IsTrue(qing > qbase);
+    }
+
+    [TestMethod]
+    public void TestLargerProgressGainsWithIngenuity()
+    {
+      Ingenuity ingenuity = new Ingenuity();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint pbase = Compute.Progress(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint ping = Compute.Progress(state, 100);
+
+      Assert.IsTrue(ping > pbase);
+    }
+
+    [TestMethod]
+    public void TestInnerQuiet()
+    {
+      InnerQuiet iq = new InnerQuiet();
+      BasicTouch bt = new BasicTouch();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.MaxQuality = 1500;
+      state.Quality = 0;
+
+      State afteriq = iq.Activate(state, true);
+      Assert.IsTrue(afteriq.InnerQuietIsActive);
+      Assert.AreEqual<uint>(0, afteriq.InnerQuietStacks);
+
+      State afterbt = bt.Activate(afteriq, true);
+      Assert.AreEqual<uint>(1, afterbt.InnerQuietStacks);
+      Assert.IsTrue(Compute.Control(afterbt) > Compute.Control(afteriq));
+      Assert.IsTrue(Compute.Quality(afterbt, 100) > Compute.Quality(afteriq, 100));
+
+      State afterbs = bs.Activate(afterbt, true);
+      Assert.AreEqual<uint>(1, afterbs.InnerQuietStacks);
+      Assert.AreEqual<uint>(Compute.Control(afterbt), Compute.Control(afterbs));
+      Assert.AreEqual<uint>(Compute.Quality(afterbt, 100), Compute.Quality(afterbs, 100));
+    }
+
+    [TestMethod]
+    public void TestWasteNot()
+    {
+      WasteNot waste = new WasteNot();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.MaxDurability = 50;
+      state.Durability = 50;
+      state.Craftsmanship = 10;
+      state.Control = 10;
+      state.MaxProgress = 100;
+
+      State activeState = waste.Activate(state, true);
+      State nextState = null;
+      for (int i=(int)waste.Duration; i > 0; --i)
+      {
+        Assert.AreEqual<uint>((uint)i, activeState.WasteNotTurns);
+        nextState = bs.Activate(activeState, true);
+        Assert.AreEqual<uint>(activeState.Durability - 5U, nextState.Durability);
+        activeState = nextState;
+      }
+
+      nextState = bs.Activate(activeState, true);
+      Assert.AreEqual<uint>(activeState.Durability - 10U, nextState.Durability);
+    }
+
+    [TestMethod]
+    public void TestSteadyHand2()
+    {
+      SteadyHand2 sh = new SteadyHand2();
+      HastyTouch ht = new HastyTouch();
+
+      State state = Utility.CreateDefaultState();
+
+      state.Control = 10;
+      state.MaxDurability = 100;
+      state.Durability = 100;
+      state.MaxProgress = 127;
+
+      // Make sure we can actually use SH
+      Assert.IsTrue(sh.CanUse(state));
+
+      State afterSH = sh.Activate(state, true);
+      // Make sure Steady Hand uses the right amount of TP.
+      Assert.AreEqual<uint>(state.CP - sh.RequiredCP, afterSH.CP);
+
+      // Test that the buff is up, and is active for the correct number of turns.
+      Assert.AreEqual<uint>(sh.Duration, SteadyHand2.GetTurnsRemaining(afterSH));
+
+      // Use Basic Synthesis 5 times, and make sure the success bonus decreases.
+      for (int i = 5; i > 0; --i)
+      {
+        Assert.AreEqual<uint>((uint)i, SteadyHand2.GetTurnsRemaining(afterSH));
+        Assert.IsTrue(Compute.SuccessRate(ht.BaseSuccessRate, afterSH) > Compute.SuccessRate(ht.BaseSuccessRate, state));
+
+        // Make sure we can't use SH while SH is up.
+        Assert.IsFalse(sh.CanUse(afterSH));
+
+        afterSH = ht.Activate(afterSH, true);
+      }
+      Assert.AreEqual<uint>(0, SteadyHand2.GetTurnsRemaining(afterSH));
+      Assert.AreEqual<double>(Compute.SuccessRate(sh.BaseSuccessRate, state), Compute.SuccessRate(sh.BaseSuccessRate, afterSH));
+    }
+
+    public void TestIngenuity2Turns()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      state = ingenuity.Activate(state, true);
+      for (int i = 0; i < ingenuity.Duration; ++i)
+      {
+        Assert.AreEqual(ingenuity.Duration - i, Ingenuity2.GetTurnsRemaining(state));
+        state = bs.Activate(state, true);
+      }
+      Assert.AreEqual<uint>(0, Ingenuity2.GetTurnsRemaining(state));
+      Assert.IsFalse(Ingenuity.IsActive(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuity2LevelReduction()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.AreEqual<int>(-5, Compute.LevelSurplus(state));
+      state = ingenuity.Activate(state, true);
+      Assert.AreEqual<int>(3, Compute.LevelSurplus(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuity2BelowLevelCantBeUsed()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 25;
+      state.SynthLevel = 20;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.IsFalse(ingenuity.CanUse(state));
+    }
+
+    [TestMethod]
+    public void TestLargerQualityGainsWithIngeuity2()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint qbase = Compute.Quality(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint qing = Compute.Quality(state, 100);
+
+      Assert.IsTrue(qing > qbase);
+    }
+
+    [TestMethod]
+    public void TestLargerProgressGainsWithIngenuity2()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint pbase = Compute.Progress(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint ping = Compute.Progress(state, 100);
+
+      Assert.IsTrue(ping > pbase);
+    }
+
+    [TestMethod]
+    public void TestComfortZone()
+    {
+      ComfortZone comfort = new ComfortZone();
+      BasicSynthesis basic = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.Craftsmanship = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 120;
+      state.CP=100;
+      state.MaxCP=500;
+      state.MaxDurability = 120;
+      state.Durability = 120;
+
+      State comfortable = comfort.Activate(state, true);
+      Assert.IsTrue(ComfortZone.IsActive(comfortable));
+
+      for (int i=(int)comfort.Duration; i>0; --i)
+      {
+        State nextState = basic.Activate(comfortable, true);
+        Assert.AreEqual<uint>(comfortable.CP + 10, nextState.CP);
+        comfortable = nextState;
+      }
+    }
+
+    [TestMethod]
+    public void TestInnovation()
+    {
+
+    }
+
+    [TestMethod]
+    public void TestWasteNot2()
+    {
+      WasteNot2 waste = new WasteNot2();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.MaxDurability = 50;
+      state.Durability = 50;
+      state.Craftsmanship = 10;
+      state.Control = 10;
+      state.MaxProgress = 100;
+
+      State activeState = waste.Activate(state, true);
+      State nextState = null;
+      for (int i = (int)waste.Duration; i > 0; --i)
+      {
+        Assert.AreEqual<uint>((uint)i, activeState.WasteNot2Turns);
+        nextState = bs.Activate(activeState, true);
+        Assert.AreEqual<uint>(activeState.Durability - 5U, nextState.Durability);
+        activeState = nextState;
+      }
+
+      nextState = bs.Activate(activeState, true);
+      Assert.AreEqual<uint>(activeState.Durability - 10U, nextState.Durability);
     }
   }
 }
