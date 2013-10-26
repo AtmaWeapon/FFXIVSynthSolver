@@ -71,7 +71,6 @@
     <Compile Include="CompletionActions.cs" />
     <Compile Include="OneTimeEnhancementActions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StateFields.cs" />
     <Compile Include="SynthActionAttribute.cs" />
     <Compile Include="SynthesisState.cs" />
   </ItemGroup>

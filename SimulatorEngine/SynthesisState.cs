@@ -256,6 +256,7 @@ namespace Simulator.Engine
         iqvalue &= 0xFFFFFFFE;
         if (value)
           iqvalue |= 0x1;
+        InnerQuietValue = iqvalue;
       }
     }
 
@@ -308,37 +309,6 @@ namespace Simulator.Engine
         }
         else
           return SynthesisStatus.COMPLETED;
-      }
-    }
-  }
-
-  internal unsafe struct StateStorage
-  {
-    public fixed byte storage[16];
-
-    [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-    private static extern int memcmp(byte* b1, byte* b2, long count);
-
-    public override bool Equals(object obj)
-    {
-      StateStorage other = (StateStorage)obj;
-
-      fixed (byte* ptr1 = storage)
-      {
-        return memcmp(ptr1, other.storage, 16) == 0;
-      }
-    }
-
-    public override int GetHashCode()
-    {
-      // fnv1a
-      const uint prime = 0x01000193;
-      uint hash = 0x811C9DC5;
-      fixed (byte* ptr = storage)
-      {
-        for (int i=0; i < 16; ++i)
-          hash = *(ptr + i) ^ hash * prime;
-        return (int)hash;
       }
     }
   }

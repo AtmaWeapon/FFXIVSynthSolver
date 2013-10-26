@@ -20,6 +20,12 @@ namespace Simulator.Engine
     GreatStrides,
     MastersMend,
     Observe,
-    TricksOfTheTrade
+    TricksOfTheTrade,
+    WasteNot,
+    SteadyHand2,
+    Ingenuity2,
+    ComfortZone,
+    Innovation,
+    WasteNot2
   }
 }

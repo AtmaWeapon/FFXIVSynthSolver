@@ -125,7 +125,9 @@ namespace Simulator.Engine
 
     public static int LevelSurplus(State state)
     {
-      if (Ingenuity.IsActive(state))
+      if (Ingenuity2.IsActive(state))
+        return Math.Max(state.LevelSurplus, 3);
+      else if (Ingenuity.IsActive(state))
         return Math.Max(state.LevelSurplus, 0);
       return state.LevelSurplus;
     }
@@ -154,7 +156,7 @@ namespace Simulator.Engine
 
     public static uint DurabilityLoss(uint baseDurability, State state)
     {
-      if (state.WasteNotTurns > 0 || state.WasteNot2Turns > 0)
+      if (WasteNot.IsActive(state) || WasteNot2.IsActive(state))
         return 5;
       else
         return 10;
@@ -162,7 +164,9 @@ namespace Simulator.Engine
 
     public static double SuccessRate(uint baseSuccessRate, State state)
     {
-      if (SteadyHand.IsActive(state))
+      if (SteadyHand2.IsActive(state))
+        baseSuccessRate += 30;
+      else if (SteadyHand.IsActive(state))
         baseSuccessRate += 20;
       baseSuccessRate = Math.Min(100, baseSuccessRate);
       return (double)baseSuccessRate / 100.0;
@@ -173,7 +177,9 @@ namespace Simulator.Engine
       if (!InnerQuiet.IsActive(state))
         return state.Control;
 
-      return (uint)Math.Floor((1.0 + 0.2 * (double)state.InnerQuietStacks) * (double)state.Control);
+      double iqfactor = (1.0 + 0.2 * (double)state.InnerQuietStacks);
+      double innofactor = (state.InnovationTurns > 0) ? 1.5 : 1.0;
+      return (uint)Math.Floor(iqfactor * innofactor * state.Control);
     }
   }
 }

@@ -20,6 +20,10 @@ namespace Simulator.Engine
 
     public uint Duration { get { return duration; } }
 
+    public virtual bool IsPermanent
+    {
+      get { return false; }
+    }
     public override bool CanFail
     {
       get { return false; }
@@ -48,6 +52,20 @@ namespace Simulator.Engine
           return state.details.ManipulationTurns;
         case Engine.AbilityId.SteadyHand:
           return state.details.SteadyHandTurns;
+        case Engine.AbilityId.InnerQuiet:
+          return (state.InnerQuietIsActive) ? 1U : 0U;
+        case Engine.AbilityId.WasteNot:
+          return state.details.WasteNotTurns;
+        case Engine.AbilityId.SteadyHand2:
+          return state.details.SteadyHand2Turns;
+        case Engine.AbilityId.Ingenuity2:
+          return state.details.Ingenuity2Turns;
+        case Engine.AbilityId.ComfortZone:
+          return state.details.ComfortZoneTurns;
+        case Engine.AbilityId.Innovation:
+          return state.details.InnovationTurns;
+        case Engine.AbilityId.WasteNot2:
+          return state.details.WasteNot2Turns;
         default:
           throw new InvalidOperationException();
       }
@@ -69,6 +87,27 @@ namespace Simulator.Engine
         case Engine.AbilityId.SteadyHand:
           state.details.SteadyHandTurns = value;
           break;
+        case Engine.AbilityId.InnerQuiet:
+          state.details.InnerQuietIsActive = (value > 0);
+          break;
+        case Engine.AbilityId.WasteNot:
+          state.details.WasteNotTurns = value;
+          break;
+        case Engine.AbilityId.SteadyHand2:
+          state.details.SteadyHand2Turns = value;
+          break;
+        case Engine.AbilityId.Ingenuity2:
+          state.details.Ingenuity2Turns = value;
+          break;
+        case Engine.AbilityId.ComfortZone:
+          state.details.ComfortZoneTurns = value;
+          break;
+        case Engine.AbilityId.Innovation:
+          state.details.InnovationTurns = value;
+          break;
+        case Engine.AbilityId.WasteNot2:
+          state.details.WasteNot2Turns = value;
+          break;
         default:
           throw new InvalidOperationException();
       }
@@ -86,19 +125,20 @@ namespace Simulator.Engine
 
     public void TickEnhancement(State state)
     {
-      uint turns = GetTurnsRemaining(state);
-      Debug.Assert(turns > 0);
-
-      // If this enhancement was not just applied on this same turn, apply
-      // the periodic affect
-      if (turns <= duration)
+      if (IsPermanent)
         ApplyPeriodicEffect(state);
+      else
+      {
+        uint turns = GetTurnsRemaining(state);
+        Debug.Assert(turns > 0);
 
-      SetTurnsRemaining(state, turns - 1);
+        // If this enhancement was not just applied on this same turn, apply
+        // the periodic affect
+        if (turns <= duration)
+          ApplyPeriodicEffect(state);
 
-      // If we initially had 1 turn going into this tick, then we're now done.
-      if (turns == 1)
-        state.tempEffects.Remove(this);
+        SetTurnsRemaining(state, turns - 1);
+      }
     }
 
     protected virtual void ApplyPeriodicEffect(State state)
@@ -111,6 +151,13 @@ namespace Simulator.Engine
   [TemporaryEnhancement(0)]
   public class InnerQuiet : TemporaryEnhancementAbility
   {
+    public override bool IsPermanent
+    {
+      get
+      {
+        return true;
+      }
+    }
     public static bool IsActive(State state)
     {
       return state.InnerQuietIsActive;
@@ -223,4 +270,165 @@ namespace Simulator.Engine
       return state.Quality <= state.MaxQuality;
     }
   }
+
+  [SynthAction(ActionType.TemporaryEnhancement, AbilityId.WasteNot, "Waste Not", 53)]
+  [TemporaryEnhancement(4)]
+  public class WasteNot : TemporaryEnhancementAbility
+  {
+    public static bool IsActive(State state)
+    {
+      return state.WasteNotTurns > 0;
+    }
+
+    public static new uint GetTurnsRemaining(State state)
+    {
+      return state.WasteNotTurns;
+    }
+
+    public static new void SetTurnsRemaining(State state, uint turns)
+    {
+      state.WasteNotTurns = turns;
+    }
+
+    public override bool CanUse(State state)
+    {
+      if (!base.CanUse(state))
+        return false;
+
+      return !WasteNot2.IsActive(state);
+    }
+  }
+
+  [SynthAction(ActionType.TemporaryEnhancement, AbilityId.SteadyHand2, "Steady Hand II", 35)]
+  [TemporaryEnhancement(5)]
+  public class SteadyHand2 : TemporaryEnhancementAbility
+  {
+    public static bool IsActive(State state)
+    {
+      return state.SteadyHand2Turns > 0;
+    }
+
+    public static new uint GetTurnsRemaining(State state)
+    {
+      return state.SteadyHand2Turns;
+    }
+
+    public static new void SetTurnsRemaining(State state, uint turns)
+    {
+      state.SteadyHand2Turns = turns;
+    }
+
+    public override bool CanUse(State state)
+    {
+      if (!base.CanUse(state))
+        return false;
+
+      return !SteadyHand.IsActive(state);
+    }
+  }
+
+  [SynthAction(ActionType.TemporaryEnhancement, AbilityId.Ingenuity2, "Ingenuity II", 85)]
+  [TemporaryEnhancement(3)]
+  public class Ingenuity2 : TemporaryEnhancementAbility
+  {
+    public static bool IsActive(State state)
+    {
+      return state.Ingenuity2Turns > 0;
+    }
+
+    public static new uint GetTurnsRemaining(State state)
+    {
+      return state.Ingenuity2Turns;
+    }
+
+    public static new void SetTurnsRemaining(State state, uint turns)
+    {
+      state.details.Ingenuity2Turns = turns;
+    }
+
+    public override bool CanUse(State state)
+    {
+      if (!base.CanUse(state))
+        return false;
+
+      return state.LevelSurplus <= -2;
+    }
+  }
+
+  [SynthAction(ActionType.TemporaryEnhancement, AbilityId.ComfortZone, "Comfort Zone", 58)]
+  [TemporaryEnhancement(10)]
+  public class ComfortZone : TemporaryEnhancementAbility
+  {
+    public static bool IsActive(State state)
+    {
+      return state.ComfortZoneTurns > 0;
+    }
+
+    public static new uint GetTurnsRemaining(State state)
+    {
+      return state.ComfortZoneTurns;
+    }
+
+    public static new void SetTurnsRemaining(State state, uint turns)
+    {
+      state.details.ComfortZoneTurns = turns;
+    }
+
+    protected override void ApplyPeriodicEffect(State state)
+    {
+      base.ApplyPeriodicEffect(state);
+
+      state.CP = Math.Min(state.CP + 10, state.MaxCP);
+    }
+  }
+
+  [SynthAction(ActionType.TemporaryEnhancement, AbilityId.Innovation, "Innovation", 18)]
+  [TemporaryEnhancement(5)]
+  public class Innovation : TemporaryEnhancementAbility
+  {
+    public static bool IsActive(State state)
+    {
+      return state.InnovationTurns > 0;
+    }
+
+    public static new uint GetTurnsRemaining(State state)
+    {
+      return state.InnovationTurns;
+    }
+
+    public static new void SetTurnsRemaining(State state, uint turns)
+    {
+      state.details.InnovationTurns = turns;
+    }
+
+  }
+
+  [SynthAction(ActionType.TemporaryEnhancement, AbilityId.WasteNot2, "Waste Not II", 95)]
+  [TemporaryEnhancement(8)]
+  public class WasteNot2 : TemporaryEnhancementAbility
+  {
+    public static bool IsActive(State state)
+    {
+      return state.WasteNot2Turns > 0;
+    }
+
+    public static new uint GetTurnsRemaining(State state)
+    {
+      return state.WasteNot2Turns;
+    }
+
+    public static new void SetTurnsRemaining(State state, uint turns)
+    {
+      state.WasteNot2Turns = turns;
+    }
+
+    public override bool CanUse(State state)
+    {
+      if (!base.CanUse(state))
+        return false;
+
+      return !WasteNot.IsActive(state);
+    }
+  }
+
 }

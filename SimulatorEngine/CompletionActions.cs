@@ -81,6 +81,8 @@ namespace Simulator.Engine
           }
           uint delta = Compute.Quality(oldState, effic);
           newState.Quality = Math.Min(newState.Quality + (uint)delta, newState.MaxQuality);
+          if (newState.InnerQuietIsActive)
+            ++newState.InnerQuietStacks;
         }
       }
     }

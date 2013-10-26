@@ -497,5 +497,245 @@ namespace Simulator.Tests
 
       Assert.IsTrue(ping > pbase);
     }
+
+    [TestMethod]
+    public void TestInnerQuiet()
+    {
+      InnerQuiet iq = new InnerQuiet();
+      BasicTouch bt = new BasicTouch();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.MaxQuality = 1500;
+      state.Quality = 0;
+
+      State afteriq = iq.Activate(state, true);
+      Assert.IsTrue(afteriq.InnerQuietIsActive);
+      Assert.AreEqual<uint>(0, afteriq.InnerQuietStacks);
+
+      State afterbt = bt.Activate(afteriq, true);
+      Assert.AreEqual<uint>(1, afterbt.InnerQuietStacks);
+      Assert.IsTrue(Compute.Control(afterbt) > Compute.Control(afteriq));
+      Assert.IsTrue(Compute.Quality(afterbt, 100) > Compute.Quality(afteriq, 100));
+
+      State afterbs = bs.Activate(afterbt, true);
+      Assert.AreEqual<uint>(1, afterbs.InnerQuietStacks);
+      Assert.AreEqual<uint>(Compute.Control(afterbt), Compute.Control(afterbs));
+      Assert.AreEqual<uint>(Compute.Quality(afterbt, 100), Compute.Quality(afterbs, 100));
+    }
+
+    [TestMethod]
+    public void TestWasteNot()
+    {
+      WasteNot waste = new WasteNot();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.MaxDurability = 50;
+      state.Durability = 50;
+      state.Craftsmanship = 10;
+      state.Control = 10;
+      state.MaxProgress = 100;
+
+      State activeState = waste.Activate(state, true);
+      State nextState = null;
+      for (int i=(int)waste.Duration; i > 0; --i)
+      {
+        Assert.AreEqual<uint>((uint)i, activeState.WasteNotTurns);
+        nextState = bs.Activate(activeState, true);
+        Assert.AreEqual<uint>(activeState.Durability - 5U, nextState.Durability);
+        activeState = nextState;
+      }
+
+      nextState = bs.Activate(activeState, true);
+      Assert.AreEqual<uint>(activeState.Durability - 10U, nextState.Durability);
+    }
+
+    [TestMethod]
+    public void TestSteadyHand2()
+    {
+      SteadyHand2 sh = new SteadyHand2();
+      HastyTouch ht = new HastyTouch();
+
+      State state = Utility.CreateDefaultState();
+
+      state.Control = 10;
+      state.MaxDurability = 100;
+      state.Durability = 100;
+      state.MaxProgress = 127;
+
+      // Make sure we can actually use SH
+      Assert.IsTrue(sh.CanUse(state));
+
+      State afterSH = sh.Activate(state, true);
+      // Make sure Steady Hand uses the right amount of TP.
+      Assert.AreEqual<uint>(state.CP - sh.RequiredCP, afterSH.CP);
+
+      // Test that the buff is up, and is active for the correct number of turns.
+      Assert.AreEqual<uint>(sh.Duration, SteadyHand2.GetTurnsRemaining(afterSH));
+
+      // Use Basic Synthesis 5 times, and make sure the success bonus decreases.
+      for (int i = 5; i > 0; --i)
+      {
+        Assert.AreEqual<uint>((uint)i, SteadyHand2.GetTurnsRemaining(afterSH));
+        Assert.IsTrue(Compute.SuccessRate(ht.BaseSuccessRate, afterSH) > Compute.SuccessRate(ht.BaseSuccessRate, state));
+
+        // Make sure we can't use SH while SH is up.
+        Assert.IsFalse(sh.CanUse(afterSH));
+
+        afterSH = ht.Activate(afterSH, true);
+      }
+      Assert.AreEqual<uint>(0, SteadyHand2.GetTurnsRemaining(afterSH));
+      Assert.AreEqual<double>(Compute.SuccessRate(sh.BaseSuccessRate, state), Compute.SuccessRate(sh.BaseSuccessRate, afterSH));
+    }
+
+    public void TestIngenuity2Turns()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      state = ingenuity.Activate(state, true);
+      for (int i = 0; i < ingenuity.Duration; ++i)
+      {
+        Assert.AreEqual(ingenuity.Duration - i, Ingenuity2.GetTurnsRemaining(state));
+        state = bs.Activate(state, true);
+      }
+      Assert.AreEqual<uint>(0, Ingenuity2.GetTurnsRemaining(state));
+      Assert.IsFalse(Ingenuity.IsActive(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuity2LevelReduction()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.AreEqual<int>(-5, Compute.LevelSurplus(state));
+      state = ingenuity.Activate(state, true);
+      Assert.AreEqual<int>(3, Compute.LevelSurplus(state));
+    }
+
+    [TestMethod]
+    public void TestIngenuity2BelowLevelCantBeUsed()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 25;
+      state.SynthLevel = 20;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      Assert.IsFalse(ingenuity.CanUse(state));
+    }
+
+    [TestMethod]
+    public void TestLargerQualityGainsWithIngeuity2()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint qbase = Compute.Quality(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint qing = Compute.Quality(state, 100);
+
+      Assert.IsTrue(qing > qbase);
+    }
+
+    [TestMethod]
+    public void TestLargerProgressGainsWithIngenuity2()
+    {
+      Ingenuity2 ingenuity = new Ingenuity2();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 100;
+
+      uint pbase = Compute.Progress(state, 100);
+      state = ingenuity.Activate(state, true);
+      uint ping = Compute.Progress(state, 100);
+
+      Assert.IsTrue(ping > pbase);
+    }
+
+    [TestMethod]
+    public void TestComfortZone()
+    {
+      ComfortZone comfort = new ComfortZone();
+      BasicSynthesis basic = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.CrafterLevel = 20;
+      state.Craftsmanship = 20;
+      state.SynthLevel = 25;
+      state.Progress = 0;
+      state.MaxProgress = 120;
+      state.CP=100;
+      state.MaxCP=500;
+      state.MaxDurability = 120;
+      state.Durability = 120;
+
+      State comfortable = comfort.Activate(state, true);
+      Assert.IsTrue(ComfortZone.IsActive(comfortable));
+
+      for (int i=(int)comfort.Duration; i>0; --i)
+      {
+        State nextState = basic.Activate(comfortable, true);
+        Assert.AreEqual<uint>(comfortable.CP + 10, nextState.CP);
+        comfortable = nextState;
+      }
+    }
+
+    [TestMethod]
+    public void TestInnovation()
+    {
+
+    }
+
+    [TestMethod]
+    public void TestWasteNot2()
+    {
+      WasteNot2 waste = new WasteNot2();
+      BasicSynthesis bs = new BasicSynthesis();
+
+      State state = Utility.CreateDefaultState();
+      state.MaxDurability = 50;
+      state.Durability = 50;
+      state.Craftsmanship = 10;
+      state.Control = 10;
+      state.MaxProgress = 100;
+
+      State activeState = waste.Activate(state, true);
+      State nextState = null;
+      for (int i = (int)waste.Duration; i > 0; --i)
+      {
+        Assert.AreEqual<uint>((uint)i, activeState.WasteNot2Turns);
+        nextState = bs.Activate(activeState, true);
+        Assert.AreEqual<uint>(activeState.Durability - 5U, nextState.Durability);
+        activeState = nextState;
+      }
+
+      nextState = bs.Activate(activeState, true);
+      Assert.AreEqual<uint>(activeState.Durability - 10U, nextState.Durability);
+    }
   }
 }
